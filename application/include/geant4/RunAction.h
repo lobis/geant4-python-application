@@ -4,6 +4,8 @@
 
 #include <G4UserRunAction.hh>
 
+#include "awkward/LayoutBuilder.h"
+
 class RunAction : public G4UserRunAction {
 public:
     RunAction();

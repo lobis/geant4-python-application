@@ -2,15 +2,34 @@ cmake_minimum_required(VERSION 3.10)
 
 project(libGeant4PythonicApplication)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 find_package(Geant4 REQUIRED)
 
 include(FetchContent)
+
+set(AWKWARD_VERSION "v2.5.0")
+set(PYBIND11_VERSION "v2.11.1")
+
+FetchContent_Declare(
+    awkward-headers
+    URL https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip
+        DOWNLOAD_EXTRACT_TIMESTAMP
+        1)
+# Instead of using `FetchContent_MakeAvailable(awkward-headers)`, we manually
+# load the target so that we can EXCLUDE_FROM_ALL
+FetchContent_GetProperties(awkward-headers)
+if (NOT awkward-headers_POPULATED)
+    FetchContent_Populate(awkward-headers)
+    add_subdirectory(${awkward-headers_SOURCE_DIR}
+                     ${awkward-headers_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif ()
+
 FetchContent_Declare(
     pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11.git
-    GIT_TAG v2.11.1)
+    GIT_TAG ${PYBIND11_VERSION}
+    DOWNLOAD_EXTRACT_TIMESTAMP 1)
 FetchContent_MakeAvailable(pybind11)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.cpp")
@@ -22,7 +41,8 @@ target_include_directories(
     PUBLIC ${PROJECT_SOURCE_DIR}/include
     PRIVATE ${Geant4_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${Geant4_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${Geant4_LIBRARIES}
+                                             awkward::layout-builder)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "Debug build, adding tests")
