@@ -4,15 +4,12 @@
 #include "geant4/DetectorConstruction.h"
 #include "geant4/PhysicsList.h"
 
-#include "pybind11/pybind11.h"
-
 #include <G4RunManagerFactory.hh>
 
 #include <iostream>
 
 using namespace std;
 using namespace geant4;
-namespace py = pybind11;
 
 Application::Application() = default;
 

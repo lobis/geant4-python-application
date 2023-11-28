@@ -56,6 +56,11 @@ target_link_libraries(
     ${PROJECT_NAME} PUBLIC ${Geant4_LIBRARIES} awkward::layout-builder
                            pybind11::module)
 
+# add the pybind11 module
+file(GLOB_RECURSE PYTHON_SOURCES CONFIGURE_DEPENDS
+     "${PROJECT_SOURCE_DIR}/src/python/*.cpp")
+pybind11_add_module(geant4 ${PYTHON_SOURCES})
+
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "Building tests")
     add_subdirectory(tests)
