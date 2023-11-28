@@ -1,31 +1,41 @@
+#include <utility>
+
 #include "geant4/DetectorConstruction.h"
 
-#include "G4Box.hh"
 #include "G4LogicalVolume.hh"
 #include "G4NistManager.hh"
-#include "G4PVPlacement.hh"
 #include "G4VisAttributes.hh"
+#include "filesystem"
+#include <unistd.h>
 
-DetectorConstruction::DetectorConstruction() : G4VUserDetectorConstruction() {}
+using namespace std;
+namespace fs = std::filesystem;
+
+DetectorConstruction::DetectorConstruction(string gdml) : G4VUserDetectorConstruction(), gdml(std::move(gdml)) {
+    // Need to remove leading characters from gdml string, otherwise GDML parser will fail
+    this->gdml.erase(0, this->gdml.find_first_not_of(" \n\r\t"));
+    // TODO: store this string as compressed data
+}
 
 G4VPhysicalVolume* DetectorConstruction::Construct() {
-    // World
-    G4double world_size = 10.0;// Half size of world
-    G4Box* solidWorld = new G4Box("World", world_size, world_size, world_size);
-    G4LogicalVolume* logicWorld =
-            new G4LogicalVolume(solidWorld, G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR"), "World");
-    G4VPhysicalVolume* physWorld = new G4PVPlacement(0, G4ThreeVector(), logicWorld, "World", 0, false, 0);
+    G4GDMLParser parser;
 
-    // Detector
-    G4double detector_size = 1.0;// Half size of detector
-    G4Box* solidDetector = new G4Box("Detector", detector_size, detector_size, detector_size);
-    G4LogicalVolume* logicDetector = new G4LogicalVolume(
-            solidDetector, G4NistManager::Instance()->FindOrBuildMaterial("G4_WATER"), "Detector");
-    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicDetector, "Detector", logicWorld, false, 0);
+    auto gdmlTmpPath = filesystem::temp_directory_path() / ("GDML" + to_string(getpid()) + ".gdml");
+    // write contents of gdml string into file, raise exception if there is a problem
+    ofstream gdmlTmpFile(gdmlTmpPath);
+    if (!gdmlTmpFile.is_open()) {
+        throw runtime_error("Could not open temporary GDML file");
+    }
+    gdmlTmpFile << gdml;
+    gdmlTmpFile.close();
 
-    // Visualization attributes
-    G4VisAttributes* detectorVisAtt = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0));// Green
-    logicDetector->SetVisAttributes(detectorVisAtt);
+    parser.Read(gdmlTmpPath.string(), false);
+    gdml.clear();
 
-    return physWorld;
+    // TODO: improve cleanup. Is it necessary to write a temporary file?
+    filesystem::remove(gdmlTmpPath);
+
+
+    world = parser.GetWorldVolume();
+    return world;
 }

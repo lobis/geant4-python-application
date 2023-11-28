@@ -22,7 +22,7 @@ namespace geant4 {
         Application();
         ~Application() = default;
 
-        void Setup();
+        void Setup(const std::string& gdml);
         void Initialize();
         void Run(int nEvents);
 

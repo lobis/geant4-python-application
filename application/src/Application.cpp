@@ -10,7 +10,7 @@ using namespace geant4;
 
 Application::Application() {}
 
-void Application::Setup() {
+void Application::Setup(const string& gdml) {
     if (IsSetup()) {
         // Geant4 RunManager cannot be constructed twice
         throw runtime_error("Application is already set up");
@@ -19,7 +19,7 @@ void Application::Setup() {
     runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));
 
     // runManager will manage the lifetime of the following objects
-    runManager->SetUserInitialization(new DetectorConstruction());
+    runManager->SetUserInitialization(new DetectorConstruction(gdml));
     runManager->SetUserInitialization(new PhysicsList());
 
     runManager->SetUserAction(new PrimaryGeneratorAction());
