@@ -27,12 +27,19 @@ if (NOT awkward-headers_POPULATED)
                      ${awkward-headers_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif ()
 
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+
 FetchContent_Declare(
     pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11.git
     GIT_TAG ${PYBIND11_VERSION}
     DOWNLOAD_EXTRACT_TIMESTAMP 1)
-FetchContent_MakeAvailable(pybind11)
+FetchContent_GetProperties(pybind11)
+if (NOT pybind11_POPULATED)
+    FetchContent_Populate(pybind11)
+    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR}
+                     EXCLUDE_FROM_ALL)
+endif ()
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.cpp")
 
@@ -41,14 +48,14 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES})
 target_include_directories(
     ${PROJECT_NAME}
     PUBLIC ${PROJECT_SOURCE_DIR}/include
-    PRIVATE ${Geant4_INCLUDE_DIRS})
+    PRIVATE ${Geant4_INCLUDE_DIRS} ${PYBIND11_INCLUDE_DIR}
+            ${Python3_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${Geant4_LIBRARIES}
-                                             awkward::layout-builder)
-
-# pybind11_add_module(geant4 MODULE ${SOURCES})
+target_link_libraries(
+    ${PROJECT_NAME} PUBLIC ${Geant4_LIBRARIES} awkward::layout-builder
+                           pybind11::module)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    message(STATUS "Debug build, adding tests")
+    message(STATUS "Building tests")
     add_subdirectory(tests)
 endif ()

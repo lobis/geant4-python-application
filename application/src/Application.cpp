@@ -1,18 +1,20 @@
 
 #include "geant4/Application.h"
-
-#include <G4RunManagerFactory.hh>
-
 #include "geant4/ActionInitialization.h"
 #include "geant4/DetectorConstruction.h"
 #include "geant4/PhysicsList.h"
+
+#include "pybind11/pybind11.h"
+
+#include <G4RunManagerFactory.hh>
 
 #include <iostream>
 
 using namespace std;
 using namespace geant4;
+namespace py = pybind11;
 
-Application::Application() {}
+Application::Application() = default;
 
 void Application::Setup(const string& gdml) {
     if (IsSetup()) {
@@ -50,3 +52,5 @@ bool Application::IsSetup() const {
 bool Application::IsInitialized() const {
     return runManager != nullptr && isInitialized;
 }
+
+// Python bindings
