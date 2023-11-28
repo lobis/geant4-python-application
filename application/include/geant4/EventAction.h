@@ -2,6 +2,7 @@
 #ifndef GEANT4_APPLICATION_EVENTACTION_H
 #define GEANT4_APPLICATION_EVENTACTION_H
 
+#include <G4Event.hh>
 #include <G4UserEventAction.hh>
 
 class EventAction : public G4UserEventAction {

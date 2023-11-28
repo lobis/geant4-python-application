@@ -8,6 +8,7 @@ using namespace geant4;
 
 TEST(Application, Run) {
     Application app;
+    app.Setup();
     app.Initialize();
     app.Run(100);
 }

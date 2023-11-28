@@ -3,10 +3,9 @@
 #ifndef GEANT4_APPLICATION_H
 #define GEANT4_APPLICATION_H
 
-#include "RunManager.h"
-
 #include "DetectorConstruction.h"
 #include "EventAction.h"
+#include "G4RunManager.hh"
 #include "PhysicsList.h"
 #include "PrimaryGeneratorAction.h"
 #include "SteppingAction.h"
@@ -16,14 +15,19 @@ namespace geant4 {
 
     class Application {
     private:
-        RunManager runManager;
+        std::unique_ptr<G4RunManager> runManager = nullptr;
+        bool isInitialized = false;
 
     public:
         Application();
         ~Application() = default;
 
+        void Setup();
         void Initialize();
-        void Run(unsigned int nEvents);
+        void Run(int nEvents);
+
+        bool IsSetup() const;
+        bool IsInitialized() const;
     };
 
 }// namespace geant4
