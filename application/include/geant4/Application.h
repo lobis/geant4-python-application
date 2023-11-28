@@ -3,13 +3,7 @@
 #ifndef GEANT4_APPLICATION_H
 #define GEANT4_APPLICATION_H
 
-#include "DetectorConstruction.h"
-#include "EventAction.h"
 #include "G4RunManager.hh"
-#include "PhysicsList.h"
-#include "PrimaryGeneratorAction.h"
-#include "SteppingAction.h"
-#include "TrackingAction.h"
 
 namespace geant4 {
 

@@ -3,6 +3,10 @@
 
 #include <G4RunManagerFactory.hh>
 
+#include "geant4/ActionInitialization.h"
+#include "geant4/DetectorConstruction.h"
+#include "geant4/PhysicsList.h"
+
 #include <iostream>
 
 using namespace std;
@@ -18,14 +22,10 @@ void Application::Setup(const string& gdml) {
     const auto runManagerType = G4RunManagerType::SerialOnly;
     runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));
 
-    // runManager will manage the lifetime of the following objects
+    // the G4RunManager will manage the lifetime of the following objects
     runManager->SetUserInitialization(new DetectorConstruction(gdml));
     runManager->SetUserInitialization(new PhysicsList());
-
-    runManager->SetUserAction(new PrimaryGeneratorAction());
-    runManager->SetUserAction(new SteppingAction());
-    runManager->SetUserAction(new TrackingAction());
-    runManager->SetUserAction(new EventAction());
+    runManager->SetUserInitialization(new ActionInitialization());
 }
 
 void Application::Initialize() {

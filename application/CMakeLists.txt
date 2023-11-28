@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 project(libGeant4PythonicApplication)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(Geant4 REQUIRED)
 
@@ -43,6 +45,8 @@ target_include_directories(
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Geant4_LIBRARIES}
                                              awkward::layout-builder)
+
+# pybind11_add_module(geant4 MODULE ${SOURCES})
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "Debug build, adding tests")
