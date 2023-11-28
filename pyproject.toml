@@ -1,0 +1,33 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = [
+  "hatchling"
+]
+
+[project]
+authors = [
+  {name = "Luis Antonio Obis Aparicio", email = "luis.antonio.obis@gmail.com"}
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent"
+]
+dependencies = [
+  "awkward"
+]
+description = "A Pythonic Geant4 Application"
+dynamic = [
+  "version"
+]
+name = "geant4"
+readme = "README.md"
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+test = [
+  "pytest",
+  "pre-commit"
+]
+
+[tool.hatch.version]
+path = "src/geant4/version.py"
