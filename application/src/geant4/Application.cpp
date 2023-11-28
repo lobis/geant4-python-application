@@ -52,5 +52,3 @@ bool Application::IsSetup() const {
 bool Application::IsInitialized() const {
     return runManager != nullptr && isInitialized;
 }
-
-// Python bindings

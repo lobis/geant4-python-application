@@ -27,7 +27,7 @@ if (NOT awkward-headers_POPULATED)
                      ${awkward-headers_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif ()
 
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module)
 
 FetchContent_Declare(
     pybind11
@@ -41,7 +41,8 @@ if (NOT pybind11_POPULATED)
                      EXCLUDE_FROM_ALL)
 endif ()
 
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
+     "${PROJECT_SOURCE_DIR}/src/geant4/*.cpp")
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
