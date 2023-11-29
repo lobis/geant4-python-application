@@ -1,8 +1,10 @@
-FROM ghcr.io/lobis/geant4:latest
+ARG BASE_TAG=latest
+
+FROM ghcr.io/lobis/geant4:${BASE_TAG}
 
 RUN /opt/conda/bin/mamba install -y -c conda-forge \
-    notebook jupyterlab jupyterhub \
-    && /opt/conda/bin/conda clean -yadocke
+    notebook jupyterlab \
+    && /opt/conda/bin/conda clean -ya
 
 ARG NB_USER=user
 ARG NB_UID=1000
