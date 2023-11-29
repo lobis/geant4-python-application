@@ -12,15 +12,18 @@ concurrency:
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest
     timeout-minutes: 20
-
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.platform }}
     defaults:
       run:
         shell: bash -l {0}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Get conda
         uses: conda-incubator/setup-miniconda@v2
@@ -34,12 +37,6 @@ jobs:
         run: |
           conda env list
           mamba install -c conda-forge cmake
-          conda list
-
-      - name: Install libexpat via conda (geant4 complains due to lower version of installed libexpat)
-        run: |
-          conda env list
-          mamba install -c conda-forge libexpat>=2.5.0
           conda list
 
       - name: Install Geant4 via conda
