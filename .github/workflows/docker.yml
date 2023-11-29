@@ -1,7 +1,13 @@
-name: Build and Test
+name: Build and Publish the Docker Image
 
 on:
   workflow_dispatch:
+    inputs:
+      publish:
+        type: boolean
+        description: Publish the image to the registry
+        required: true
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -43,3 +49,4 @@ jobs:
 
       - name: Publish
         run: docker push ghcr.io/lobis/geant4:latest
+        if: ${{ github.event.inputs.publish }}
