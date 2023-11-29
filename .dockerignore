@@ -1,0 +1,5 @@
+venv
+build
+*-build-*
+*_cache
+.github
