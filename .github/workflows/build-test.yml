@@ -26,10 +26,18 @@ jobs:
         with:
           python-version: 3.11
 
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.14
+
+      - name: Version
+        run: |
+          cmake --version
+          python --version
+
       - name: Build the c++ to run tests
         run: |
           cd application
-          mkdir build
+          mkdir -p build
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Debug
           cd tests
@@ -39,7 +47,7 @@ jobs:
         run: |
           cd application
           rm -rf build
-          mkdir build
+          mkdir -p build
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
           make
