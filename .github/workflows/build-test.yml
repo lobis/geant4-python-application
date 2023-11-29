@@ -52,7 +52,7 @@ jobs:
         # TODO: fix the cmake so it doesn't try to find graphical libraries
         run: |
           sudo apt-get update
-          sudo apt-get install -y mesa-common-dev libglu1-mesa-dev python-dev
+          sudo apt-get install -y mesa-common-dev libglu1-mesa-dev python3-dev
 
       - name: Install additional dependencies (macos)
         if: matrix.platform == 'macos-latest'
