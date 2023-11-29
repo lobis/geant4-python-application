@@ -42,10 +42,19 @@ jobs:
           mamba install -c conda-forge cmake
           conda list
 
-      - name: Version
+      - name: Install libexpat via conda (geant4 complains due to lower version of installed libexpat)
+        run: |
+          conda env list
+          mamba -c conda-forge libexpat>=2.5.0
+          conda list
+
+      - name: Info
         run: |
           cmake --version
           python --version
+          geant4-config --version
+          geant4-config --prefix
+          geant4-config --cflags
 
       - name: Build the c++ to run tests
         run: |
