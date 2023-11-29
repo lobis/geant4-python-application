@@ -13,21 +13,34 @@ concurrency:
 jobs:
   build-test:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/rest-for-physics/root-garfield-geant4:latest
-
     timeout-minutes: 20
+
+    defaults:
+      run:
+        shell: bash -l {0}
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Get conda
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: 3.11
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          miniforge-variant: Mambaforge
+          use-mamba: true
 
-      - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.14
+      - name: Install Geant4 via conda
+        run: |
+          conda env list
+          mamba install -c conda-forge geant4
+          conda list
+
+      - name: Install cmake via conda
+        run: |
+          conda env list
+          mamba install -c conda-forge cmake
+          conda list
 
       - name: Version
         run: |
