@@ -1,0 +1,54 @@
+name: Build and Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/rest-for-physics/root-garfield-geant4:latest
+
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Build the c++ to run tests
+        run: |
+          cd application
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Debug
+          cd tests
+          ctest
+
+      - name: Build the c++ library
+        run: |
+          cd application
+          rm -rf build
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make
+          ls ../lib
+
+      - name: Install the python bindings
+        run: pip install .[test]
+
+      - name: Run tests
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/application/lib
+          python -m pytest -vv tests

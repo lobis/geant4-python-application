@@ -59,6 +59,6 @@ void init_Application(py::module& m) {
             .def("is_initialized", &Application::IsInitialized);
 }
 
-PYBIND11_MODULE(geant4, m) {
+PYBIND11_MODULE(geant4_cpp, m) {
     init_Application(m);
 }

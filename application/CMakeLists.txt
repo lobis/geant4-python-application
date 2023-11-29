@@ -45,6 +45,7 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
      "${PROJECT_SOURCE_DIR}/src/geant4/*.cpp")
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
 target_include_directories(
     ${PROJECT_NAME}
@@ -57,10 +58,11 @@ target_link_libraries(
                            pybind11::embed)
 
 # add the pybind11 module
+set(PYTHON_MODULE_NAME geant4_cpp)
 file(GLOB_RECURSE PYTHON_SOURCES CONFIGURE_DEPENDS
      "${PROJECT_SOURCE_DIR}/src/python/*.cpp")
-pybind11_add_module(geant4 ${PYTHON_SOURCES})
-target_link_libraries(geant4 PUBLIC ${PROJECT_NAME})
+pybind11_add_module(${PYTHON_MODULE_NAME} ${PYTHON_SOURCES})
+target_link_libraries(${PYTHON_MODULE_NAME} PUBLIC ${PROJECT_NAME})
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "Building tests")
