@@ -62,7 +62,7 @@ jobs:
           conda list
 
       # # This doesn't work in the CI for some reason. ctest is somewhat redundant, but it's useful during development.
-      #      - name: Build the c++ library and run tests
+      #      - name: Build the C++ library and run tests
       #        run: |
       #          cd application
       #          mkdir -p build
@@ -72,12 +72,12 @@ jobs:
       #          cd tests
       #          ctest
 
-      - name: Build the c++ library
+      - name: Build the C++ library
         run: |
           cd application
           mkdir build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${CONDA_PREFIX} -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX}
-          make install
+          make -j$(nproc) install
 
       - name: Install the python bindings
         run: python -m pip install .[test]
@@ -90,4 +90,5 @@ jobs:
 
       - name: Run tests
         run: |
+          export PYTHONPATH=${CONDA_PREFIX}/lib
           python -m pytest -vv tests
