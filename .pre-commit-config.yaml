@@ -23,20 +23,21 @@ repos:
         args: [--autofix]
 
   - repo: https://github.com/psf/black
-    rev: 23.10.1
+    rev: 23.11.0
     hooks:
       - id: black
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.4
+    rev: v0.1.6
     hooks:
       - id: ruff
         args: [--fix-only, --show-fixes]
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v15.0.6
+    rev: v17.0.5
     hooks:
       - id: clang-format
+        exclude: .*\.ipynb # for some reason clang-format tries to format ipynb files
 
   - repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.13

@@ -13,7 +13,7 @@ RUN adduser --disabled-password \
     --uid ${NB_UID} \
     ${NB_USER}
 
-# COPY . ${HOME}
+COPY ./examples ${HOME}/examples
 USER root
 RUN chown -R ${NB_UID} ${HOME}
 USER ${NB_USER}

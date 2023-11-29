@@ -11,7 +11,7 @@ app = Application()
 
 app.setup_manager(n_threads=4)
 app.setup_physics()
-app.setup_detector()  # can take a gdml string as argument
+app.setup_detector()  # can take a GDML string as argument
 app.setup_action()
 
 app.initialize()
