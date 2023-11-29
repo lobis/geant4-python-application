@@ -5,13 +5,21 @@ on:
     inputs:
       publish:
         type: boolean
-        description: Publish the image to the registry
+        description: Publish the image to the GitHub Container Registry
         required: true
         default: true
+      tag:
+        type: string
+        description: Tag the image
+        required: true
+        default: latest
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  IMAGE_NAME: ghcr.io/lobis/geant4:${{ github.event.inputs.tag }}
 
 jobs:
   docker-image:
@@ -37,16 +45,16 @@ jobs:
           context: .
           push: false
           tags: |
-            ghcr.io/lobis/geant4:latest
+            ${{ env.IMAGE_NAME }}
           labels: |
-            maintainer.name="Luis Antonio Obis Aparicio"
-            maintainer.email="luis.antonio.obis@gmail.com"
-            org.opencontainers.image.source="https://github.com/lobis/geant4-pythonic-application"
+            maintainer.name=Luis Antonio Obis Aparicio
+            maintainer.email=luis.antonio.obis@gmail.com
+            org.opencontainers.image.source=${{ github.repository }}
 
       - name: Test image
         run: |
-          docker run --rm ghcr.io/lobis/geant4:latest -c 'from geant4 import Application; Application().setup_manager()'
+          docker run --rm ${{ env.IMAGE_NAME }} -c 'from geant4 import Application; Application().setup_manager()'
 
       - name: Publish
-        run: docker push ghcr.io/lobis/geant4:latest
+        run: docker push ${{ env.IMAGE_NAME }}
         if: ${{ github.event.inputs.publish }}
