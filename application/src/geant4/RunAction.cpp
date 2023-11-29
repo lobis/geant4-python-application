@@ -26,3 +26,8 @@ void RunAction::EndOfRunAction(const G4Run*) {
         }
     }
 }
+
+geant4::data::Builder& RunAction::GetBuilder() {
+    auto runAction = dynamic_cast<RunAction*>(const_cast<G4UserRunAction*>(G4RunManager::GetRunManager()->GetUserRunAction()));
+    return runAction->builder;
+}

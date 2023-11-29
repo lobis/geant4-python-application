@@ -11,8 +11,7 @@
 #include <iostream>
 
 
-using namespace geant4::data;
-
+namespace geant4::data {
 void InsertEvent(const G4Event* event, Builder& builder) {
 }
 
@@ -26,3 +25,4 @@ void InsertTrack(const G4Track* track, Builder& builder) {
 
 void InsertStep(const G4Step* step, Builder& builder) {
 }
+}// namespace geant4::data

@@ -18,8 +18,8 @@ using namespace std;
 TrackingAction::TrackingAction() : G4UserTrackingAction() {}
 
 void TrackingAction::PreUserTrackingAction(const G4Track* track) {
-    auto runAction = dynamic_cast<RunAction*>(const_cast<G4UserRunAction*>(G4RunManager::GetRunManager()->GetUserRunAction()));
-    // auto& builder = runAction->GetBuilder();
+    auto& builder = RunAction::GetBuilder();
+    geant4::data::InsertTrack(track, builder);
 }
 
 void TrackingAction::PostUserTrackingAction(const G4Track* track) {

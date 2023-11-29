@@ -15,7 +15,8 @@ public:
 
     void EndOfRunAction(const G4Run*) override;
 
-    geant4::data::Builder& GetBuilder() { return builder; }
+    /// Only one instance of RunAction is created for each thread.
+    static geant4::data::Builder& GetBuilder();
 
 private:
     geant4::data::Builder builder;
