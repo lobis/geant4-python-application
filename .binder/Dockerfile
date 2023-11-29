@@ -1,7 +1,5 @@
 FROM ghcr.io/lobis/geant4:latest
 
-RUN /opt/conda/bin/pip install --no-cache-dir notebook jupyterlab
-
 ARG NB_USER=user
 ARG NB_UID=1000
 ENV USER ${NB_USER}
@@ -13,10 +11,17 @@ RUN adduser --disabled-password \
     --uid ${NB_UID} \
     ${NB_USER}
 
+RUN mamba install -y \
+    notebook jupyterlab \
+    && mamba clean -ya
+
 COPY ./examples ${HOME}/examples
 USER root
 RUN chown -R ${NB_UID} ${HOME}
+
 USER ${NB_USER}
 
-# Override the default entrypoint
+RUN /opt/conda/bin/conda init bash \
+    && /opt/conda/bin/conda config --set auto_activate_base true
+
 ENTRYPOINT []
