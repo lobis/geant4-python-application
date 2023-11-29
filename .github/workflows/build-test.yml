@@ -41,31 +41,17 @@ jobs:
           miniforge-variant: Mambaforge
           use-mamba: true
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
-        with:
-          limit-access-to-actor: true
-
-      - name: Install cmake via conda
-        run: |
-          conda env list
-          mamba install -c conda-forge cmake
-          conda list
-
       - name: Install Geant4 via conda
         run: |
           conda env list
           mamba install -c conda-forge geant4=${{ matrix.geant4-version }}
           conda list
 
-      - name: Info
-        run: |
-          cmake --version
-          python --version
-          geant4-config --version
-          geant4-config --prefix
-          geant4-config --cflags
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+        with:
+          limit-access-to-actor: true
 
       - name: Build the c++ library to run tests
         run: |
