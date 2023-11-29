@@ -40,6 +40,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           miniforge-variant: Mambaforge
           use-mamba: true
+          auto-activate-base: true
 
       - name: Install Geant4 via conda
         run: |
@@ -58,7 +59,7 @@ jobs:
           cd application
           mkdir -p build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=${CONDA_PREFIX}
+          cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=$(conda info --base)
           cd tests
           ctest
 
@@ -68,7 +69,7 @@ jobs:
           rm -rf build
           mkdir -p build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${CONDA_PREFIX}
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$(conda info --base)
           make
           ls ../lib
 
