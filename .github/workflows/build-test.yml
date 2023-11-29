@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   build-test:
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -40,19 +40,18 @@ jobs:
           python-version: ${{ matrix.python-version }}
           miniforge-variant: Mambaforge
           use-mamba: true
-          auto-activate-base: true
 
       - name: Install Geant4 via conda
         run: |
           conda env list
-          mamba install -c conda-forge geant4=${{ matrix.geant4-version }}
+          mamba install -c conda-forge qt qt-devel geant4=${{ matrix.geant4-version }}
           conda list
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
         with:
-          limit-access-to-actor: true
+          limit-access-to-actor: false
 
       - name: Build the c++ library to run tests
         run: |
