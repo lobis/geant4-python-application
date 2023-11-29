@@ -10,7 +10,7 @@ on:
         default: true
       tag:
         type: string
-        description: Tag the image
+        description: The tag to use for the image
         required: true
         default: latest
 

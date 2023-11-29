@@ -17,7 +17,8 @@ RUN curl -o miniconda_installer.sh https://repo.anaconda.com/miniconda/Miniconda
     && /opt/conda/bin/conda clean -ya
 
 # Install conda packages (geant4 is not available for aarch64 at the time of writing)
-RUN /opt/conda/bin/mamba install -y -c conda-forge cmake geant4 \
+RUN /opt/conda/bin/mamba install -y -c conda-forge  \
+    cmake geant4 \
     && /opt/conda/bin/conda clean -ya
 
 # Copy files
@@ -36,8 +37,8 @@ RUN cd /source/application \
 
 ENV PYTHONPATH=/opt/conda/lib:${PYTHONPATH}
 
-RUN echo "#!/bin/bash\nexec /opt/conda/bin/conda run --no-capture-output -n base /opt/conda/bin/python \"\$@\"" > /usr/local/bin/entrypoint.sh && \
-    chmod +x /usr/local/bin/entrypoint.sh
+RUN echo "#!/bin/bash\nexec /opt/conda/bin/conda run --no-capture-output -n base /opt/conda/bin/python \"\$@\"" > /usr/local/bin/entrypoint.sh \
+    && chmod +x /usr/local/bin/entrypoint.sh
 
 # Set the entry point to the script
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
