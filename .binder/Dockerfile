@@ -1,4 +1,4 @@
-FROM ghcr.io/lobis/geant4:sha256:7409afd3fd02372b5477e127bdce292115cd26262f24c8661510fda2e34d12bc
+FROM ghcr.io/lobis/geant4:binder
 
 ARG NB_USER=jovyan
 ARG NB_UID=1000
