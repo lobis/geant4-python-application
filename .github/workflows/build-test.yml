@@ -81,15 +81,12 @@ jobs:
       - name: Build the c++ library
         run: |
           cd application
-          rm -rf build
-          mkdir -p build
-          cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${CONDA_PREFIX}
-          make
-          ls ../lib
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${CONDA_PREFIX} -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX}
+          make install
 
       - name: Install the python bindings
-        run: pip install .[test]
+        run: python -m pip install .[test]
 
       - name: Run tests
         run: |
