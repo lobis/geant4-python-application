@@ -13,18 +13,65 @@ using namespace geant4;
 
 Application::Application() = default;
 
-void Application::Setup(const string& gdml) {
-    if (IsSetup()) {
-        // Geant4 RunManager cannot be constructed twice
-        throw runtime_error("Application is already set up");
+template<typename... Args>
+void Application::SetupDetector(Args... arg) {
+    if (runManager == nullptr) {
+        throw runtime_error("RunManager needs to be set up first");
     }
-    const auto runManagerType = G4RunManagerType::SerialOnly;
-    runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));
 
-    // the G4RunManager will manage the lifetime of the following objects
-    runManager->SetUserInitialization(new DetectorConstruction(gdml));
+    if (runManager->GetUserDetectorConstruction() != nullptr) {
+        throw runtime_error("Detector is already set up");
+    }
+
+    runManager->SetUserInitialization(new DetectorConstruction(std::forward<Args>(arg)...));
+}
+
+// explicit template instantiation
+template void Application::SetupDetector<string, set<string>>(string, set<string>);
+template void Application::SetupDetector<string>(string);
+
+void Application::SetupPhysics() {
+    if (runManager == nullptr) {
+        throw runtime_error("RunManager needs to be set up first");
+    }
+
+    if (runManager->GetUserPhysicsList() != nullptr) {
+        throw runtime_error("Physics is already set up");
+    }
+
     runManager->SetUserInitialization(new PhysicsList());
+}
+
+void Application::SetupAction() {
+    if (runManager == nullptr) {
+        throw runtime_error("RunManager needs to be set up first");
+    }
+
+    // check detector and physics are set up
+    if (runManager->GetUserDetectorConstruction() == nullptr) {
+        throw runtime_error("Detector needs to be set up first");
+    }
+
+    if (runManager->GetUserPhysicsList() == nullptr) {
+        throw runtime_error("Physics needs to be set up first");
+    }
+
+    if (runManager->GetUserActionInitialization() != nullptr) {
+        throw runtime_error("Action is already set up");
+    }
+
     runManager->SetUserInitialization(new ActionInitialization());
+}
+
+void Application::SetupManager(unsigned short nThreads) {
+    if (runManager != nullptr) {
+        throw runtime_error("RunManager is already set up");
+    }
+    const auto runManagerType = nThreads > 0 ? G4RunManagerType::MTOnly : G4RunManagerType::SerialOnly;
+    runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));
+    if (nThreads > 0) {
+        runManager->SetNumberOfThreads((G4int) nThreads);
+    }
 }
 
 void Application::Initialize() {
@@ -43,7 +90,8 @@ void Application::Run(int nEvents) {
 }
 
 bool Application::IsSetup() const {
-    return runManager != nullptr;
+    return runManager != nullptr && runManager->GetUserDetectorConstruction() != nullptr &&
+           runManager->GetUserPhysicsList() != nullptr && runManager->GetUserActionInitialization() != nullptr;
 }
 
 bool Application::IsInitialized() const {

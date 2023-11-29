@@ -3,7 +3,7 @@
 #ifndef GEANT4_APPLICATION_H
 #define GEANT4_APPLICATION_H
 
-#include "G4RunManager.hh"
+#include <G4RunManager.hh>
 
 namespace geant4 {
 
@@ -16,7 +16,12 @@ namespace geant4 {
         Application();
         ~Application() = default;
 
-        void Setup(const std::string& gdml);
+        void SetupManager(unsigned short nThreads = 0);
+        template<typename... Args>
+        void SetupDetector(Args... args);
+        void SetupPhysics();
+        void SetupAction();
+
         void Initialize();
         void Run(int nEvents);
 

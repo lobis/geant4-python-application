@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(libGeant4PythonicApplication)
+project(Geant4PythonicApplication)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -49,17 +49,17 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES})
 target_include_directories(
     ${PROJECT_NAME}
     PUBLIC ${PROJECT_SOURCE_DIR}/include
-    PRIVATE ${Geant4_INCLUDE_DIRS} ${PYBIND11_INCLUDE_DIR}
-            ${Python3_INCLUDE_DIRS})
+    PRIVATE ${Geant4_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS}
+            ${PyBind11_INCLUDE_DIRS})
 
-target_link_libraries(
-    ${PROJECT_NAME} PUBLIC ${Geant4_LIBRARIES} awkward::layout-builder
-                           pybind11::module)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${Geant4_LIBRARIES}
+                                             awkward::layout-builder)
 
 # add the pybind11 module
 file(GLOB_RECURSE PYTHON_SOURCES CONFIGURE_DEPENDS
      "${PROJECT_SOURCE_DIR}/src/python/*.cpp")
 pybind11_add_module(geant4 ${PYTHON_SOURCES})
+target_link_libraries(geant4 PUBLIC ${PROJECT_NAME})
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "Building tests")

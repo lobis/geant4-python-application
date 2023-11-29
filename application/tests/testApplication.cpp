@@ -48,7 +48,19 @@ const std::string gdml = R"(
 
 TEST(Application, Run) {
     Application app;
-    app.Setup(gdml);
+    EXPECT_FALSE(app.IsSetup());
+    app.SetupManager();
+    EXPECT_FALSE(app.IsSetup());
+    app.SetupDetector<string, set<string>>(gdml, {"boxVolume"});
+    EXPECT_FALSE(app.IsSetup());
+    app.SetupPhysics();
+    EXPECT_FALSE(app.IsSetup());
+    app.SetupAction();
+    EXPECT_TRUE(app.IsSetup());
+
+    EXPECT_FALSE(app.IsInitialized());
     app.Initialize();
+    EXPECT_TRUE(app.IsInitialized());
+
     app.Run(100);
 }
