@@ -2,6 +2,12 @@ name: Build and Test
 
 on:
   workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)
+        required: false
+        default: false
   pull_request:
   push:
     branches: [main]
@@ -35,6 +41,12 @@ jobs:
           miniforge-variant: Mambaforge
           use-mamba: true
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+        with:
+          limit-access-to-actor: true
+
       - name: Install cmake via conda
         run: |
           conda env list
@@ -55,7 +67,7 @@ jobs:
           geant4-config --prefix
           geant4-config --cflags
 
-      - name: Build the c++ to run tests
+      - name: Build the c++ library to run tests
         run: |
           cd application
           mkdir -p build
