@@ -47,11 +47,8 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
-target_include_directories(
-    ${PROJECT_NAME}
-    PUBLIC ${PROJECT_SOURCE_DIR}/include
-    PRIVATE ${Geant4_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS}
-            ${PyBind11_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include
+                                                  ${Geant4_INCLUDE_DIRS})
 
 target_link_libraries(
     ${PROJECT_NAME} PUBLIC ${Geant4_LIBRARIES} awkward::layout-builder
@@ -64,7 +61,8 @@ file(GLOB_RECURSE PYTHON_SOURCES CONFIGURE_DEPENDS
 pybind11_add_module(${PYTHON_MODULE_NAME} ${PYTHON_SOURCES})
 target_link_libraries(${PYTHON_MODULE_NAME} PUBLIC ${PROJECT_NAME})
 
-if (CMAKE_BUILD_TYPE MATCHES Debug)
+# -DWITH_TESTS=ON
+if (WITH_TESTS)
     message(STATUS "Building tests")
     add_subdirectory(tests)
 endif ()

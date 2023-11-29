@@ -72,7 +72,7 @@ jobs:
           cd application
           mkdir -p build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=${CONDA_PREFIX}
+          cmake .. -DCMAKE_BUILD_TYPE=Debug -DWITH_TESTS=ON -DCMAKE_PREFIX_PATH=${CONDA_PREFIX}
           make
           cd tests
           ctest

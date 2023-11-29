@@ -1,7 +1,11 @@
 
 #include "geant4/Application.h"
 
+#include "pybind11/chrono.h"
+#include "pybind11/complex.h"
+#include "pybind11/functional.h"
 #include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
 
 using namespace geant4;
 namespace py = pybind11;

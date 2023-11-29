@@ -20,7 +20,8 @@ add_executable(${TEST_EXECUTABLE_NAME})
 target_sources(${TEST_EXECUTABLE_NAME} PRIVATE ${TEST_SOURCES})
 target_include_directories(${TEST_EXECUTABLE_NAME}
                            PRIVATE ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(${TEST_EXECUTABLE_NAME} ${PROJECT_NAME} GTest::gtest_main)
+target_link_libraries(${TEST_EXECUTABLE_NAME} ${PROJECT_NAME} GTest::gtest_main
+                      pybind11::embed)
 
 include(GoogleTest)
 gtest_discover_tests(${TEST_EXECUTABLE_NAME})
