@@ -1,6 +1,6 @@
-FROM ghcr.io/lobis/geant4:latest
+FROM ghcr.io/lobis/geant4:sha256:7409afd3fd02372b5477e127bdce292115cd26262f24c8661510fda2e34d12bc
 
-ARG NB_USER=user
+ARG NB_USER=jovyan
 ARG NB_UID=1000
 ENV USER ${NB_USER}
 ENV NB_UID ${NB_UID}
