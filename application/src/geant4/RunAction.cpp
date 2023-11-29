@@ -1,6 +1,5 @@
 
 #include "geant4/RunAction.h"
-#include <G4Threading.hh>
 #include <iostream>
 
 using namespace std;
@@ -8,9 +7,22 @@ using namespace std;
 RunAction::RunAction() : G4UserRunAction() {}
 
 void RunAction::BeginOfRunAction(const G4Run*) {
-    cout << "Begin of run for thread " << G4Threading::G4GetThreadId() << endl;
+
+    if (IsMaster()) {
+        cout << "RunAction::BeginOfRunAction" << endl;
+    } else {
+        cout << "RunAction::BeginOfRunAction (worker)" << endl;
+    }
 }
 
 void RunAction::EndOfRunAction(const G4Run*) {
-    G4cout << "END OF RUN" << G4endl;
+    if (IsMaster()) {
+        cout << "RunAction::EndOfRunAction" << endl;
+    } else {
+        cout << "RunAction::EndOfRunAction (worker)" << endl;
+        string error;
+        if (!builder.is_valid(error)) {
+            throw std::runtime_error("Builder is not valid: " + error);
+        }
+    }
 }

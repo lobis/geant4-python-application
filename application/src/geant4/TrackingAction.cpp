@@ -3,6 +3,7 @@
 //
 
 #include "geant4/TrackingAction.h"
+#include "geant4/RunAction.h"
 
 #include <G4ParticleDefinition.hh>
 #include <G4ParticleTypes.hh>
@@ -17,6 +18,8 @@ using namespace std;
 TrackingAction::TrackingAction() : G4UserTrackingAction() {}
 
 void TrackingAction::PreUserTrackingAction(const G4Track* track) {
+    auto runAction = dynamic_cast<RunAction*>(const_cast<G4UserRunAction*>(G4RunManager::GetRunManager()->GetUserRunAction()));
+    // auto& builder = runAction->GetBuilder();
 }
 
 void TrackingAction::PostUserTrackingAction(const G4Track* track) {

@@ -13,26 +13,26 @@
 
 namespace geant4 {
 
-    class Application {
-    private:
-        std::unique_ptr<G4RunManager> runManager = nullptr;
-        bool isInitialized = false;
+class Application {
+private:
+    std::unique_ptr<G4RunManager> runManager = nullptr;
+    bool isInitialized = false;
 
-    public:
-        Application();
-        ~Application() = default;
+public:
+    Application();
+    ~Application() = default;
 
-        void SetupManager(unsigned short nThreads = 0);
-        void SetupDetector(std::string gdml, const std::set<std::string>& sensitiveVolumes = {});
-        void SetupPhysics();
-        void SetupAction();
+    void SetupManager(unsigned short nThreads = 0);
+    void SetupDetector(std::string gdml, const std::set<std::string>& sensitiveVolumes = {});
+    void SetupPhysics();
+    void SetupAction();
 
-        void Initialize();
-        void Run(int nEvents);
+    void Initialize();
+    void Run(int nEvents);
 
-        bool IsSetup() const;
-        bool IsInitialized() const;
-    };
+    bool IsSetup() const;
+    bool IsInitialized() const;
+};
 
 }// namespace geant4
 

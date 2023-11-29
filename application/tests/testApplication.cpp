@@ -49,7 +49,7 @@ const std::string gdml = R"(
 TEST(Application, Run) {
     Application app;
     EXPECT_FALSE(app.IsSetup());
-    app.SetupManager();
+    app.SetupManager(4);
     EXPECT_FALSE(app.IsSetup());
     app.SetupDetector(gdml);
     EXPECT_FALSE(app.IsSetup());
