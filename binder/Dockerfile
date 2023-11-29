@@ -1,10 +1,6 @@
-ARG BASE_TAG=latest
+FROM ghcr.io/lobis/geant4:latest
 
-FROM ghcr.io/lobis/geant4:${BASE_TAG}
-
-RUN /opt/conda/bin/mamba install -y -c conda-forge \
-    notebook jupyterlab \
-    && /opt/conda/bin/conda clean -ya
+RUN /opt/conda/bin/pip install --no-cache-dir notebook jupyterlab
 
 ARG NB_USER=user
 ARG NB_UID=1000
