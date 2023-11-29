@@ -47,12 +47,19 @@ jobs:
           mamba install -c conda-forge geant4=${{ matrix.geant4-version }}
           conda list
 
-      - name: Install additional dependencies
+      - name: Install additional dependencies (ubuntu)
         if: matrix.platform == 'ubuntu-latest'
         # TODO: fix the cmake so it doesn't try to find graphical libraries
         run: |
           sudo apt-get update
           sudo apt-get install -y mesa-common-dev libglu1-mesa-dev
+
+      - name: Install additional dependencies (macos)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          conda env list
+          mamba install -c conda-forge zlib
+          conda list
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
