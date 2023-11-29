@@ -12,15 +12,45 @@
 
 
 namespace geant4::data {
-void InsertEvent(const G4Event* event, Builder& builder) {
+
+void InsertEventBegin(const G4Event* event, Builder& builder) {
+    builder.content<Field::eventId>()
+            .append(event->GetEventID());
+
+    auto& trackId = builder.content<Field::trackId>();
+    auto& trackParentId = builder.content<Field::trackParentId>();
+    auto& trackEnergy = builder.content<Field::trackEnergy>();
+    auto& trackTime = builder.content<Field::trackTime>();
+
+    trackId.begin_list();
+    trackParentId.begin_list();
+    trackEnergy.begin_list();
+    trackTime.begin_list();
 }
 
-void InsertTrack(const G4Track* track, Builder& builder) {
-    auto& energyBuilder = builder.content<Field::energy>();
-    auto& timeBuilder = builder.content<Field::time>();
+void InsertEventEnd(const G4Event*, Builder& builder) {
 
-    energyBuilder.append(track->GetKineticEnergy());
-    timeBuilder.append(track->GetGlobalTime());
+    auto& trackId = builder.content<Field::trackId>();
+    auto& trackParentId = builder.content<Field::trackParentId>();
+    auto& trackEnergy = builder.content<Field::trackEnergy>();
+    auto& trackTime = builder.content<Field::trackTime>();
+
+    trackId.end_list();
+    trackParentId.end_list();
+    trackEnergy.end_list();
+    trackTime.end_list();
+}
+
+void InsertTrackBegin(const G4Track* track, Builder& builder) {
+    auto& trackId = builder.content<Field::trackId>();
+    auto& trackParentId = builder.content<Field::trackParentId>();
+    auto& trackEnergy = builder.content<Field::trackEnergy>();
+    auto& trackTime = builder.content<Field::trackTime>();
+
+    // is there a way to get the ref to the output of begin_list without having to pass it around?
+}
+
+void InsertTrackEnd(const G4Track* track, Builder& builder) {
 }
 
 void InsertStep(const G4Step* step, Builder& builder) {
