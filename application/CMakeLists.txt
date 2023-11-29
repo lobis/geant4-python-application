@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.22)
 
 project(Geant4PythonicApplication)
 
@@ -6,12 +6,12 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(Geant4 REQUIRED)
-
 include(FetchContent)
 
 set(AWKWARD_VERSION "v2.5.0")
 set(PYBIND11_VERSION "v2.11.1")
+
+find_package(Geant4 REQUIRED CONFIG COMPONENTS gdml)
 
 FetchContent_Declare(
     awkward-headers
