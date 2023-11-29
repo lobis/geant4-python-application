@@ -51,7 +51,7 @@ TEST(Application, Run) {
     EXPECT_FALSE(app.IsSetup());
     app.SetupManager();
     EXPECT_FALSE(app.IsSetup());
-    app.SetupDetector<string, set<string>>(gdml, {"boxVolume"});
+    app.SetupDetector(gdml);
     EXPECT_FALSE(app.IsSetup());
     app.SetupPhysics();
     EXPECT_FALSE(app.IsSetup());

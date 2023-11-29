@@ -10,11 +10,11 @@
 
 using namespace std;
 using namespace geant4;
+namespace py = pybind11;
 
 Application::Application() = default;
 
-template<typename... Args>
-void Application::SetupDetector(Args... arg) {
+void Application::SetupDetector(string gdml, const set<string>& sensitiveVolumes) {
     if (runManager == nullptr) {
         throw runtime_error("RunManager needs to be set up first");
     }
@@ -23,12 +23,14 @@ void Application::SetupDetector(Args... arg) {
         throw runtime_error("Detector is already set up");
     }
 
-    runManager->SetUserInitialization(new DetectorConstruction(std::forward<Args>(arg)...));
-}
+    // sensitive volumes should be a set of strings
+    set<string> sensitiveVolumesSet;
+    for (const auto& volumeName: sensitiveVolumes) {
+        sensitiveVolumesSet.insert(volumeName);
+    }
 
-// explicit template instantiation
-template void Application::SetupDetector<string, set<string>>(string, set<string>);
-template void Application::SetupDetector<string>(string);
+    runManager->SetUserInitialization(new DetectorConstruction(std::move(gdml), sensitiveVolumesSet));
+}
 
 void Application::SetupPhysics() {
     if (runManager == nullptr) {

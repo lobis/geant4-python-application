@@ -52,8 +52,9 @@ target_include_directories(
     PRIVATE ${Geant4_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS}
             ${PyBind11_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${Geant4_LIBRARIES}
-                                             awkward::layout-builder)
+target_link_libraries(
+    ${PROJECT_NAME} PUBLIC ${Geant4_LIBRARIES} awkward::layout-builder
+                           pybind11::embed)
 
 # add the pybind11 module
 file(GLOB_RECURSE PYTHON_SOURCES CONFIGURE_DEPENDS

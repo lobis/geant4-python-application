@@ -24,7 +24,7 @@ private:
     std::string gdml;
     G4VPhysicalVolume* world = nullptr;
 
-    const std::set<std::string> sensitiveVolumes;
+    std::set<std::string> sensitiveVolumes;
 };
 
 #endif// GEANT4_APPLICATION_DETECTORCONSTRUCTION_H

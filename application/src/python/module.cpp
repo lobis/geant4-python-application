@@ -10,7 +10,7 @@ void init_Application(py::module& m) {
     py::class_<Application>(m, "Application")
             .def(py::init<>())
             .def("setup_manager", &Application::SetupManager, py::arg("n_threads") = 0)
-            .def("setup_detector", &Application::SetupDetector<std::string, std::set<std::string>>, py::arg("gdml"), py::arg("sensitive_volumes") = py::set())
+            .def("setup_detector", &Application::SetupDetector, py::arg("gdml"), py::arg("sensitive_volumes") = py::set())
             .def("setup_physics", &Application::SetupPhysics)
             .def("setup_action", &Application::SetupAction)
             .def("initialize", &Application::Initialize)

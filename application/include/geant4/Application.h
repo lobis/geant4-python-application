@@ -5,6 +5,12 @@
 
 #include <G4RunManager.hh>
 
+#include "pybind11/chrono.h"
+#include "pybind11/complex.h"
+#include "pybind11/functional.h"
+#include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
+
 namespace geant4 {
 
     class Application {
@@ -17,8 +23,7 @@ namespace geant4 {
         ~Application() = default;
 
         void SetupManager(unsigned short nThreads = 0);
-        template<typename... Args>
-        void SetupDetector(Args... args);
+        void SetupDetector(std::string gdml, const std::set<std::string>& sensitiveVolumes = {});
         void SetupPhysics();
         void SetupAction();
 
