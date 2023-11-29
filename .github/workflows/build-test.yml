@@ -44,7 +44,7 @@ jobs:
       - name: Install Geant4 via conda
         run: |
           conda env list
-          mamba install -c conda-forge qt qt-devel geant4=${{ matrix.geant4-version }}
+          mamba install -c conda-forge geant4=${{ matrix.geant4-version }}
           conda list
 
       - name: Setup tmate session
