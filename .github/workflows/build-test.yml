@@ -30,12 +30,6 @@ jobs:
           miniforge-variant: Mambaforge
           use-mamba: true
 
-      - name: Install Geant4 via conda
-        run: |
-          conda env list
-          mamba install -c conda-forge geant4
-          conda list
-
       - name: Install cmake via conda
         run: |
           conda env list
@@ -45,7 +39,13 @@ jobs:
       - name: Install libexpat via conda (geant4 complains due to lower version of installed libexpat)
         run: |
           conda env list
-          mamba -c conda-forge libexpat>=2.5.0
+          mamba install -c conda-forge libexpat>=2.5.0
+          conda list
+
+      - name: Install Geant4 via conda
+        run: |
+          conda env list
+          mamba install -c conda-forge geant4
           conda list
 
       - name: Info
