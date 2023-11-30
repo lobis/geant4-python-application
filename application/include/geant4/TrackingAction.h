@@ -1,6 +1,3 @@
-//
-// Created by Luis Antonio Obis Aparicio on 25/11/23.
-//
 
 #ifndef GEANT4_APPLICATION_TRACKINGACTION_H
 #define GEANT4_APPLICATION_TRACKINGACTION_H

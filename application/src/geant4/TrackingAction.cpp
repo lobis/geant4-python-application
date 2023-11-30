@@ -1,6 +1,3 @@
-//
-// Created by Luis Antonio Obis Aparicio on 25/11/23.
-//
 
 #include "geant4/TrackingAction.h"
 #include "geant4/RunAction.h"

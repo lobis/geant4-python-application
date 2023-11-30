@@ -1,6 +1,3 @@
-//
-// Created by Luis Antonio Obis Aparicio on 28/11/23.
-//
 
 #include "geant4/ActionInitialization.h"
 #include "geant4/EventAction.h"
