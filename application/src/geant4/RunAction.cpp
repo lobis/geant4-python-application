@@ -1,5 +1,6 @@
 
 #include "geant4/RunAction.h"
+#include "geant4/SteppingVerbose.h"
 
 #include <iostream>
 
@@ -9,6 +10,11 @@ RunAction::RunAction() : G4UserRunAction() {}
 
 void RunAction::BeginOfRunAction(const G4Run*) {
     builder.clear();
+
+    // auto steppingVerbose = ((SteppingVerbose*) G4VSteppingVerbose::GetInstance());
+    // SteppingVerbose::SetSilent(1);
+    // steppingVerbose->SetSteppingVerbose(1);
+
     if (IsMaster()) {
         builderMainPtr = &builder;
     } else {

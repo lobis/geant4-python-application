@@ -90,22 +90,21 @@ void InsertTrackEnd(const G4Track*, Builder& builder) {
 }
 
 void InsertStep(const G4Step* step, Builder& builder) {
-    auto& stepEnergy = builder.content<Field::stepEnergy>();
-    auto& stepTime = builder.content<Field::stepTime>();
-
     const G4Track* track = step->GetTrack();
 
     const auto& stepPost = step->GetPostStepPoint();
     const auto& stepPre = step->GetPreStepPoint();
 
     const auto process = step->GetPostStepPoint()->GetProcessDefinedStep();
-    G4String processName = "Init";
-    G4String processTypeName = "Init";
+    G4String processName = "InitStep";
+    G4String processTypeName = "InitStep";
     if (track->GetCurrentStepNumber() != 0) {
         // 0 = Init step (G4SteppingVerbose) process is not defined for this step
         processName = process->GetProcessName();
         processTypeName = G4VProcess::GetProcessTypeName(process->GetProcessType());
     }
+
+    cout << "STEP NUMBER: " << track->GetCurrentStepNumber() << " PROCESS: " << processName << endl;
 
     builder.content<Field::stepEnergy>().content().content().append(step->GetTotalEnergyDeposit() / units::energy);
     builder.content<Field::stepTime>().content().content().append(stepPost->GetGlobalTime() / units::time);

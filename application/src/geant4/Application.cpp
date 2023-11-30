@@ -4,6 +4,7 @@
 #include "geant4/DetectorConstruction.h"
 #include "geant4/PhysicsList.h"
 #include "geant4/RunAction.h"
+#include "geant4/SteppingVerbose.h"
 
 // TODO: conditional include
 #include <G4UIExecutive.hh>
@@ -13,7 +14,6 @@
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
-#include <G4VSteppingVerbose.hh>
 
 #include <random>
 
@@ -115,7 +115,12 @@ void Application::Initialize() {
         throw runtime_error("Application needs to be set up first");
     }
 
+    if (IsInitialized()) {
+        throw runtime_error("Application is already initialized");
+    }
+
     SetupRandomEngine();
+    // G4VSteppingVerbose::SetInstance(new SteppingVerbose);
 
     runManager->Initialize();
     isInitialized = true;

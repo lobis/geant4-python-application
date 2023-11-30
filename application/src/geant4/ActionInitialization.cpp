@@ -5,7 +5,12 @@
 #include "geant4/RunAction.h"
 #include "geant4/StackingAction.h"
 #include "geant4/SteppingAction.h"
+#include "geant4/SteppingVerbose.h"
 #include "geant4/TrackingAction.h"
+
+#include <iostream>
+
+using namespace std;
 
 ActionInitialization::ActionInitialization() : G4VUserActionInitialization() {}
 
@@ -14,6 +19,8 @@ void ActionInitialization::BuildForMaster() const {
 }
 
 void ActionInitialization::Build() const {
+    cout << "ActionInitialization::Build" << endl;
+
     SetUserAction(new PrimaryGeneratorAction);
     SetUserAction(new RunAction);
     SetUserAction(new EventAction);
@@ -22,4 +29,9 @@ void ActionInitialization::Build() const {
     SetUserAction(new TrackingAction);
 
     // G4EventManager::GetEventManager()->SetNumberOfAdditionalWaitingStacks(1);  // optical stack
+}
+
+G4VSteppingVerbose* ActionInitialization::InitializeSteppingVerbose() const {
+    cout << "ActionInitialization::InitializeSteppingVerbose" << endl;
+    return new SteppingVerbose;
 }
