@@ -21,9 +21,15 @@ private:
     bool isInitialized = false;
     long randomSeed = 0;
 
+    static Application* pInstance;
+    void SetupRandomEngine();
+
 public:
     Application();
-    ~Application() = default;
+    ~Application();
+
+    Application(const Application&) = delete;
+    Application& operator=(const Application&) = delete;
 
     void SetRandomSeed(long seed);
     void SetupManager(unsigned short nThreads = 0);

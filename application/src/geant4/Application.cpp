@@ -7,15 +7,36 @@
 
 #include <G4RunManagerFactory.hh>
 
-#include <iostream>
 #include <random>
 
 using namespace std;
 using namespace geant4;
 namespace py = pybind11;
 
+Application* Application::pInstance = nullptr;
+
+
 Application::Application() {
+    // if the instance already exists, return it, otherwise create one
+    if (pInstance != nullptr) {
+        throw runtime_error("Application can only be created once");
+        return;
+    }
+    pInstance = this;
+}
+
+Application::~Application() {
+    // Recreating the Application will likely cause a segfault due to how Geant4 works, we should not allow it
+    // It's preferable to throw an exception that we can handle in Python
+    pInstance = this;// nullptr;
+}
+
+void Application::SetupRandomEngine() {
     CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);
+    if (randomSeed == 0) {
+        randomSeed = std::random_device()();
+    }
+    CLHEP::HepRandom::setTheSeed(randomSeed);
 }
 
 void Application::SetupDetector(string gdml, const set<string>& sensitiveVolumes) {
@@ -85,10 +106,7 @@ void Application::Initialize() {
         throw runtime_error("Application needs to be set up first");
     }
 
-    if (randomSeed == 0) {
-        randomSeed = std::random_device()();
-    }
-    CLHEP::HepRandom::setTheSeed(randomSeed);
+    SetupRandomEngine();
 
     runManager->Initialize();
     isInitialized = true;
