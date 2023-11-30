@@ -67,33 +67,33 @@ using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
 
 typedef unsigned int id;
 using Builder = RecordBuilder<
-        RecordField<static_cast<std::size_t>(Field::runId), NumpyBuilder<id>>,
-        RecordField<static_cast<std::size_t>(Field::eventId), NumpyBuilder<id>>,
+        RecordField<Field::runId, NumpyBuilder<id>>,
+        RecordField<Field::eventId, NumpyBuilder<id>>,
         //
-        RecordField<static_cast<std::size_t>(Field::trackId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
-        RecordField<static_cast<std::size_t>(Field::trackParentId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
-        RecordField<static_cast<std::size_t>(Field::trackParticle), ListOffsetBuilder<id, NumpyBuilder<bool>>>,// this should be a string
-        // RecordField<static_cast<std::size_t>(Field::trackParticleType), ListOffsetBuilder<id, NumpyBuilder<std::string>>>,
-        RecordField<static_cast<std::size_t>(Field::trackInitialEnergy), ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<static_cast<std::size_t>(Field::trackInitialTime), ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        // RecordField<static_cast<std::size_t>(Field::trackCreatorProcess), ListOffsetBuilder<id, NumpyBuilder<std::string>>>,
-        RecordField<static_cast<std::size_t>(Field::trackInitialPositionX), ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<static_cast<std::size_t>(Field::trackInitialPositionY), ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<static_cast<std::size_t>(Field::trackInitialPositionZ), ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<static_cast<std::size_t>(Field::trackInitialMomentumX), ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<static_cast<std::size_t>(Field::trackInitialMomentumY), ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<static_cast<std::size_t>(Field::trackInitialMomentumZ), ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<static_cast<std::size_t>(Field::trackWeight), ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<Field::trackId, ListOffsetBuilder<id, NumpyBuilder<id>>>,
+        RecordField<Field::trackParentId, ListOffsetBuilder<id, NumpyBuilder<id>>>,
+        RecordField<Field::trackParticle, ListOffsetBuilder<id, NumpyBuilder<bool>>>,// this should be a string
+        // RecordField<Field::trackParticleType,ListOffsetBuilder<id, NumpyBuilder<std::string>>>,
+        RecordField<Field::trackInitialEnergy, ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<Field::trackInitialTime, ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        // RecordField<Field::trackCreatorProcess,ListOffsetBuilder<id, NumpyBuilder<std::string>>>,
+        RecordField<Field::trackInitialPositionX, ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<Field::trackInitialPositionY, ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<Field::trackInitialPositionZ, ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<Field::trackInitialMomentumX, ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<Field::trackInitialMomentumY, ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<Field::trackInitialMomentumZ, ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<Field::trackWeight, ListOffsetBuilder<id, NumpyBuilder<float>>>,
         //
-        RecordField<static_cast<std::size_t>(Field::stepEnergy), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        RecordField<static_cast<std::size_t>(Field::stepTime), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        // RecordField<static_cast<std::size_t>(Field::stepVolume), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
-        // RecordField<static_cast<std::size_t>(Field::stepProcess), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
-        // RecordField<static_cast<std::size_t>(Field::stepProcessType), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
-        RecordField<static_cast<std::size_t>(Field::stepPositionX), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        RecordField<static_cast<std::size_t>(Field::stepPositionY), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        RecordField<static_cast<std::size_t>(Field::stepPositionZ), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        RecordField<static_cast<std::size_t>(Field::stepTrackKineticEnergy), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>
+        RecordField<Field::stepEnergy, ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        RecordField<Field::stepTime, ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        // RecordField<Field::stepVolume,ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
+        // RecordField<Field::stepProcess,ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
+        // RecordField<Field::stepProcessType,ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
+        RecordField<Field::stepPositionX, ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        RecordField<Field::stepPositionY, ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        RecordField<Field::stepPositionZ, ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        RecordField<Field::stepTrackKineticEnergy, ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>
         //
         >;
 
