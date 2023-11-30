@@ -78,14 +78,20 @@ void init_Application(py::module& m) {
     py::class_<DetectorConstruction>(m, "DetectorConstruction")
             .def("check_overlaps", &DetectorConstruction::CheckOverlaps)
             .def_static("print_materials", &DetectorConstruction::PrintMaterials)
+            // why are properties not working (due to sets?)
             .def_property("materials", &DetectorConstruction::GetMaterialNames, nullptr)
+            .def_static("get_materials", &DetectorConstruction::GetMaterialNames)
             .def_property("logical_volumes", &DetectorConstruction::GetLogicalVolumeNames, nullptr)
-            .def_property("physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames, nullptr);
+            .def_static("get_logical_volumes", &DetectorConstruction::GetLogicalVolumeNames)
+            .def_property("physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames, nullptr)
+            .def_property_readonly_static("patata", &DetectorConstruction::GetPhysicalVolumeNames)
+            .def_static("get_physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames);
 
     py::class_<StackingAction>(m, "StackingAction")
             .def_property("ignored_particles", &StackingAction::GetIgnoredParticles, &StackingAction::SetIgnoredParticles)
-            .def_static("ignore_particle", &StackingAction::IgnoreParticle, py::arg("particle"))
-            .def_static("ignore_particle_undo", &StackingAction::IgnoreParticleUndo, py::arg("particle"));
+            .def_static("get_ignored_particles", &StackingAction::GetIgnoredParticles)
+            .def_static("ignore_particle", &StackingAction::IgnoreParticle, py::arg("name"))
+            .def_static("ignore_particle_undo", &StackingAction::IgnoreParticleUndo, py::arg("name"));
 }
 
 PYBIND11_MODULE(geant4_cpp, m) {
