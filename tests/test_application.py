@@ -30,14 +30,15 @@ def test_missing_manager():
 
 def test_multiple_apps():
     # Could this work somehow?
-    for _ in range(2):
-        app = geant4.Application()
-        app.setup_manager()
-        app.setup_detector()
-        app.setup_physics()
-        app.setup_action()
-        app.initialize()
-        app.run()
+    with pytest.raises(Exception):
+        for _ in range(2):
+            app = geant4.Application()
+            app.setup_manager()
+            app.setup_detector()
+            app.setup_physics()
+            app.setup_action()
+            app.initialize()
+            app.run()
 
 
 # This may not hold for all Geant4 versions
