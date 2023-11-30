@@ -10,6 +10,7 @@
 #include "pybind11/functional.h"
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
+#include <G4UImanager.hh>
 
 namespace py = pybind11;
 
@@ -45,7 +46,9 @@ public:
 
     inline long GetRandomSeed() const { return randomSeed; }
 
-    void Command(const std::string& command);
+    static int Command(const std::string& command);
+    static void ListCommands(const std::string& directory);
+    static G4UImanager* GetUIManager();
 };
 
 }// namespace geant4

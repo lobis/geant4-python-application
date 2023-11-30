@@ -6,7 +6,6 @@
 #include "geant4/RunAction.h"
 
 #include <G4RunManagerFactory.hh>
-#include <G4UImanager.hh>
 
 #include <random>
 
@@ -136,13 +135,24 @@ void Application::SetRandomSeed(long seed) {
     randomSeed = seed;
 }
 
-void Application::Command(const string& command) {
-    if (!IsInitialized()) {
-        throw runtime_error("Application needs to be initialized first");
-    }
+G4UImanager* Application::GetUIManager() {
     auto ui = G4UImanager::GetUIpointer();
     if (ui == nullptr) {
         throw runtime_error("UI manager is not available");
     }
-    ui->ApplyCommand(command);
+    return ui;
+}
+
+int Application::Command(const string& command) {
+    auto ui = GetUIManager();
+    int code = ui->ApplyCommand(command);
+    if (code != 0) {
+        throw runtime_error("Command '" + command + "' failed with code " + to_string(code));
+    }
+    return code;
+}
+
+void Application::ListCommands(const string& directory) {
+    auto ui = GetUIManager();
+    ui->ListCommands(directory.c_str());
 }
