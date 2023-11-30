@@ -26,7 +26,6 @@ void InsertEvent(const G4Event* event, Builder& builder) {
     builder.content<Field::eventId>().append(event->GetEventID());
 }
 
-
 template<std::size_t... I>
 void InsertEventBeginHelper(Builder& builder) {
     (builder.content<I>().begin_list(), ...);
@@ -70,30 +69,24 @@ void InsertTrack(const G4Track* track, Builder& builder) {
     builder.content<Field::trackWeight>().content().append(track->GetWeight());
 }
 
-void InsertTrackBegin(const G4Track* track, Builder& builder) {
-    builder.content<Field::stepEnergy>().content().begin_list();
-    builder.content<Field::stepTime>().content().begin_list();
-    // builder.content<Field::stepProcess>().content().begin_list();
-    // builder.content<Field::stepProcessType>().content().begin_list();
-    // builder.content<Field::stepVolume>().content().begin_list();
-    builder.content<Field::stepPositionX>().content().begin_list();
-    builder.content<Field::stepPositionY>().content().begin_list();
-    builder.content<Field::stepPositionZ>().content().begin_list();
-    builder.content<Field::stepTrackKineticEnergy>().content().begin_list();
+template<std::size_t... I>
+void InsertTrackBeginHelper(Builder& builder) {
+    (builder.content<I>().content().begin_list(), ...);
+}
 
-    // we should probably insert a step here to mark the beginning of the track / use stepping verbose
+void InsertTrackBegin(const G4Track* track, Builder& builder) {
+    InsertTrackBeginHelper<Field::stepEnergy, Field::stepTime, Field::stepPositionX, Field::stepPositionY, Field::stepPositionZ,
+                           Field::stepTrackKineticEnergy>(builder);
+}
+
+template<std::size_t... I>
+void InsertTrackEndHelper(Builder& builder) {
+    (builder.content<I>().content().end_list(), ...);
 }
 
 void InsertTrackEnd(const G4Track*, Builder& builder) {
-    builder.content<Field::stepEnergy>().content().end_list();
-    builder.content<Field::stepTime>().content().end_list();
-    // builder.content<Field::stepProcess>().content().end_list();
-    // builder.content<Field::stepProcessType>().content().end_list();
-    // builder.content<Field::stepVolume>().content().end_list();
-    builder.content<Field::stepPositionX>().content().end_list();
-    builder.content<Field::stepPositionY>().content().end_list();
-    builder.content<Field::stepPositionZ>().content().end_list();
-    builder.content<Field::stepTrackKineticEnergy>().content().end_list();
+    InsertTrackEndHelper<Field::stepEnergy, Field::stepTime, Field::stepPositionX, Field::stepPositionY, Field::stepPositionZ,
+                         Field::stepTrackKineticEnergy>(builder);
 }
 
 void InsertStep(const G4Step* step, Builder& builder) {
