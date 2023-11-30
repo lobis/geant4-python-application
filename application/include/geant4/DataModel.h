@@ -6,6 +6,7 @@
 #include <G4SystemOfUnits.hh>
 #include <G4UnitsTable.hh>
 
+#include <CLHEP/Units/PhysicalConstants.h>
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
@@ -16,16 +17,35 @@ class G4Step;
 
 namespace geant4::data {
 
-enum Field : std::size_t { eventId,
-                           //
-                           trackId,
-                           trackParentId,
-                           trackInitialEnergy,
-                           trackInitialTime,
-                           //
-                           hitsEnergy,
-                           hitsTime,
-                           hitsProcess,
+enum Field : std::size_t {
+    runId,
+    eventId,
+    //
+    trackId,
+    trackParentId,
+    // trackParticle,
+    // trackParticleType,
+    trackInitialEnergy,
+    trackInitialTime,
+    // trackCreatorProcess,
+    // trackCreatorProcessType,
+    trackInitialPositionX,
+    trackInitialPositionY,
+    trackInitialPositionZ,
+    trackInitialMomentumX,
+    trackInitialMomentumY,
+    trackInitialMomentumZ,
+    trackWeight,
+    //
+    hitsEnergy,
+    hitsTime,
+    // hitsProcess,
+    // hitsProcessType,
+    // hitsVolume,
+    hitsPositionX,
+    hitsPositionY,
+    hitsPositionZ,
+    hitsTrackKineticEnergy,
 };
 
 using UserDefinedMap = std::map<std::size_t, std::string>;
@@ -43,27 +63,65 @@ template<class PRIMITIVE>
 using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
 
 typedef unsigned int id;
-using Builder = RecordBuilder<RecordField<static_cast<std::size_t>(Field::eventId), NumpyBuilder<id>>,
-                              RecordField<static_cast<std::size_t>(Field::trackId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
-                              RecordField<static_cast<std::size_t>(Field::trackParentId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
-                              RecordField<static_cast<std::size_t>(Field::trackInitialEnergy), ListOffsetBuilder<id, NumpyBuilder<float>>>,
-                              RecordField<static_cast<std::size_t>(Field::trackInitialTime), ListOffsetBuilder<id, NumpyBuilder<float>>>,
-                              RecordField<static_cast<std::size_t>(Field::hitsEnergy), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-                              RecordField<static_cast<std::size_t>(Field::hitsTime), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>
-                              // RecordField<static_cast<std::size_t>(Field::hitsProcess), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
-                              >;
+using Builder = RecordBuilder<
+        RecordField<static_cast<std::size_t>(Field::runId), NumpyBuilder<id>>,
+        RecordField<static_cast<std::size_t>(Field::eventId), NumpyBuilder<id>>,
+        //
+        RecordField<static_cast<std::size_t>(Field::trackId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
+        RecordField<static_cast<std::size_t>(Field::trackParentId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
+        // RecordField<static_cast<std::size_t>(Field::trackParticle), ListOffsetBuilder<id, NumpyBuilder<std::string>>>,
+        // RecordField<static_cast<std::size_t>(Field::trackParticleType), ListOffsetBuilder<id, NumpyBuilder<std::string>>>,
+        RecordField<static_cast<std::size_t>(Field::trackInitialEnergy), ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<static_cast<std::size_t>(Field::trackInitialTime), ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        // RecordField<static_cast<std::size_t>(Field::trackCreatorProcess), ListOffsetBuilder<id, NumpyBuilder<std::string>>>,
+        RecordField<static_cast<std::size_t>(Field::trackInitialPositionX), ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<static_cast<std::size_t>(Field::trackInitialPositionY), ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<static_cast<std::size_t>(Field::trackInitialPositionZ), ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<static_cast<std::size_t>(Field::trackInitialMomentumX), ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<static_cast<std::size_t>(Field::trackInitialMomentumY), ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<static_cast<std::size_t>(Field::trackInitialMomentumZ), ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        RecordField<static_cast<std::size_t>(Field::trackWeight), ListOffsetBuilder<id, NumpyBuilder<float>>>,
+        //
+        RecordField<static_cast<std::size_t>(Field::hitsEnergy), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        RecordField<static_cast<std::size_t>(Field::hitsTime), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        // RecordField<static_cast<std::size_t>(Field::hitsVolume), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
+        // RecordField<static_cast<std::size_t>(Field::hitsProcess), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
+        // RecordField<static_cast<std::size_t>(Field::hitsProcessType), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
+        RecordField<static_cast<std::size_t>(Field::hitsPositionX), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        RecordField<static_cast<std::size_t>(Field::hitsPositionY), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        RecordField<static_cast<std::size_t>(Field::hitsPositionZ), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        RecordField<static_cast<std::size_t>(Field::hitsTrackKineticEnergy), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>
+        //
+        >;
 
 inline Builder MakeBuilder() {
     return {
             {
+                    {Field::runId, "run_id"},
                     {Field::eventId, "event_id"},
+                    //
                     {Field::trackId, "track.id"},
                     {Field::trackParentId, "track.parent_id"},
                     {Field::trackInitialEnergy, "track.energy"},
                     {Field::trackInitialTime, "track.time"},
+                    {Field::trackInitialPositionX, "track.position.x"},
+                    {Field::trackInitialPositionY, "track.position.y"},
+                    {Field::trackInitialPositionZ, "track.position.z"},
+                    {Field::trackInitialMomentumX, "track.momentum.x"},
+                    {Field::trackInitialMomentumY, "track.momentum.y"},
+                    {Field::trackInitialMomentumZ, "track.momentum.z"},
+                    {Field::trackWeight, "track.weight"},
+                    //
                     {Field::hitsEnergy, "track.hits.energy"},
                     {Field::hitsTime, "track.hits.time"},
+                    {Field::hitsPositionX, "track.hits.position.x"},
+                    {Field::hitsPositionY, "track.hits.position.y"},
+                    {Field::hitsPositionZ, "track.hits.position.z"},
+                    {Field::hitsTrackKineticEnergy, "track.hits.track_kinetic_energy"},
+
                     // {Field::hitsProcess, "track.hits.process"}},
+                    // {Field::hitsProcessType, "track.hits.process_type"}},
+                    // {Field::hitsVolume, "track.hits.volume"}},
             }};
 }
 
@@ -79,6 +137,7 @@ namespace units {
 static constexpr auto energy = CLHEP::keV;
 static constexpr auto time = CLHEP::us;
 static constexpr auto length = CLHEP::mm;
+static constexpr auto momentum = CLHEP::GeV / CLHEP::c_light;
 }// namespace units
 
 }// namespace geant4::data

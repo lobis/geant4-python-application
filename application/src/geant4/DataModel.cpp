@@ -6,6 +6,8 @@
 #include <G4Nucleus.hh>
 #include <G4ParticleDefinition.hh>
 #include <G4ParticleTypes.hh>
+#include <G4Run.hh>
+#include <G4RunManager.hh>
 #include <G4Step.hh>
 #include <G4Track.hh>
 #include <G4UnitsTable.hh>
@@ -20,14 +22,28 @@ using namespace std;
 namespace geant4::data {
 
 void InsertEventBegin(const G4Event* event, Builder& builder) {
+    builder.content<Field::runId>().append(G4RunManager::GetRunManager()->GetCurrentRun()->GetRunID());
     builder.content<Field::eventId>().append(event->GetEventID());
-
+    //
     builder.content<Field::trackId>().begin_list();
     builder.content<Field::trackParentId>().begin_list();
     builder.content<Field::trackInitialEnergy>().begin_list();
     builder.content<Field::trackInitialTime>().begin_list();
+    builder.content<Field::trackInitialPositionX>().begin_list();
+    builder.content<Field::trackInitialPositionY>().begin_list();
+    builder.content<Field::trackInitialPositionZ>().begin_list();
+    builder.content<Field::trackInitialMomentumX>().begin_list();
+    builder.content<Field::trackInitialMomentumY>().begin_list();
+    builder.content<Field::trackInitialMomentumZ>().begin_list();
+    builder.content<Field::trackWeight>().begin_list();
+    //
     builder.content<Field::hitsEnergy>().begin_list();
     builder.content<Field::hitsTime>().begin_list();
+    builder.content<Field::hitsPositionX>().begin_list();
+    builder.content<Field::hitsPositionY>().begin_list();
+    builder.content<Field::hitsPositionZ>().begin_list();
+    builder.content<Field::hitsTrackKineticEnergy>().begin_list();
+
     // builder.content<Field::hitsProcess>().begin_list();
 }
 
@@ -36,25 +52,51 @@ void InsertEventEnd(const G4Event*, Builder& builder) {
     builder.content<Field::trackParentId>().end_list();
     builder.content<Field::trackInitialEnergy>().end_list();
     builder.content<Field::trackInitialTime>().end_list();
+    // builder.content<Field::trackCreatorProcess>().end_list();
+    // builder.content<Field::trackCreatorProcessType>().end_list();
+    builder.content<Field::trackInitialPositionX>().end_list();
+    builder.content<Field::trackInitialPositionY>().end_list();
+    builder.content<Field::trackInitialPositionZ>().end_list();
+    builder.content<Field::trackInitialMomentumX>().end_list();
+    builder.content<Field::trackInitialMomentumY>().end_list();
+    builder.content<Field::trackInitialMomentumZ>().end_list();
+    builder.content<Field::trackWeight>().end_list();
+    //
     builder.content<Field::hitsEnergy>().end_list();
     builder.content<Field::hitsTime>().end_list();
     // builder.content<Field::hitsProcess>().end_list();
+    // builder.content<Field::hitsProcessType>().end_list();
+    // builder.content<Field::hitsVolume>().end_list();
+    builder.content<Field::hitsPositionX>().end_list();
+    builder.content<Field::hitsPositionY>().end_list();
+    builder.content<Field::hitsPositionZ>().end_list();
+    builder.content<Field::hitsTrackKineticEnergy>().end_list();
 }
 
 void InsertTrackBegin(const G4Track* track, Builder& builder) {
-    auto& trackId = builder.content<Field::trackId>();
-    auto& trackParentId = builder.content<Field::trackParentId>();
-    auto& trackEnergy = builder.content<Field::trackInitialEnergy>();
-    auto& trackInitialTime = builder.content<Field::trackInitialTime>();
-
-    trackId.content().append(track->GetTrackID());
-    trackParentId.content().append(track->GetParentID());
-    trackEnergy.content().append(track->GetKineticEnergy() / units::energy);
-    trackInitialTime.content().append(track->GetGlobalTime() / units::time);
-
+    builder.content<Field::trackId>().content().append(track->GetTrackID());
+    builder.content<Field::trackParentId>().content().append(track->GetParentID());
+    builder.content<Field::trackInitialEnergy>().content().append(track->GetKineticEnergy() / units::energy);
+    builder.content<Field::trackInitialTime>().content().append(track->GetGlobalTime() / units::time);
+    // builder.content<Field::trackCreatorProcess>().content().append(track->GetCreatorProcess()->GetProcessName());
+    // builder.content<Field::trackCreatorProcessType>().content().append(G4VProcess::GetProcessTypeName(track->GetCreatorProcess()->GetProcessType()));
+    builder.content<Field::trackInitialPositionX>().content().append(track->GetPosition().x() / units::length);
+    builder.content<Field::trackInitialPositionY>().content().append(track->GetPosition().y() / units::length);
+    builder.content<Field::trackInitialPositionZ>().content().append(track->GetPosition().z() / units::length);
+    builder.content<Field::trackInitialMomentumX>().content().append(track->GetMomentum().x() / units::momentum);
+    builder.content<Field::trackInitialMomentumY>().content().append(track->GetMomentum().y() / units::momentum);
+    builder.content<Field::trackInitialMomentumZ>().content().append(track->GetMomentum().z() / units::momentum);
+    builder.content<Field::trackWeight>().content().append(track->GetWeight());
+    //
     builder.content<Field::hitsEnergy>().content().begin_list();
     builder.content<Field::hitsTime>().content().begin_list();
     // builder.content<Field::hitsProcess>().content().begin_list();
+    // builder.content<Field::hitsProcessType>().content().begin_list();
+    // builder.content<Field::hitsVolume>().content().begin_list();
+    builder.content<Field::hitsPositionX>().content().begin_list();
+    builder.content<Field::hitsPositionY>().content().begin_list();
+    builder.content<Field::hitsPositionZ>().content().begin_list();
+    builder.content<Field::hitsTrackKineticEnergy>().content().begin_list();
 
     // we should probably insert a step here to mark the beginning of the track / use stepping verbose
 }
@@ -63,6 +105,12 @@ void InsertTrackEnd(const G4Track*, Builder& builder) {
     builder.content<Field::hitsEnergy>().content().end_list();
     builder.content<Field::hitsTime>().content().end_list();
     // builder.content<Field::hitsProcess>().content().end_list();
+    // builder.content<Field::hitsProcessType>().content().end_list();
+    // builder.content<Field::hitsVolume>().content().end_list();
+    builder.content<Field::hitsPositionX>().content().end_list();
+    builder.content<Field::hitsPositionY>().content().end_list();
+    builder.content<Field::hitsPositionZ>().content().end_list();
+    builder.content<Field::hitsTrackKineticEnergy>().content().end_list();
 }
 
 void InsertStep(const G4Step* step, Builder& builder) {
@@ -86,6 +134,12 @@ void InsertStep(const G4Step* step, Builder& builder) {
     builder.content<Field::hitsEnergy>().content().content().append(step->GetTotalEnergyDeposit() / units::energy);
     builder.content<Field::hitsTime>().content().content().append(stepPost->GetGlobalTime() / units::time);
     // builder.content<Field::hitsProcess>().content().content().append(processName);
+    // builder.content<Field::hitsProcessType>().content().content().append(processTypeName);
+    // builder.content<Field::hitsVolume>().content().content().append(stepPost->GetPhysicalVolume()->GetName());
+    builder.content<Field::hitsPositionX>().content().content().append(stepPost->GetPosition().x() / units::length);
+    builder.content<Field::hitsPositionY>().content().content().append(stepPost->GetPosition().y() / units::length);
+    builder.content<Field::hitsPositionZ>().content().content().append(stepPost->GetPosition().z() / units::length);
+    builder.content<Field::hitsTrackKineticEnergy>().content().content().append(stepPost->GetKineticEnergy() / units::energy);
 }
 
 py::object SnapshotBuilder(Builder& builder) {
