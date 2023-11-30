@@ -21,10 +21,12 @@ using namespace std;
 
 namespace geant4::data {
 
-void InsertEventBegin(const G4Event* event, Builder& builder) {
+void InsertEvent(const G4Event* event, Builder& builder) {
     builder.content<Field::runId>().append(G4RunManager::GetRunManager()->GetCurrentRun()->GetRunID());
     builder.content<Field::eventId>().append(event->GetEventID());
-    //
+}
+
+void InsertEventBegin(const G4Event* event, Builder& builder) {
     builder.content<Field::trackId>().begin_list();
     builder.content<Field::trackParentId>().begin_list();
     builder.content<Field::trackParticle>().begin_list();
@@ -75,7 +77,7 @@ void InsertEventEnd(const G4Event*, Builder& builder) {
     builder.content<Field::stepTrackKineticEnergy>().end_list();
 }
 
-void InsertTrackBegin(const G4Track* track, Builder& builder) {
+void InsertTrack(const G4Track* track, Builder& builder) {
     builder.content<Field::trackId>().content().append(track->GetTrackID());
     builder.content<Field::trackParentId>().content().append(track->GetParentID());
     builder.content<Field::trackParticle>().content().append({});
@@ -90,7 +92,9 @@ void InsertTrackBegin(const G4Track* track, Builder& builder) {
     builder.content<Field::trackInitialMomentumY>().content().append(track->GetMomentum().y() / units::momentum);
     builder.content<Field::trackInitialMomentumZ>().content().append(track->GetMomentum().z() / units::momentum);
     builder.content<Field::trackWeight>().content().append(track->GetWeight());
-    //
+}
+
+void InsertTrackBegin(const G4Track* track, Builder& builder) {
     builder.content<Field::stepEnergy>().content().begin_list();
     builder.content<Field::stepTime>().content().begin_list();
     // builder.content<Field::stepProcess>().content().begin_list();
