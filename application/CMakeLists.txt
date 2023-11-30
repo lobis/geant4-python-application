@@ -45,8 +45,12 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
      "${PROJECT_SOURCE_DIR}/src/geant4/*.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
-set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY
-                                                 ${PROJECT_BINARY_DIR}/lib)
+
+target_compile_options(${PROJECT_NAME} PUBLIC -fPIC)
+set_target_properties(
+    ${PROJECT_NAME}
+    PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib
+               ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include
                                                   ${Geant4_INCLUDE_DIRS})
@@ -62,9 +66,11 @@ file(GLOB_RECURSE PYTHON_SOURCES CONFIGURE_DEPENDS
      "${PROJECT_SOURCE_DIR}/src/python/*.cpp")
 pybind11_add_module(${PYTHON_MODULE_NAME} ${PYTHON_SOURCES})
 target_link_libraries(${PYTHON_MODULE_NAME} PRIVATE ${PROJECT_NAME})
+target_compile_options(${PYTHON_MODULE_NAME} PRIVATE -fPIC)
 set_target_properties(
     ${PYTHON_MODULE_NAME}
     PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib
+               ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib
                CXX_VISIBILITY_PRESET hidden
                VISIBILITY_INLINES_HIDDEN ON
                CXX_EXTENSIONS NO)
