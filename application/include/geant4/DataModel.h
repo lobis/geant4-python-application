@@ -37,15 +37,15 @@ enum Field : std::size_t {
     trackInitialMomentumZ,
     trackWeight,
     //
-    hitsEnergy,
-    hitsTime,
-    // hitsProcess,
-    // hitsProcessType,
-    // hitsVolume,
-    hitsPositionX,
-    hitsPositionY,
-    hitsPositionZ,
-    hitsTrackKineticEnergy,
+    stepEnergy,
+    stepTime,
+    // stepProcess,
+    // stepProcessType,
+    // stepVolume,
+    stepPositionX,
+    stepPositionY,
+    stepPositionZ,
+    stepTrackKineticEnergy,
 };
 
 using UserDefinedMap = std::map<std::size_t, std::string>;
@@ -82,15 +82,15 @@ using Builder = RecordBuilder<
         RecordField<static_cast<std::size_t>(Field::trackInitialMomentumZ), ListOffsetBuilder<id, NumpyBuilder<float>>>,
         RecordField<static_cast<std::size_t>(Field::trackWeight), ListOffsetBuilder<id, NumpyBuilder<float>>>,
         //
-        RecordField<static_cast<std::size_t>(Field::hitsEnergy), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        RecordField<static_cast<std::size_t>(Field::hitsTime), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        // RecordField<static_cast<std::size_t>(Field::hitsVolume), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
-        // RecordField<static_cast<std::size_t>(Field::hitsProcess), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
-        // RecordField<static_cast<std::size_t>(Field::hitsProcessType), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
-        RecordField<static_cast<std::size_t>(Field::hitsPositionX), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        RecordField<static_cast<std::size_t>(Field::hitsPositionY), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        RecordField<static_cast<std::size_t>(Field::hitsPositionZ), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        RecordField<static_cast<std::size_t>(Field::hitsTrackKineticEnergy), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>
+        RecordField<static_cast<std::size_t>(Field::stepEnergy), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        RecordField<static_cast<std::size_t>(Field::stepTime), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        // RecordField<static_cast<std::size_t>(Field::stepVolume), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
+        // RecordField<static_cast<std::size_t>(Field::stepProcess), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
+        // RecordField<static_cast<std::size_t>(Field::stepProcessType), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
+        RecordField<static_cast<std::size_t>(Field::stepPositionX), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        RecordField<static_cast<std::size_t>(Field::stepPositionY), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        RecordField<static_cast<std::size_t>(Field::stepPositionZ), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+        RecordField<static_cast<std::size_t>(Field::stepTrackKineticEnergy), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>
         //
         >;
 
@@ -112,16 +112,16 @@ inline Builder MakeBuilder() {
                     {Field::trackInitialMomentumZ, "track.momentum.z"},
                     {Field::trackWeight, "track.weight"},
                     //
-                    {Field::hitsEnergy, "track.hits.energy"},
-                    {Field::hitsTime, "track.hits.time"},
-                    {Field::hitsPositionX, "track.hits.position.x"},
-                    {Field::hitsPositionY, "track.hits.position.y"},
-                    {Field::hitsPositionZ, "track.hits.position.z"},
-                    {Field::hitsTrackKineticEnergy, "track.hits.track_kinetic_energy"},
+                    {Field::stepEnergy, "track.step.energy"},
+                    {Field::stepTime, "track.step.time"},
+                    {Field::stepPositionX, "track.step.position.x"},
+                    {Field::stepPositionY, "track.step.position.y"},
+                    {Field::stepPositionZ, "track.step.position.z"},
+                    {Field::stepTrackKineticEnergy, "track.step.track_kinetic_energy"},
 
-                    // {Field::hitsProcess, "track.hits.process"}},
-                    // {Field::hitsProcessType, "track.hits.process_type"}},
-                    // {Field::hitsVolume, "track.hits.volume"}},
+                    // {Field::stepProcess, "track.step.process"}},
+                    // {Field::stepProcessType, "track.step.process_type"}},
+                    // {Field::stepVolume, "track.step.volume"}},
             }};
 }
 
