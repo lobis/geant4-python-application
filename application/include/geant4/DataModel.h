@@ -21,7 +21,7 @@ enum Field : std::size_t { eventId,
                            trackId,
                            trackParentId,
                            trackInitialEnergy,
-                           trackTime,
+                           trackInitialTime,
                            //
                            hitsEnergy,
                            hitsTime,
@@ -47,7 +47,7 @@ using Builder = RecordBuilder<RecordField<static_cast<std::size_t>(Field::eventI
                               RecordField<static_cast<std::size_t>(Field::trackId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
                               RecordField<static_cast<std::size_t>(Field::trackParentId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
                               RecordField<static_cast<std::size_t>(Field::trackInitialEnergy), ListOffsetBuilder<id, NumpyBuilder<float>>>,
-                              RecordField<static_cast<std::size_t>(Field::trackTime), ListOffsetBuilder<id, NumpyBuilder<float>>>,
+                              RecordField<static_cast<std::size_t>(Field::trackInitialTime), ListOffsetBuilder<id, NumpyBuilder<float>>>,
                               RecordField<static_cast<std::size_t>(Field::hitsEnergy), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
                               RecordField<static_cast<std::size_t>(Field::hitsTime), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>
                               // RecordField<static_cast<std::size_t>(Field::hitsProcess), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
@@ -59,8 +59,8 @@ inline Builder MakeBuilder() {
                     {Field::eventId, "event_id"},
                     {Field::trackId, "track.id"},
                     {Field::trackParentId, "track.parent_id"},
-                    {Field::trackInitialEnergy, "track.initial_energy"},
-                    {Field::trackTime, "track.time"},
+                    {Field::trackInitialEnergy, "track.energy"},
+                    {Field::trackInitialTime, "track.time"},
                     {Field::hitsEnergy, "track.hits.energy"},
                     {Field::hitsTime, "track.hits.time"},
                     // {Field::hitsProcess, "track.hits.process"}},

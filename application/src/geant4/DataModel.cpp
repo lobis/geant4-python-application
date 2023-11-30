@@ -25,7 +25,7 @@ void InsertEventBegin(const G4Event* event, Builder& builder) {
     builder.content<Field::trackId>().begin_list();
     builder.content<Field::trackParentId>().begin_list();
     builder.content<Field::trackInitialEnergy>().begin_list();
-    builder.content<Field::trackTime>().begin_list();
+    builder.content<Field::trackInitialTime>().begin_list();
     builder.content<Field::hitsEnergy>().begin_list();
     builder.content<Field::hitsTime>().begin_list();
     // builder.content<Field::hitsProcess>().begin_list();
@@ -35,7 +35,7 @@ void InsertEventEnd(const G4Event*, Builder& builder) {
     builder.content<Field::trackId>().end_list();
     builder.content<Field::trackParentId>().end_list();
     builder.content<Field::trackInitialEnergy>().end_list();
-    builder.content<Field::trackTime>().end_list();
+    builder.content<Field::trackInitialTime>().end_list();
     builder.content<Field::hitsEnergy>().end_list();
     builder.content<Field::hitsTime>().end_list();
     // builder.content<Field::hitsProcess>().end_list();
@@ -45,12 +45,12 @@ void InsertTrackBegin(const G4Track* track, Builder& builder) {
     auto& trackId = builder.content<Field::trackId>();
     auto& trackParentId = builder.content<Field::trackParentId>();
     auto& trackEnergy = builder.content<Field::trackInitialEnergy>();
-    auto& trackTime = builder.content<Field::trackTime>();
+    auto& trackInitialTime = builder.content<Field::trackInitialTime>();
 
     trackId.content().append(track->GetTrackID());
     trackParentId.content().append(track->GetParentID());
     trackEnergy.content().append(track->GetKineticEnergy() / units::energy);
-    trackTime.content().append(track->GetGlobalTime() / units::time);
+    trackInitialTime.content().append(track->GetGlobalTime() / units::time);
 
     builder.content<Field::hitsEnergy>().content().begin_list();
     builder.content<Field::hitsTime>().content().begin_list();
