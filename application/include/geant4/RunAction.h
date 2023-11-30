@@ -20,6 +20,8 @@ public:
 
 private:
     geant4::data::Builder builder = geant4::data::MakeBuilder();
+    static geant4::data::Builder* builderMainPtr;
+    std::mutex mutex;
 };
 
 #endif// GEANT4_APPLICATION_RUNACTION_H

@@ -14,8 +14,7 @@
 namespace geant4::data {
 
 void InsertEventBegin(const G4Event* event, Builder& builder) {
-    builder.content<Field::eventId>()
-            .append(event->GetEventID());
+    builder.content<Field::eventId>().append(event->GetEventID());
 
     auto& trackId = builder.content<Field::trackId>();
     auto& trackParentId = builder.content<Field::trackParentId>();
@@ -55,6 +54,5 @@ void InsertTrackEnd(const G4Track* track, Builder& builder) {
 
 void InsertStep(const G4Step* step, Builder& builder) {
 }
-
 
 }// namespace geant4::data
