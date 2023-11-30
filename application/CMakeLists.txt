@@ -6,40 +6,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(FetchContent)
-
-set(AWKWARD_VERSION "v2.5.0")
-set(PYBIND11_VERSION "v2.11.1")
-
 find_package(Geant4 REQUIRED CONFIG COMPONENTS gdml)
-
-FetchContent_Declare(
-    awkward-headers
-    URL https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip
-        DOWNLOAD_EXTRACT_TIMESTAMP
-        1)
-# Instead of using `FetchContent_MakeAvailable(awkward-headers)`, we manually
-# load the target so that we can EXCLUDE_FROM_ALL
-FetchContent_GetProperties(awkward-headers)
-if (NOT awkward-headers_POPULATED)
-    FetchContent_Populate(awkward-headers)
-    add_subdirectory(${awkward-headers_SOURCE_DIR}
-                     ${awkward-headers_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif ()
-
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module)
 
-FetchContent_Declare(
-    pybind11
-    GIT_REPOSITORY https://github.com/pybind/pybind11.git
-    GIT_TAG ${PYBIND11_VERSION}
-    DOWNLOAD_EXTRACT_TIMESTAMP 1)
-FetchContent_GetProperties(pybind11)
-if (NOT pybind11_POPULATED)
-    FetchContent_Populate(pybind11)
-    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR}
-                     EXCLUDE_FROM_ALL)
-endif ()
+add_subdirectory(external/awkward/header-only)
+add_subdirectory(external/pybind11)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
      "${PROJECT_SOURCE_DIR}/src/geant4/*.cpp")
@@ -60,7 +31,6 @@ target_link_libraries(
     PUBLIC ${Geant4_LIBRARIES} awkward::layout-builder pybind11::embed
            pybind11::module ${Python3_LIBRARY} Python3::Module)
 
-# add the pybind11 module
 set(PYTHON_MODULE_NAME geant4_cpp)
 file(GLOB_RECURSE PYTHON_SOURCES CONFIGURE_DEPENDS
      "${PROJECT_SOURCE_DIR}/src/python/*.cpp")

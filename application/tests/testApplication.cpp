@@ -1,10 +1,11 @@
 
 #include "geant4/Application.h"
+
 #include <gtest/gtest.h>
 #include <iostream>
 
 using namespace std;
-using namespace geant4;
+using namespace geant4_app;
 
 const std::string gdml = R"(
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>

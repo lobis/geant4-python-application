@@ -1,0 +1,6 @@
+[submodule "application/external/pybind11"]
+	path = application/external/pybind11
+	url = https://github.com/pybind/pybind11.git
+[submodule "application/external/awkward"]
+	path = application/external/awkward
+	url = https://github.com/scikit-hep/awkward.git

@@ -10,18 +10,19 @@ set(gtest_force_shared_crt
     CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module)
+
 enable_testing()
 
 set(TEST_EXECUTABLE_NAME ${PROJECT_NAME}Test)
 
 file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS
      "${PROJECT_SOURCE_DIR}/tests/*.cpp")
-add_executable(${TEST_EXECUTABLE_NAME})
-target_sources(${TEST_EXECUTABLE_NAME} PRIVATE ${TEST_SOURCES})
+add_executable(${TEST_EXECUTABLE_NAME} ${TEST_SOURCES})
 target_include_directories(${TEST_EXECUTABLE_NAME}
                            PRIVATE ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(${TEST_EXECUTABLE_NAME} ${PROJECT_NAME} GTest::gtest_main
-                      pybind11::embed)
+target_link_libraries(${TEST_EXECUTABLE_NAME} PRIVATE GTest::gtest_main
+                                                      ${PROJECT_NAME})
 
 include(GoogleTest)
 gtest_discover_tests(${TEST_EXECUTABLE_NAME})
