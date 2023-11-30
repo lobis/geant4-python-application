@@ -44,6 +44,8 @@ public:
     bool IsInitialized() const;
 
     inline long GetRandomSeed() const { return randomSeed; }
+
+    void Command(const std::string& command);
 };
 
 }// namespace geant4

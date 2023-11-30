@@ -1,12 +1,12 @@
 
 #include "geant4/PrimaryGeneratorAction.h"
 
-#include "G4Event.hh"
-#include "G4GeneralParticleSource.hh"
-#include "G4ParticleDefinition.hh"
-#include "G4ParticleTable.hh"
-#include "G4SystemOfUnits.hh"
-#include "G4VUserPrimaryGeneratorAction.hh"
+#include <G4Event.hh>
+#include <G4GeneralParticleSource.hh>
+#include <G4ParticleDefinition.hh>
+#include <G4ParticleTable.hh>
+#include <G4SystemOfUnits.hh>
+#include <G4VUserPrimaryGeneratorAction.hh>
 
 PrimaryGeneratorAction::PrimaryGeneratorAction() : G4VUserPrimaryGeneratorAction(), particleGun(1) {
     G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
