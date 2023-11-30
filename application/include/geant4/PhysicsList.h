@@ -14,9 +14,11 @@
 #include <G4StoppingPhysics.hh>
 #include <G4VModularPhysicsList.hh>
 
+namespace geant4_app {
+
 class PhysicsList : public G4VModularPhysicsList {
 public:
     PhysicsList();
 };
-
+}// namespace geant4_app
 #endif// GEANT4_APPLICATION_PHYSICSLIST_H

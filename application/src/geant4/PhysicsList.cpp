@@ -13,6 +13,8 @@
 #include <G4StoppingPhysics.hh>
 #include <G4VModularPhysicsList.hh>
 
+using namespace geant4_app;
+
 PhysicsList::PhysicsList() : G4VModularPhysicsList() {
     SetVerboseLevel(1);
 

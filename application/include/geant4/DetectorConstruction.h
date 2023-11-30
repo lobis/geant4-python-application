@@ -3,12 +3,15 @@
 #define GEANT4_APPLICATION_DETECTORCONSTRUCTION_H
 
 #include <G4GDMLParser.hh>
+#include <G4LogicalVolume.hh>
+#include <G4LogicalVolumeStore.hh>
+#include <G4NistManager.hh>
+#include <G4PhysicalVolumeStore.hh>
 #include <G4VUserDetectorConstruction.hh>
+#include <G4VisAttributes.hh>
 #include <globals.hh>
 
-using namespace std;
-
-class G4VPhysicalVolume;
+namespace geant4_app {
 
 class DetectorConstruction : public G4VUserDetectorConstruction {
 
@@ -31,5 +34,7 @@ private:
 
     std::set<std::string> sensitiveVolumes;
 };
+
+}// namespace geant4_app
 
 #endif// GEANT4_APPLICATION_DETECTORCONSTRUCTION_H

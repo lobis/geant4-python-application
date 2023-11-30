@@ -8,6 +8,8 @@
 #include <set>
 #include <string>
 
+namespace geant4_app {
+
 class StackingAction : public G4UserStackingAction {
 public:
     StackingAction();
@@ -24,5 +26,6 @@ private:
     static std::set<std::string> particlesToIgnore;
 };
 
+}// namespace geant4_app
 
 #endif//LIBGEANT4PYTHONICAPPLICATION_STACKINGACTION_H

@@ -5,6 +5,8 @@
 #include <G4ParticleGun.hh>
 #include <G4VUserPrimaryGeneratorAction.hh>
 
+namespace geant4_app {
+
 class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction {
 public:
     PrimaryGeneratorAction();
@@ -19,4 +21,5 @@ public:
     static void SetParticle(const std::string& particle);
 };
 
+}// namespace geant4_app
 #endif// GEANT4_APPLICATION_PRIMARYGENERATORACTION_H

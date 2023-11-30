@@ -6,6 +6,8 @@
 #include <G4SteppingVerbose.hh>
 #include <G4VSteppingVerbose.hh>
 
+namespace geant4_app {
+
 class SteppingVerbose : public G4SteppingVerbose {
 public:
     SteppingVerbose();
@@ -13,5 +15,7 @@ public:
     void TrackingStarted() override;
     void StepInfo() override;
 };
+
+}// namespace geant4_app
 
 #endif//GEANT4PYTHONICAPPLICATION_STEPPINGVERBOSE_H

@@ -9,7 +9,7 @@
 #include <G4VUserPrimaryGeneratorAction.hh>
 
 using namespace std;
-using namespace geant4;
+using namespace geant4_app;
 
 PrimaryGeneratorAction::PrimaryGeneratorAction() : G4VUserPrimaryGeneratorAction(), particleGun(1) {
     particleGun.SetParticleDefinition(G4ParticleTable::GetParticleTable()->FindParticle("e-"));

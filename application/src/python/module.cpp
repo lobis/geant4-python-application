@@ -7,7 +7,7 @@
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 
-using namespace geant4;
+using namespace geant4_app;
 namespace py = pybind11;
 
 constexpr const char* basicGdml = R"(
@@ -84,7 +84,6 @@ void init_Application(py::module& m) {
             .def_property("logical_volumes", &DetectorConstruction::GetLogicalVolumeNames, nullptr)
             .def_static("get_logical_volumes", &DetectorConstruction::GetLogicalVolumeNames)
             .def_property("physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames, nullptr)
-            .def_property_readonly_static("patata", &DetectorConstruction::GetPhysicalVolumeNames)
             .def_static("get_physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames);
 
     py::class_<StackingAction>(m, "StackingAction")

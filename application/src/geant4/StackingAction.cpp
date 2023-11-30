@@ -5,6 +5,7 @@
 #include <G4Track.hh>
 
 using namespace std;
+using namespace geant4_app;
 
 StackingAction::StackingAction() : G4UserStackingAction() {}
 

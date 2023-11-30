@@ -1,15 +1,12 @@
 
 #include "geant4/DataModel.h"
 
-#include <G4Event.hh>
 #include <G4HadronicProcess.hh>
 #include <G4Nucleus.hh>
 #include <G4ParticleDefinition.hh>
 #include <G4ParticleTypes.hh>
 #include <G4Run.hh>
 #include <G4RunManager.hh>
-#include <G4Step.hh>
-#include <G4Track.hh>
 #include <G4UnitsTable.hh>
 #include <G4VProcess.hh>
 #include <iostream>
@@ -18,8 +15,9 @@
 #include <pybind11/stl.h>
 
 using namespace std;
+using namespace geant4_app;
 
-namespace geant4::data {
+namespace geant4_app::data {
 
 void InsertEvent(const G4Event* event, Builder& builder) {
     builder.content<Field::runId>().append(G4RunManager::GetRunManager()->GetCurrentRun()->GetRunID());
@@ -161,4 +159,4 @@ Builder MakeBuilder() {
     }
     return {fieldToName};
 }
-}// namespace geant4::data
+}// namespace geant4_app::data

@@ -11,6 +11,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace geant4_app;
 
 ActionInitialization::ActionInitialization() : G4VUserActionInitialization() {}
 

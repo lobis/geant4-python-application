@@ -3,19 +3,18 @@
 
 #include "awkward/LayoutBuilder.h"
 
+#include <CLHEP/Units/PhysicalConstants.h>
+#include <G4Event.hh>
+#include <G4Step.hh>
 #include <G4SystemOfUnits.hh>
+#include <G4Track.hh>
 #include <G4UnitsTable.hh>
 
-#include <CLHEP/Units/PhysicalConstants.h>
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 
-class G4Event;
-class G4Track;
-class G4Step;
-
-namespace geant4::data {
+namespace geant4_app::data {
 
 using UserDefinedMap = std::map<std::size_t, std::string>;
 
@@ -152,7 +151,7 @@ static constexpr auto length = CLHEP::mm;
 static constexpr auto momentum = CLHEP::GeV / CLHEP::c_light;
 }// namespace units
 
-}// namespace geant4::data
+}// namespace geant4_app::data
 
 
 #endif// GEANT4PYTHONICAPPLICATION_DATAMODEL_H

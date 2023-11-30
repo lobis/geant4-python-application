@@ -7,9 +7,10 @@
 #include <iostream>
 
 using namespace std;
+using namespace geant4_app;
 
 SteppingAction::SteppingAction() : G4UserSteppingAction() {}
 
 void SteppingAction::UserSteppingAction(const G4Step* step) {
-    geant4::data::InsertStep(step, RunAction::GetBuilder());
+    data::InsertStep(step, RunAction::GetBuilder());
 }

@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 using namespace std;
+using namespace geant4_app;
 namespace fs = std::filesystem;
 
 DetectorConstruction::DetectorConstruction(string gdml, const std::set<std::string>& sensitiveVolumes) : G4VUserDetectorConstruction(), gdml(std::move(gdml)), sensitiveVolumes(sensitiveVolumes) {

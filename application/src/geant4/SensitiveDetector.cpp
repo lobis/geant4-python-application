@@ -2,6 +2,7 @@
 #include "geant4/SensitiveDetector.h"
 
 using namespace std;
+using namespace geant4_app;
 
 SensitiveDetector::SensitiveDetector(const string& name) : G4VSensitiveDetector(name) {}
 

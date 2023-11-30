@@ -6,6 +6,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace geant4_app;
 
 SteppingVerbose::SteppingVerbose() : G4SteppingVerbose() {
     cout << "SteppingVerbose::SteppingVerbose" << endl;
@@ -15,7 +16,7 @@ SteppingVerbose::SteppingVerbose() : G4SteppingVerbose() {
 void SteppingVerbose::TrackingStarted() {
     CopyState();
     cout << "SteppingVerbose::TrackingStarted" << endl;
-    geant4::data::InsertStep(fStep, RunAction::GetBuilder());
+    data::InsertStep(fStep, RunAction::GetBuilder());
 }
 
 void SteppingVerbose::StepInfo() {}

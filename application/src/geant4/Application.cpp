@@ -18,7 +18,7 @@
 #include <random>
 
 using namespace std;
-using namespace geant4;
+using namespace geant4_app;
 namespace py = pybind11;
 
 Application* Application::pInstance = nullptr;
@@ -133,7 +133,7 @@ py::object Application::Run(int nEvents) {
     runManager->BeamOn(nEvents);
 
     auto& builder = RunAction::GetBuilder();
-    auto events = geant4::data::SnapshotBuilder(builder);
+    const auto events = data::SnapshotBuilder(builder);
     builder.clear();
     return events;
 }

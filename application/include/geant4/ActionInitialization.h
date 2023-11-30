@@ -5,6 +5,8 @@
 #include <G4VSteppingVerbose.hh>
 #include <G4VUserActionInitialization.hh>
 
+namespace geant4_app {
+
 class ActionInitialization : public G4VUserActionInitialization {
 public:
     ActionInitialization();
@@ -14,6 +16,6 @@ public:
 
     G4VSteppingVerbose* InitializeSteppingVerbose() const override;
 };
-
+}// namespace geant4_app
 
 #endif//LIBGEANT4PYTHONICAPPLICATION_ACTIONINITIALIZATION_H

@@ -5,6 +5,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace geant4_app;
 
 RunAction::RunAction() : G4UserRunAction() {}
 
@@ -37,9 +38,9 @@ void RunAction::EndOfRunAction(const G4Run*) {
     }
 }
 
-geant4::data::Builder& RunAction::GetBuilder() {
+data::Builder& RunAction::GetBuilder() {
     auto runAction = dynamic_cast<RunAction*>(const_cast<G4UserRunAction*>(G4RunManager::GetRunManager()->GetUserRunAction()));
     return runAction->builder;
 }
 
-geant4::data::Builder* RunAction::builderMainPtr = nullptr;
+data::Builder* RunAction::builderMainPtr = nullptr;

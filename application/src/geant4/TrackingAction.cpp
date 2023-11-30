@@ -11,14 +11,15 @@
 #include <iostream>
 
 using namespace std;
+using namespace geant4_app;
 
 TrackingAction::TrackingAction() : G4UserTrackingAction() {}
 
 void TrackingAction::PreUserTrackingAction(const G4Track* track) {
-    geant4::data::InsertTrackBegin(track, RunAction::GetBuilder());
-    geant4::data::InsertTrack(track, RunAction::GetBuilder());
+    data::InsertTrackBegin(track, RunAction::GetBuilder());
+    data::InsertTrack(track, RunAction::GetBuilder());
 }
 
 void TrackingAction::PostUserTrackingAction(const G4Track* track) {
-    geant4::data::InsertTrackEnd(track, RunAction::GetBuilder());
+    data::InsertTrackEnd(track, RunAction::GetBuilder());
 }

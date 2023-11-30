@@ -6,14 +6,15 @@
 #include <iostream>
 
 using namespace std;
+using namespace geant4_app;
 
 EventAction::EventAction() : G4UserEventAction() {}
 
 void EventAction::BeginOfEventAction(const G4Event* event) {
-    geant4::data::InsertEventBegin(event, RunAction::GetBuilder());
-    geant4::data::InsertEvent(event, RunAction::GetBuilder());
+    data::InsertEventBegin(event, RunAction::GetBuilder());
+    data::InsertEvent(event, RunAction::GetBuilder());
 }
 
 void EventAction::EndOfEventAction(const G4Event* event) {
-    geant4::data::InsertEventEnd(event, RunAction::GetBuilder());
+    data::InsertEventEnd(event, RunAction::GetBuilder());
 }

@@ -18,7 +18,7 @@
 
 namespace py = pybind11;
 
-namespace geant4 {
+namespace geant4_app {
 
 class Application {
 private:
@@ -61,6 +61,6 @@ public:
     static void StartGUI();
 };
 
-}// namespace geant4
+}// namespace geant4_app
 
 #endif//GEANT4_APPLICATION_H

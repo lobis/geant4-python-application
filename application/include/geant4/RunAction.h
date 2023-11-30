@@ -7,6 +7,8 @@
 
 #include "geant4/DataModel.h"
 
+namespace geant4_app {
+
 class RunAction : public G4UserRunAction {
 public:
     RunAction();
@@ -15,12 +17,13 @@ public:
     void EndOfRunAction(const G4Run*) override;
 
     /// Only one instance of RunAction is created for each thread.
-    static geant4::data::Builder& GetBuilder();
+    static data::Builder& GetBuilder();
 
 private:
-    geant4::data::Builder builder = geant4::data::MakeBuilder();
-    static geant4::data::Builder* builderMainPtr;
+    data::Builder builder = data::MakeBuilder();
+    static data::Builder* builderMainPtr;
     std::mutex mutex;
 };
 
+}// namespace geant4_app
 #endif// GEANT4_APPLICATION_RUNACTION_H
