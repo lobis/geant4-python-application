@@ -28,6 +28,18 @@ def test_missing_manager():
         app.setup_detector()
 
 
+def test_multiple_apps():
+    # Could this work somehow?
+    for _ in range(2):
+        app = geant4.Application()
+        app.setup_manager()
+        app.setup_detector()
+        app.setup_physics()
+        app.setup_action()
+        app.initialize()
+        app.run()
+
+
 # This may not hold for all Geant4 versions
 def test_seed_single_thread():
     app = geant4.Application()
@@ -67,6 +79,22 @@ def test_seed_single_thread():
         12.271155,
     ]
 
-    energy = np.array(events["track.hits.energy"][0][0])
+    energy = np.array(events["track.step.energy"][0][0])
 
     assert np.allclose(energy, reference_value, atol=1e-5)
+
+
+def test_event_data_is_cleared():
+    app = geant4.Application()
+
+    app.setup_manager()
+    app.set_random_seed(137)
+    app.setup_physics()
+    app.setup_detector()
+    app.setup_action()
+
+    app.initialize()
+
+    for _ in range(10):
+        events = app.run(100)
+        assert len(events) == 100
