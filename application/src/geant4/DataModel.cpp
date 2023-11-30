@@ -182,4 +182,11 @@ py::object SnapshotBuilder(Builder& builder) {
     return from_buffers(builder.form(), builder.length(), container);
 }
 
+Builder MakeBuilder() {
+    UserDefinedMap fieldToName;
+    for (const auto& m: {fieldToNameEvent, fieldToNameTrack, fieldToNameStep}) {
+        fieldToName.insert(m.begin(), m.end());
+    }
+    return {fieldToName};
+}
 }// namespace geant4::data

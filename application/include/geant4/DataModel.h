@@ -50,6 +50,40 @@ enum Field : std::size_t {
 
 using UserDefinedMap = std::map<std::size_t, std::string>;
 
+inline static const UserDefinedMap fieldToNameEvent = {
+        {Field::runId, "run_id"},
+        {Field::eventId, "event_id"},
+};
+
+inline static const UserDefinedMap fieldToNameTrack = {
+        {Field::trackId, "track.id"},
+        {Field::trackParentId, "track.parent_id"},
+        {Field::trackParticle, "track.particle"},
+        // {Field::trackParticleType, "track.particle_type"},
+        {Field::trackInitialEnergy, "track.energy"},
+        {Field::trackInitialTime, "track.time"},
+        {Field::trackInitialPositionX, "track.position.x"},
+        {Field::trackInitialPositionY, "track.position.y"},
+        {Field::trackInitialPositionZ, "track.position.z"},
+        {Field::trackInitialMomentumX, "track.momentum.x"},
+        {Field::trackInitialMomentumY, "track.momentum.y"},
+        {Field::trackInitialMomentumZ, "track.momentum.z"},
+        {Field::trackWeight, "track.weight"},
+};
+
+inline static const UserDefinedMap fieldToNameStep = {
+        {Field::stepEnergy, "track.step.energy"},
+        {Field::stepTime, "track.step.time"},
+        {Field::stepPositionX, "track.step.position.x"},
+        {Field::stepPositionY, "track.step.position.y"},
+        {Field::stepPositionZ, "track.step.position.z"},
+        {Field::stepTrackKineticEnergy, "track.step.track_kinetic_energy"},
+
+        // {Field::stepProcess, "track.step.process"}},
+        // {Field::stepProcessType, "track.step.process_type"}},
+        // {Field::stepVolume, "track.step.volume"}},
+};
+
 template<std::size_t field_name, class BUILDER>
 using RecordField = awkward::LayoutBuilder::Field<field_name, BUILDER>;
 
@@ -97,38 +131,8 @@ using Builder = RecordBuilder<
         //
         >;
 
-inline Builder MakeBuilder() {
-    return {
-            {
-                    {Field::runId, "run_id"},
-                    {Field::eventId, "event_id"},
-                    //
-                    {Field::trackId, "track.id"},
-                    {Field::trackParentId, "track.parent_id"},
-                    {Field::trackParticle, "track.particle"},
-                    // {Field::trackParticleType, "track.particle_type"},
-                    {Field::trackInitialEnergy, "track.energy"},
-                    {Field::trackInitialTime, "track.time"},
-                    {Field::trackInitialPositionX, "track.position.x"},
-                    {Field::trackInitialPositionY, "track.position.y"},
-                    {Field::trackInitialPositionZ, "track.position.z"},
-                    {Field::trackInitialMomentumX, "track.momentum.x"},
-                    {Field::trackInitialMomentumY, "track.momentum.y"},
-                    {Field::trackInitialMomentumZ, "track.momentum.z"},
-                    {Field::trackWeight, "track.weight"},
-                    //
-                    {Field::stepEnergy, "track.step.energy"},
-                    {Field::stepTime, "track.step.time"},
-                    {Field::stepPositionX, "track.step.position.x"},
-                    {Field::stepPositionY, "track.step.position.y"},
-                    {Field::stepPositionZ, "track.step.position.z"},
-                    {Field::stepTrackKineticEnergy, "track.step.track_kinetic_energy"},
+Builder MakeBuilder();
 
-                    // {Field::stepProcess, "track.step.process"}},
-                    // {Field::stepProcessType, "track.step.process_type"}},
-                    // {Field::stepVolume, "track.step.volume"}},
-            }};
-}
 
 void InsertEventBegin(const G4Event* event, Builder& builder);
 void InsertEventEnd(const G4Event* event, Builder& builder);
