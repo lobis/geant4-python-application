@@ -11,6 +11,7 @@
 #include <G4VisManager.hh>
 // TODO: conditional include
 
+#include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
 #include <G4VSteppingVerbose.hh>
 
@@ -29,13 +30,15 @@ Application::Application() {
         throw runtime_error("Application can only be created once");
         return;
     }
+    if (G4RunManager::GetRunManager() != nullptr) {
+        throw runtime_error("RunManager already exists on Application creation");
+    }
     pInstance = this;
 }
 
 Application::~Application() {
-    // Recreating the Application will likely cause a segfault due to how Geant4 works, we should not allow it
-    // It is preferable to throw an exception that we can handle in Python
-    pInstance = this;// nullptr;
+    // Recreating the Application may cause a segfault
+    pInstance = nullptr;
 }
 
 void Application::SetupRandomEngine() {
@@ -98,7 +101,7 @@ void Application::SetupAction() {
 }
 
 void Application::SetupManager(unsigned short nThreads) {
-    if (runManager != nullptr) {
+    if (runManager != nullptr || G4RunManager::GetRunManager() != nullptr) {
         throw runtime_error("RunManager is already set up");
     }
     const auto runManagerType = nThreads > 0 ? G4RunManagerType::MTOnly : G4RunManagerType::SerialOnly;
