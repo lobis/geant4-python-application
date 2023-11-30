@@ -17,6 +17,8 @@ enum Field : std::size_t { eventId,
                            trackParentId,
                            trackEnergy,
                            trackTime,
+                           trackHitsEnergy,
+                           trackHitsTime,
 };
 
 using UserDefinedMap = std::map<std::size_t, std::string>;
@@ -38,14 +40,20 @@ using Builder = RecordBuilder<RecordField<static_cast<std::size_t>(Field::eventI
                               RecordField<static_cast<std::size_t>(Field::trackId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
                               RecordField<static_cast<std::size_t>(Field::trackParentId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
                               RecordField<static_cast<std::size_t>(Field::trackEnergy), ListOffsetBuilder<id, NumpyBuilder<float>>>,
-                              RecordField<static_cast<std::size_t>(Field::trackTime), ListOffsetBuilder<id, NumpyBuilder<float>>>>;
+                              RecordField<static_cast<std::size_t>(Field::trackTime), ListOffsetBuilder<id, NumpyBuilder<float>>>,
+                              RecordField<static_cast<std::size_t>(Field::trackHitsEnergy), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+                              RecordField<static_cast<std::size_t>(Field::trackHitsTime), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>>;
 
 inline Builder MakeBuilder() {
-    return {{{Field::eventId, "event_id"},
+    return {
+            {{Field::eventId, "event_id"},
              {Field::trackId, "track.id"},
              {Field::trackParentId, "track.parent_id"},
              {Field::trackEnergy, "track.energy"},
-             {Field::trackTime, "track.time"}}};
+             {Field::trackTime, "track.time"},
+             {Field::trackHitsEnergy, "track.hits.energy"},
+             {Field::trackHitsTime, "track.hits.time"}},
+    };
 }
 
 void InsertEventBegin(const G4Event* event, Builder& builder);
