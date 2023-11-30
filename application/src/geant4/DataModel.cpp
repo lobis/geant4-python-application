@@ -10,6 +10,7 @@
 #include <G4UnitsTable.hh>
 #include <iostream>
 
+using namespace std;
 
 namespace geant4::data {
 
@@ -46,6 +47,10 @@ void InsertTrackBegin(const G4Track* track, Builder& builder) {
     auto& trackEnergy = builder.content<Field::trackEnergy>();
     auto& trackTime = builder.content<Field::trackTime>();
 
+    trackId.content().append(track->GetTrackID());
+    trackParentId.content().append(track->GetParentID());
+    trackEnergy.content().append(track->GetKineticEnergy() / units::energy);
+    trackTime.content().append(track->GetGlobalTime() / units::time);
     // is there a way to get the ref to the output of begin_list without having to pass it around?
 }
 
