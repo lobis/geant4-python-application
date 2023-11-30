@@ -53,6 +53,8 @@ public:
     static G4UImanager* GetUIManager();
 
     const PrimaryGeneratorAction& GetPrimaryGeneratorAction() const;
+
+    static void StartGUI();
 };
 
 }// namespace geant4

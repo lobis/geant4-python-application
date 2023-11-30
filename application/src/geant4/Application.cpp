@@ -5,7 +5,14 @@
 #include "geant4/PhysicsList.h"
 #include "geant4/RunAction.h"
 
+// TODO: conditional include
+#include <G4UIExecutive.hh>
+#include <G4VisExecutive.hh>
+#include <G4VisManager.hh>
+// TODO: conditional include
+
 #include <G4RunManagerFactory.hh>
+#include <G4VSteppingVerbose.hh>
 
 #include <random>
 
@@ -27,7 +34,7 @@ Application::Application() {
 
 Application::~Application() {
     // Recreating the Application will likely cause a segfault due to how Geant4 works, we should not allow it
-    // It's preferable to throw an exception that we can handle in Python
+    // It is preferable to throw an exception that we can handle in Python
     pInstance = this;// nullptr;
 }
 
@@ -166,4 +173,15 @@ const PrimaryGeneratorAction& Application::GetPrimaryGeneratorAction() const {
         throw runtime_error("Primary generator action is not available");
     }
     return *primaryGeneratorAction;
+}
+
+void Application::StartGUI() {
+    throw runtime_error("Not working yet ):");
+
+    auto vis = new G4VisExecutive;
+    vis->Initialize();
+    auto uiExecutive = new G4UIExecutive(1, nullptr);
+
+    // start session
+    uiExecutive->SessionStart();
 }

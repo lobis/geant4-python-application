@@ -64,6 +64,7 @@ void init_Application(py::module& m) {
             .def_property("random_seed", &Application::GetRandomSeed, &Application::SetRandomSeed)
             .def_static("command", &Application::Command, py::arg("command"))
             .def_static("list_commands", &Application::ListCommands, py::arg("directory") = "/")
+            .def_static("start_gui", &Application::StartGUI)
             .def_property("primary_generator", &Application::GetPrimaryGeneratorAction, nullptr, py::return_value_policy::reference_internal);
 
     py::class_<PrimaryGeneratorAction>(m, "PrimaryGenerator")
