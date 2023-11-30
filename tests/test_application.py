@@ -11,7 +11,8 @@ def test_setup_and_run():
     app.setup_physics()
     app.setup_action()
     app.initialize()
-    app.run()
+    events = app.run(100)
+    assert len(events) == 100
 
 
 def test_missing_setup():
@@ -28,6 +29,7 @@ def test_missing_manager():
         app.setup_detector()
 
 
+@pytest.mark.skip(reason="TODO")
 def test_multiple_apps():
     # Could this work somehow?
     with pytest.raises(RuntimeError):

@@ -16,6 +16,7 @@ TrackingAction::TrackingAction() : G4UserTrackingAction() {}
 
 void TrackingAction::PreUserTrackingAction(const G4Track* track) {
     geant4::data::InsertTrackBegin(track, RunAction::GetBuilder());
+    geant4::data::InsertTrack(track, RunAction::GetBuilder());
 }
 
 void TrackingAction::PostUserTrackingAction(const G4Track* track) {

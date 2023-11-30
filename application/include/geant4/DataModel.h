@@ -135,8 +135,12 @@ Builder MakeBuilder();
 
 void InsertEventBegin(const G4Event* event, Builder& builder);
 void InsertEventEnd(const G4Event* event, Builder& builder);
+
 void InsertTrackBegin(const G4Track* track, Builder& builder);
 void InsertTrackEnd(const G4Track* track, Builder& builder);
+
+void InsertEvent(const G4Event* event, Builder& builder);
+void InsertTrack(const G4Track* track, Builder& builder);
 void InsertStep(const G4Step* step, Builder& builder);
 
 py::object SnapshotBuilder(Builder& builder);

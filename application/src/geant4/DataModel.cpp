@@ -21,61 +21,38 @@ using namespace std;
 
 namespace geant4::data {
 
-void InsertEventBegin(const G4Event* event, Builder& builder) {
+void InsertEvent(const G4Event* event, Builder& builder) {
     builder.content<Field::runId>().append(G4RunManager::GetRunManager()->GetCurrentRun()->GetRunID());
     builder.content<Field::eventId>().append(event->GetEventID());
-    //
-    builder.content<Field::trackId>().begin_list();
-    builder.content<Field::trackParentId>().begin_list();
-    builder.content<Field::trackParticle>().begin_list();
-    builder.content<Field::trackInitialEnergy>().begin_list();
-    builder.content<Field::trackInitialTime>().begin_list();
-    builder.content<Field::trackInitialPositionX>().begin_list();
-    builder.content<Field::trackInitialPositionY>().begin_list();
-    builder.content<Field::trackInitialPositionZ>().begin_list();
-    builder.content<Field::trackInitialMomentumX>().begin_list();
-    builder.content<Field::trackInitialMomentumY>().begin_list();
-    builder.content<Field::trackInitialMomentumZ>().begin_list();
-    builder.content<Field::trackWeight>().begin_list();
-    //
-    builder.content<Field::stepEnergy>().begin_list();
-    builder.content<Field::stepTime>().begin_list();
-    builder.content<Field::stepPositionX>().begin_list();
-    builder.content<Field::stepPositionY>().begin_list();
-    builder.content<Field::stepPositionZ>().begin_list();
-    builder.content<Field::stepTrackKineticEnergy>().begin_list();
+}
 
-    // builder.content<Field::stepProcess>().begin_list();
+template<std::size_t... I>
+void InsertEventBeginHelper(Builder& builder) {
+    (builder.content<I>().begin_list(), ...);
+}
+
+void InsertEventBegin(const G4Event* event, Builder& builder) {
+    InsertEventBeginHelper<Field::trackId, Field::trackParentId, Field::trackInitialEnergy, Field::trackInitialTime,
+                           Field::trackParticle, Field::trackInitialPositionX, Field::trackInitialPositionY, Field::trackInitialPositionZ,
+                           Field::trackInitialMomentumX, Field::trackInitialMomentumY, Field::trackInitialMomentumZ, Field::trackWeight,
+                           Field::stepEnergy, Field::stepTime, Field::stepPositionX, Field::stepPositionY, Field::stepPositionZ,
+                           Field::stepTrackKineticEnergy>(builder);
+}
+
+template<std::size_t... I>
+void InsertEventEndHelper(Builder& builder) {
+    (builder.content<I>().end_list(), ...);
 }
 
 void InsertEventEnd(const G4Event*, Builder& builder) {
-    builder.content<Field::trackId>().end_list();
-    builder.content<Field::trackParentId>().end_list();
-    builder.content<Field::trackInitialEnergy>().end_list();
-    builder.content<Field::trackInitialTime>().end_list();
-    builder.content<Field::trackParticle>().end_list();
-    // builder.content<Field::trackCreatorProcess>().end_list();
-    // builder.content<Field::trackCreatorProcessType>().end_list();
-    builder.content<Field::trackInitialPositionX>().end_list();
-    builder.content<Field::trackInitialPositionY>().end_list();
-    builder.content<Field::trackInitialPositionZ>().end_list();
-    builder.content<Field::trackInitialMomentumX>().end_list();
-    builder.content<Field::trackInitialMomentumY>().end_list();
-    builder.content<Field::trackInitialMomentumZ>().end_list();
-    builder.content<Field::trackWeight>().end_list();
-    //
-    builder.content<Field::stepEnergy>().end_list();
-    builder.content<Field::stepTime>().end_list();
-    // builder.content<Field::stepProcess>().end_list();
-    // builder.content<Field::stepProcessType>().end_list();
-    // builder.content<Field::stepVolume>().end_list();
-    builder.content<Field::stepPositionX>().end_list();
-    builder.content<Field::stepPositionY>().end_list();
-    builder.content<Field::stepPositionZ>().end_list();
-    builder.content<Field::stepTrackKineticEnergy>().end_list();
+    InsertEventEndHelper<Field::trackId, Field::trackParentId, Field::trackInitialEnergy, Field::trackInitialTime,
+                         Field::trackParticle, Field::trackInitialPositionX, Field::trackInitialPositionY, Field::trackInitialPositionZ,
+                         Field::trackInitialMomentumX, Field::trackInitialMomentumY, Field::trackInitialMomentumZ, Field::trackWeight,
+                         Field::stepEnergy, Field::stepTime, Field::stepPositionX, Field::stepPositionY, Field::stepPositionZ,
+                         Field::stepTrackKineticEnergy>(builder);
 }
 
-void InsertTrackBegin(const G4Track* track, Builder& builder) {
+void InsertTrack(const G4Track* track, Builder& builder) {
     builder.content<Field::trackId>().content().append(track->GetTrackID());
     builder.content<Field::trackParentId>().content().append(track->GetParentID());
     builder.content<Field::trackParticle>().content().append({});
@@ -90,30 +67,26 @@ void InsertTrackBegin(const G4Track* track, Builder& builder) {
     builder.content<Field::trackInitialMomentumY>().content().append(track->GetMomentum().y() / units::momentum);
     builder.content<Field::trackInitialMomentumZ>().content().append(track->GetMomentum().z() / units::momentum);
     builder.content<Field::trackWeight>().content().append(track->GetWeight());
-    //
-    builder.content<Field::stepEnergy>().content().begin_list();
-    builder.content<Field::stepTime>().content().begin_list();
-    // builder.content<Field::stepProcess>().content().begin_list();
-    // builder.content<Field::stepProcessType>().content().begin_list();
-    // builder.content<Field::stepVolume>().content().begin_list();
-    builder.content<Field::stepPositionX>().content().begin_list();
-    builder.content<Field::stepPositionY>().content().begin_list();
-    builder.content<Field::stepPositionZ>().content().begin_list();
-    builder.content<Field::stepTrackKineticEnergy>().content().begin_list();
+}
 
-    // we should probably insert a step here to mark the beginning of the track / use stepping verbose
+template<std::size_t... I>
+void InsertTrackBeginHelper(Builder& builder) {
+    (builder.content<I>().content().begin_list(), ...);
+}
+
+void InsertTrackBegin(const G4Track* track, Builder& builder) {
+    InsertTrackBeginHelper<Field::stepEnergy, Field::stepTime, Field::stepPositionX, Field::stepPositionY, Field::stepPositionZ,
+                           Field::stepTrackKineticEnergy>(builder);
+}
+
+template<std::size_t... I>
+void InsertTrackEndHelper(Builder& builder) {
+    (builder.content<I>().content().end_list(), ...);
 }
 
 void InsertTrackEnd(const G4Track*, Builder& builder) {
-    builder.content<Field::stepEnergy>().content().end_list();
-    builder.content<Field::stepTime>().content().end_list();
-    // builder.content<Field::stepProcess>().content().end_list();
-    // builder.content<Field::stepProcessType>().content().end_list();
-    // builder.content<Field::stepVolume>().content().end_list();
-    builder.content<Field::stepPositionX>().content().end_list();
-    builder.content<Field::stepPositionY>().content().end_list();
-    builder.content<Field::stepPositionZ>().content().end_list();
-    builder.content<Field::stepTrackKineticEnergy>().content().end_list();
+    InsertTrackEndHelper<Field::stepEnergy, Field::stepTime, Field::stepPositionX, Field::stepPositionY, Field::stepPositionZ,
+                         Field::stepTrackKineticEnergy>(builder);
 }
 
 void InsertStep(const G4Step* step, Builder& builder) {
