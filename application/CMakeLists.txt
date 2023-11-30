@@ -45,6 +45,8 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
      "${PROJECT_SOURCE_DIR}/src/geant4/*.cpp")
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
+set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY
+                                                 ${PROJECT_BINARY_DIR}/lib)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include
                                                   ${Geant4_INCLUDE_DIRS})

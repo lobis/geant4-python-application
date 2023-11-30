@@ -17,12 +17,15 @@ class G4Step;
 namespace geant4::data {
 
 enum Field : std::size_t { eventId,
+                           //
                            trackId,
                            trackParentId,
-                           trackEnergy,
+                           trackInitialEnergy,
                            trackTime,
-                           trackHitsEnergy,
-                           trackHitsTime,
+                           //
+                           hitsEnergy,
+                           hitsTime,
+                           hitsProcess,
 };
 
 using UserDefinedMap = std::map<std::size_t, std::string>;
@@ -43,21 +46,25 @@ typedef unsigned int id;
 using Builder = RecordBuilder<RecordField<static_cast<std::size_t>(Field::eventId), NumpyBuilder<id>>,
                               RecordField<static_cast<std::size_t>(Field::trackId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
                               RecordField<static_cast<std::size_t>(Field::trackParentId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
-                              RecordField<static_cast<std::size_t>(Field::trackEnergy), ListOffsetBuilder<id, NumpyBuilder<float>>>,
+                              RecordField<static_cast<std::size_t>(Field::trackInitialEnergy), ListOffsetBuilder<id, NumpyBuilder<float>>>,
                               RecordField<static_cast<std::size_t>(Field::trackTime), ListOffsetBuilder<id, NumpyBuilder<float>>>,
-                              RecordField<static_cast<std::size_t>(Field::trackHitsEnergy), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-                              RecordField<static_cast<std::size_t>(Field::trackHitsTime), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>>;
+                              RecordField<static_cast<std::size_t>(Field::hitsEnergy), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
+                              RecordField<static_cast<std::size_t>(Field::hitsTime), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>
+                              // RecordField<static_cast<std::size_t>(Field::hitsProcess), ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
+                              >;
 
 inline Builder MakeBuilder() {
     return {
-            {{Field::eventId, "event_id"},
-             {Field::trackId, "track.id"},
-             {Field::trackParentId, "track.parent_id"},
-             {Field::trackEnergy, "track.energy"},
-             {Field::trackTime, "track.time"},
-             {Field::trackHitsEnergy, "track.hits.energy"},
-             {Field::trackHitsTime, "track.hits.time"}},
-    };
+            {
+                    {Field::eventId, "event_id"},
+                    {Field::trackId, "track.id"},
+                    {Field::trackParentId, "track.parent_id"},
+                    {Field::trackInitialEnergy, "track.initial_energy"},
+                    {Field::trackTime, "track.time"},
+                    {Field::hitsEnergy, "track.hits.energy"},
+                    {Field::hitsTime, "track.hits.time"},
+                    // {Field::hitsProcess, "track.hits.process"}},
+            }};
 }
 
 void InsertEventBegin(const G4Event* event, Builder& builder);
