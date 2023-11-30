@@ -82,7 +82,7 @@ jobs:
           cd application
           mkdir build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${CONDA_PREFIX} -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX}
-          make -j$(nproc) install
+          make install
 
       - name: Install the python bindings
         run: python -m pip install .[test]
