@@ -30,8 +30,8 @@ def test_missing_manager():
 
 def test_multiple_apps():
     # Could this work somehow?
-    with pytest.raises(Exception):
-        for _ in range(2):
+    with pytest.raises(RuntimeError):
+        for _ in range(10):
             app = geant4.Application()
             app.setup_manager()
             app.setup_detector()
@@ -46,42 +46,43 @@ def test_seed_single_thread():
     app = geant4.Application()
 
     app.setup_manager()
-    app.set_random_seed(137)
+    app.random_seed = 137
     app.setup_physics()
     app.setup_detector()
     app.setup_action()
 
     app.initialize()
 
+    assert app.random_seed == 137
+
     # launch 100 events
     events = app.run(100)
     assert len(events) == 100
 
     reference_value = [
-        113.52462,
-        124.65908,
-        98.72738,
-        130.19978,
-        65.732864,
-        72.24915,
-        58.46046,
-        40.267754,
-        47.890503,
-        42.38143,
-        25.019478,
-        34.674374,
-        21.276197,
-        24.153574,
-        12.234435,
-        31.175776,
-        15.838588,
-        11.047329,
-        18.216051,
-        12.271155,
+        0.0,
+        231.04991,
+        164.29599,
+        72.8029,
+        66.77133,
+        57.87128,
+        42.725155,
+        44.92826,
+        57.972427,
+        31.946453,
+        31.096113,
+        37.32029,
+        14.65972,
+        23.0362,
+        47.28438,
+        14.196298,
+        19.810057,
+        13.936412,
+        17.764618,
+        10.532204,
     ]
 
     energy = np.array(events["track.step.energy"][0][0])
-
     assert np.allclose(energy, reference_value, atol=1e-5)
 
 
@@ -89,7 +90,6 @@ def test_event_data_is_cleared():
     app = geant4.Application()
 
     app.setup_manager()
-    app.set_random_seed(137)
     app.setup_physics()
     app.setup_detector()
     app.setup_action()

@@ -23,7 +23,6 @@ namespace py = pybind11;
 
 Application* Application::pInstance = nullptr;
 
-
 Application::Application() {
     // if the instance already exists, return it, otherwise create one
     if (pInstance != nullptr) {
