@@ -5,10 +5,12 @@
 #include <G4ParticleDefinition.hh>
 #include <G4ParticleTypes.hh>
 #include <G4Step.hh>
-#include <G4SystemOfUnits.hh>
 #include <G4Track.hh>
 #include <G4UnitsTable.hh>
 #include <iostream>
+
+#include <pybind11/numpy.h>
+#include <pybind11/stl.h>
 
 using namespace std;
 
@@ -83,6 +85,43 @@ void InsertStep(const G4Step* step, Builder& builder) {
 
     trackHitsEnergy.content().content().append(step->GetTotalEnergyDeposit() / units::energy);
     trackHitsTime.content().content().append(stepPost->GetGlobalTime() / units::time);
+}
+
+py::object SnapshotBuilder(Builder& builder) {
+    // How much memory to allocate?
+    std::map<std::string, size_t> names_nbytes = {};
+    builder.buffer_nbytes(names_nbytes);
+
+    // Allocate memory
+    std::map<std::string, void*> buffers = {};
+    for (const auto& it: names_nbytes) {
+        uint8_t* ptr = new uint8_t[it.second];
+        buffers[it.first] = static_cast<void*>(ptr);
+    }
+
+    // Write non-contiguous contents to memory
+    builder.to_buffers(buffers);
+    auto from_buffers = py::module::import("awkward").attr("from_buffers");
+
+    // Build Python dictionary containing arrays
+    py::dict container;
+    for (const auto& it: buffers) {
+
+        // Create capsule that frees the allocated data when out of scope
+        py::capsule free_when_done(it.second, [](void* data) {
+            uint8_t* dataPtr = reinterpret_cast<uint8_t*>(data);
+            delete[] dataPtr;
+        });
+
+        // Adopt the memory filled by `to_buffers` as a NumPy array
+        container[py::str(it.first)] = py::array_t<uint8_t>(
+                {names_nbytes[it.first]},
+                {sizeof(uint8_t)},
+                reinterpret_cast<uint8_t*>(it.second),
+                free_when_done);
+    }
+
+    return from_buffers(builder.form(), builder.length(), container);
 }
 
 }// namespace geant4::data

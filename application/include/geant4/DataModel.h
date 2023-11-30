@@ -6,6 +6,10 @@
 #include <G4SystemOfUnits.hh>
 #include <G4UnitsTable.hh>
 
+#include <pybind11/pybind11.h>
+
+namespace py = pybind11;
+
 class G4Event;
 class G4Track;
 class G4Step;
@@ -61,6 +65,8 @@ void InsertEventEnd(const G4Event* event, Builder& builder);
 void InsertTrackBegin(const G4Track* track, Builder& builder);
 void InsertTrackEnd(const G4Track* track, Builder& builder);
 void InsertStep(const G4Step* step, Builder& builder);
+
+py::object SnapshotBuilder(Builder& builder);
 
 namespace units {
 static constexpr auto energy = CLHEP::keV;

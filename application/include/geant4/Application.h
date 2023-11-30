@@ -11,6 +11,8 @@
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 
+namespace py = pybind11;
+
 namespace geant4 {
 
 class Application {
@@ -28,7 +30,7 @@ public:
     void SetupAction();
 
     void Initialize();
-    void Run(int nEvents);
+    py::object Run(int nEvents);
 
     bool IsSetup() const;
     bool IsInitialized() const;

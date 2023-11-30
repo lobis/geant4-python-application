@@ -50,8 +50,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include
                                                   ${Geant4_INCLUDE_DIRS})
 
 target_link_libraries(
-    ${PROJECT_NAME} PUBLIC ${Geant4_LIBRARIES} awkward::layout-builder
-                           pybind11::embed)
+    ${PROJECT_NAME}
+    PUBLIC ${Geant4_LIBRARIES} awkward::layout-builder pybind11::embed
+           pybind11::module ${Python3_LIBRARIES} Python3::Module)
 
 # add the pybind11 module
 set(PYTHON_MODULE_NAME geant4_cpp)

@@ -3,6 +3,7 @@
 #include "geant4/ActionInitialization.h"
 #include "geant4/DetectorConstruction.h"
 #include "geant4/PhysicsList.h"
+#include "geant4/RunAction.h"
 
 #include <G4RunManagerFactory.hh>
 
@@ -84,11 +85,14 @@ void Application::Initialize() {
     isInitialized = true;
 }
 
-void Application::Run(int nEvents) {
+py::object Application::Run(int nEvents) {
     if (!IsInitialized()) {
         throw runtime_error("Application needs to be initialized first");
     }
     runManager->BeamOn(nEvents);
+
+    auto& builder = RunAction::GetBuilder();
+    return geant4::data::SnapshotBuilder(builder);
 }
 
 bool Application::IsSetup() const {
