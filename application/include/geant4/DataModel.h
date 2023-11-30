@@ -17,6 +17,23 @@ class G4Step;
 
 namespace geant4::data {
 
+using UserDefinedMap = std::map<std::size_t, std::string>;
+
+template<std::size_t field_name, class BUILDER>
+using RecordField = awkward::LayoutBuilder::Field<field_name, BUILDER>;
+
+template<class... BUILDERS>
+using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...>;
+
+template<class PRIMITIVE, class BUILDER>
+using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<PRIMITIVE, BUILDER>;
+
+template<class PRIMITIVE, class BUILDER>
+using IndexedBuilder = awkward::LayoutBuilder::IndexedOption<PRIMITIVE, BUILDER>;
+
+template<class PRIMITIVE>
+using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
+
 enum Field : std::size_t {
     runId,
     eventId,
@@ -47,8 +64,6 @@ enum Field : std::size_t {
     stepPositionZ,
     stepTrackKineticEnergy,
 };
-
-using UserDefinedMap = std::map<std::size_t, std::string>;
 
 inline static const UserDefinedMap fieldToNameEvent = {
         {Field::runId, "run_id"},
@@ -84,21 +99,6 @@ inline static const UserDefinedMap fieldToNameStep = {
         // {Field::stepVolume, "track.step.volume"}},
 };
 
-template<std::size_t field_name, class BUILDER>
-using RecordField = awkward::LayoutBuilder::Field<field_name, BUILDER>;
-
-template<class... BUILDERS>
-using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...>;
-
-template<class PRIMITIVE, class BUILDER>
-using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<PRIMITIVE, BUILDER>;
-
-template<class PRIMITIVE, class BUILDER>
-using IndexedBuilder = awkward::LayoutBuilder::IndexedOption<PRIMITIVE, BUILDER>;
-
-template<class PRIMITIVE>
-using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
-
 typedef unsigned int id;
 using Builder = RecordBuilder<
         RecordField<Field::runId, NumpyBuilder<id>>,
@@ -132,7 +132,6 @@ using Builder = RecordBuilder<
         >;
 
 Builder MakeBuilder();
-
 
 void InsertEventBegin(const G4Event* event, Builder& builder);
 void InsertEventEnd(const G4Event* event, Builder& builder);
