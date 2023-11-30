@@ -12,7 +12,9 @@
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 
+#include "geant4/DetectorConstruction.h"
 #include "geant4/PrimaryGeneratorAction.h"
+#include "geant4/StackingAction.h"
 
 namespace py = pybind11;
 
@@ -53,6 +55,8 @@ public:
     static G4UImanager* GetUIManager();
 
     const PrimaryGeneratorAction& GetPrimaryGeneratorAction() const;
+    const StackingAction& GetStackingAction() const;
+    const DetectorConstruction& GetDetectorConstruction() const;
 
     static void StartGUI();
 };

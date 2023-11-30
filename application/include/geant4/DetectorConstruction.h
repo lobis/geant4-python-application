@@ -20,6 +20,11 @@ public:
     bool CheckOverlaps() const;
     void ConstructSDandField() override;
 
+    static void PrintMaterials();
+    static std::set<std::string> GetMaterialNames();
+    static std::set<std::string> GetLogicalVolumeNames();
+    static std::set<std::string> GetPhysicalVolumeNames();
+
 private:
     std::string gdml;
     G4VPhysicalVolume* world = nullptr;

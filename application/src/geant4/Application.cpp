@@ -174,6 +174,24 @@ const PrimaryGeneratorAction& Application::GetPrimaryGeneratorAction() const {
     return *primaryGeneratorAction;
 }
 
+const StackingAction& Application::GetStackingAction() const {
+    // mostly to give Python easy access to the static methods
+    const auto stackingAction = dynamic_cast<const StackingAction*>(runManager->GetUserStackingAction());
+    if (stackingAction == nullptr) {
+        throw runtime_error("Stacking action is not available");
+    }
+    return *stackingAction;
+}
+
+const DetectorConstruction& Application::GetDetectorConstruction() const {
+    // mostly to give Python easy access to the static methods
+    const auto detectorConstruction = dynamic_cast<const DetectorConstruction*>(runManager->GetUserDetectorConstruction());
+    if (detectorConstruction == nullptr) {
+        throw runtime_error("Detector construction is not available");
+    }
+    return *detectorConstruction;
+}
+
 void Application::StartGUI() {
     throw runtime_error("Not working yet ):");
 

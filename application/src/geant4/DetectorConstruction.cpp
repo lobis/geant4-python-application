@@ -6,6 +6,7 @@
 #include <G4LogicalVolume.hh>
 #include <G4LogicalVolumeStore.hh>
 #include <G4NistManager.hh>
+#include <G4PhysicalVolumeStore.hh>
 #include <G4VisAttributes.hh>
 
 #include <filesystem>
@@ -61,4 +62,38 @@ void DetectorConstruction::ConstructSDandField() {
         logicalVolume->SetSensitiveDetector(sensitiveDetector);
         // TODO: Regions
     }
+}
+
+void DetectorConstruction::PrintMaterials() {
+    const auto materialTable = G4Material::GetMaterialTable();
+    for (const auto& material: *materialTable) {
+        cout << material->GetName() << ", " << material->GetDensity() << endl;
+    }
+}
+
+set<string> DetectorConstruction::GetMaterialNames() {
+    set<string> names;
+    const auto materialTable = G4Material::GetMaterialTable();
+    for (const auto& material: *materialTable) {
+        names.insert(material->GetName());
+    }
+    return names;
+}
+
+set<string> DetectorConstruction::GetLogicalVolumeNames() {
+    set<string> names;
+    const auto logicalVolumeTable = G4LogicalVolumeStore::GetInstance();
+    for (const auto& logicalVolume: *logicalVolumeTable) {
+        names.insert(logicalVolume->GetName());
+    }
+    return names;
+}
+
+set<string> DetectorConstruction::GetPhysicalVolumeNames() {
+    set<string> names;
+    const auto physicalVolumeTable = G4PhysicalVolumeStore::GetInstance();
+    for (const auto& physicalVolume: *physicalVolumeTable) {
+        names.insert(physicalVolume->GetName());
+    }
+    return names;
 }

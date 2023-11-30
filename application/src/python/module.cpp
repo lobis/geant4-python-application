@@ -65,14 +65,27 @@ void init_Application(py::module& m) {
             .def_static("command", &Application::Command, py::arg("command"))
             .def_static("list_commands", &Application::ListCommands, py::arg("directory") = "/")
             .def_static("start_gui", &Application::StartGUI)
-            .def_property("primary_generator", &Application::GetPrimaryGeneratorAction, nullptr, py::return_value_policy::reference_internal);
+            .def_property("generator", &Application::GetPrimaryGeneratorAction, nullptr, py::return_value_policy::reference_internal)
+            .def_property("detector", &Application::GetDetectorConstruction, nullptr, py::return_value_policy::reference_internal)
+            .def_property("stacking", &Application::GetStackingAction, nullptr, py::return_value_policy::reference_internal);
 
     py::class_<PrimaryGeneratorAction>(m, "PrimaryGenerator")
-            .def(py::init<>())
             .def_static("set_energy", &PrimaryGeneratorAction::SetEnergy, py::arg("energy"))
             .def_static("set_position", &PrimaryGeneratorAction::SetPosition, py::arg("position"))
             .def_static("set_direction", &PrimaryGeneratorAction::SetDirection, py::arg("direction"))
             .def_static("set_particle", &PrimaryGeneratorAction::SetParticle, py::arg("particle"));
+
+    py::class_<DetectorConstruction>(m, "DetectorConstruction")
+            .def("check_overlaps", &DetectorConstruction::CheckOverlaps)
+            .def_static("print_materials", &DetectorConstruction::PrintMaterials)
+            .def_property("materials", &DetectorConstruction::GetMaterialNames, nullptr)
+            .def_property("logical_volumes", &DetectorConstruction::GetLogicalVolumeNames, nullptr)
+            .def_property("physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames, nullptr);
+
+    py::class_<StackingAction>(m, "StackingAction")
+            .def_property("ignored_particles", &StackingAction::GetIgnoredParticles, &StackingAction::SetIgnoredParticles)
+            .def_static("ignore_particle", &StackingAction::IgnoreParticle, py::arg("particle"))
+            .def_static("ignore_particle_undo", &StackingAction::IgnoreParticleUndo, py::arg("particle"));
 }
 
 PYBIND11_MODULE(geant4_cpp, m) {
