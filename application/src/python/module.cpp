@@ -61,8 +61,17 @@ void init_Application(py::module& m) {
             .def("run", &Application::Run, py::arg("n_events") = 1)
             .def("is_setup", &Application::IsSetup)
             .def("is_initialized", &Application::IsInitialized)
-            .def("set_random_seed", &Application::SetRandomSeed, py::arg("seed") = 0)
-            .def("get_random_seed", &Application::GetRandomSeed);
+            .def_property("random_seed", &Application::GetRandomSeed, &Application::SetRandomSeed)
+            .def_static("command", &Application::Command, py::arg("command"))
+            .def_static("list_commands", &Application::ListCommands, py::arg("directory") = "/")
+            .def_property("primary_generator", &Application::GetPrimaryGeneratorAction, nullptr, py::return_value_policy::reference_internal);
+
+    py::class_<PrimaryGeneratorAction>(m, "PrimaryGenerator")
+            .def(py::init<>())
+            .def_static("set_energy", &PrimaryGeneratorAction::SetEnergy, py::arg("energy"))
+            .def_static("set_position", &PrimaryGeneratorAction::SetPosition, py::arg("position"))
+            .def_static("set_direction", &PrimaryGeneratorAction::SetDirection, py::arg("direction"))
+            .def_static("set_particle", &PrimaryGeneratorAction::SetParticle, py::arg("particle"));
 }
 
 PYBIND11_MODULE(geant4_cpp, m) {

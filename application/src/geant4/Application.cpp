@@ -156,3 +156,12 @@ void Application::ListCommands(const string& directory) {
     auto ui = GetUIManager();
     ui->ListCommands(directory.c_str());
 }
+
+const PrimaryGeneratorAction& Application::GetPrimaryGeneratorAction() const {
+    // mostly to give Python easy access to the static methods
+    const auto primaryGeneratorAction = dynamic_cast<const PrimaryGeneratorAction*>(runManager->GetUserPrimaryGeneratorAction());
+    if (primaryGeneratorAction == nullptr) {
+        throw runtime_error("Primary generator action is not available");
+    }
+    return *primaryGeneratorAction;
+}

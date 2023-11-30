@@ -4,13 +4,15 @@
 #define GEANT4_APPLICATION_H
 
 #include <G4RunManager.hh>
+#include <G4UImanager.hh>
 
 #include "pybind11/chrono.h"
 #include "pybind11/complex.h"
 #include "pybind11/functional.h"
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
-#include <G4UImanager.hh>
+
+#include "geant4/PrimaryGeneratorAction.h"
 
 namespace py = pybind11;
 
@@ -49,6 +51,8 @@ public:
     static int Command(const std::string& command);
     static void ListCommands(const std::string& directory);
     static G4UImanager* GetUIManager();
+
+    const PrimaryGeneratorAction& GetPrimaryGeneratorAction() const;
 };
 
 }// namespace geant4
