@@ -60,7 +60,9 @@ void init_Application(py::module& m) {
             .def("initialize", &Application::Initialize)
             .def("run", &Application::Run, py::arg("n_events") = 1)
             .def("is_setup", &Application::IsSetup)
-            .def("is_initialized", &Application::IsInitialized);
+            .def("is_initialized", &Application::IsInitialized)
+            .def("set_random_seed", &Application::SetRandomSeed, py::arg("seed") = 0)
+            .def("get_random_seed", &Application::GetRandomSeed);
 }
 
 PYBIND11_MODULE(geant4_cpp, m) {

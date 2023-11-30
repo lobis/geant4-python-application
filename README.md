@@ -17,6 +17,5 @@ app.setup_action()
 app.initialize()
 
 # launch 100 events
-app.run(100)
-
+events = app.run(100)
 ```

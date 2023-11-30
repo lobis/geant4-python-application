@@ -19,11 +19,13 @@ class Application {
 private:
     std::unique_ptr<G4RunManager> runManager = nullptr;
     bool isInitialized = false;
+    long randomSeed = 0;
 
 public:
     Application();
     ~Application() = default;
 
+    void SetRandomSeed(long seed);
     void SetupManager(unsigned short nThreads = 0);
     void SetupDetector(std::string gdml, const std::set<std::string>& sensitiveVolumes = {});
     void SetupPhysics();
@@ -34,6 +36,8 @@ public:
 
     bool IsSetup() const;
     bool IsInitialized() const;
+
+    inline long GetRandomSeed() const { return randomSeed; }
 };
 
 }// namespace geant4

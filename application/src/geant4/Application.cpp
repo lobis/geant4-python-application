@@ -8,12 +8,15 @@
 #include <G4RunManagerFactory.hh>
 
 #include <iostream>
+#include <random>
 
 using namespace std;
 using namespace geant4;
 namespace py = pybind11;
 
-Application::Application() = default;
+Application::Application() {
+    CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);
+}
 
 void Application::SetupDetector(string gdml, const set<string>& sensitiveVolumes) {
     if (runManager == nullptr) {
@@ -81,6 +84,12 @@ void Application::Initialize() {
     if (!IsSetup()) {
         throw runtime_error("Application needs to be set up first");
     }
+
+    if (randomSeed == 0) {
+        randomSeed = std::random_device()();
+    }
+    CLHEP::HepRandom::setTheSeed(randomSeed);
+
     runManager->Initialize();
     isInitialized = true;
 }
@@ -102,4 +111,8 @@ bool Application::IsSetup() const {
 
 bool Application::IsInitialized() const {
     return runManager != nullptr && isInitialized;
+}
+
+void Application::SetRandomSeed(long seed) {
+    randomSeed = seed;
 }
