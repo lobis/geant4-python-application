@@ -28,10 +28,9 @@ def test_missing_manager():
         app.setup_detector()
 
 
+# This may not hold for all Geant4 versions
 def test_seed_single_thread():
-    # This may not hold for all Geant4 versions
-
-    app = Application()
+    app = geant4.Application()
 
     app.setup_manager()
     app.set_random_seed(137)
