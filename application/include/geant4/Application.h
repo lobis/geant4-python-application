@@ -48,7 +48,7 @@ public:
 
     inline long GetRandomSeed() const { return randomSeed; }
 
-    static int Command(const std::string& command);
+    static void Command(const std::string& command);
     static void ListCommands(const std::string& directory);
     static G4UImanager* GetUIManager();
 

@@ -152,13 +152,12 @@ G4UImanager* Application::GetUIManager() {
     return ui;
 }
 
-int Application::Command(const string& command) {
+void Application::Command(const string& command) {
     auto ui = GetUIManager();
     int code = ui->ApplyCommand(command);
     if (code != 0) {
         throw runtime_error("Command '" + command + "' failed with code " + to_string(code));
     }
-    return code;
 }
 
 void Application::ListCommands(const string& directory) {
