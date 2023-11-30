@@ -55,4 +55,6 @@ void InsertTrackEnd(const G4Track* track, Builder& builder) {
 
 void InsertStep(const G4Step* step, Builder& builder) {
 }
+
+
 }// namespace geant4::data

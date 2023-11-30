@@ -19,7 +19,7 @@ public:
     static geant4::data::Builder& GetBuilder();
 
 private:
-    geant4::data::Builder builder;
+    geant4::data::Builder builder = geant4::data::MakeBuilder();
 };
 
 #endif// GEANT4_APPLICATION_RUNACTION_H

@@ -37,6 +37,13 @@ using Builder = RecordBuilder<RecordField<static_cast<std::size_t>(Field::eventI
                               RecordField<static_cast<std::size_t>(Field::trackEnergy), ListOffsetBuilder<id, NumpyBuilder<float>>>,
                               RecordField<static_cast<std::size_t>(Field::trackTime), ListOffsetBuilder<id, NumpyBuilder<float>>>>;
 
+inline Builder MakeBuilder() {
+    return {{{Field::eventId, "event_id"},
+             {Field::trackId, "track.id"},
+             {Field::trackParentId, "track.parent_id"},
+             {Field::trackEnergy, "track.energy"},
+             {Field::trackTime, "track.time"}}};
+}
 
 void InsertEventBegin(const G4Event* event, Builder& builder);
 void InsertEventEnd(const G4Event* event, Builder& builder);
