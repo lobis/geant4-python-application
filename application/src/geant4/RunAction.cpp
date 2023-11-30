@@ -8,6 +8,7 @@ using namespace std;
 RunAction::RunAction() : G4UserRunAction() {}
 
 void RunAction::BeginOfRunAction(const G4Run*) {
+    builder.clear();
     if (IsMaster()) {
         builderMainPtr = &builder;
     } else {

@@ -27,6 +27,7 @@ void InsertEventBegin(const G4Event* event, Builder& builder) {
     //
     builder.content<Field::trackId>().begin_list();
     builder.content<Field::trackParentId>().begin_list();
+    // builder.content<Field::trackParticle>().begin_list();
     builder.content<Field::trackInitialEnergy>().begin_list();
     builder.content<Field::trackInitialTime>().begin_list();
     builder.content<Field::trackInitialPositionX>().begin_list();

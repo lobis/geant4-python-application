@@ -12,7 +12,6 @@ public:
     RunAction();
 
     void BeginOfRunAction(const G4Run*) override;
-
     void EndOfRunAction(const G4Run*) override;
 
     /// Only one instance of RunAction is created for each thread.

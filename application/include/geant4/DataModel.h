@@ -59,6 +59,9 @@ using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...
 template<class PRIMITIVE, class BUILDER>
 using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<PRIMITIVE, BUILDER>;
 
+template<class PRIMITIVE, class BUILDER>
+using IndexedBuilder = awkward::LayoutBuilder::IndexedOption<PRIMITIVE, BUILDER>;
+
 template<class PRIMITIVE>
 using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
 
@@ -69,7 +72,7 @@ using Builder = RecordBuilder<
         //
         RecordField<static_cast<std::size_t>(Field::trackId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
         RecordField<static_cast<std::size_t>(Field::trackParentId), ListOffsetBuilder<id, NumpyBuilder<id>>>,
-        // RecordField<static_cast<std::size_t>(Field::trackParticle), ListOffsetBuilder<id, NumpyBuilder<std::string>>>,
+        // RecordField<static_cast<std::size_t>(Field::trackParticle), IndexedBuilder<NumpyBuilder<std::string>, NumpyBuilder<id>>>,
         // RecordField<static_cast<std::size_t>(Field::trackParticleType), ListOffsetBuilder<id, NumpyBuilder<std::string>>>,
         RecordField<static_cast<std::size_t>(Field::trackInitialEnergy), ListOffsetBuilder<id, NumpyBuilder<float>>>,
         RecordField<static_cast<std::size_t>(Field::trackInitialTime), ListOffsetBuilder<id, NumpyBuilder<float>>>,
@@ -102,6 +105,8 @@ inline Builder MakeBuilder() {
                     //
                     {Field::trackId, "track.id"},
                     {Field::trackParentId, "track.parent_id"},
+                    // {Field::trackParticle, "track.particle"},
+                    // {Field::trackParticleType, "track.particle_type"},
                     {Field::trackInitialEnergy, "track.energy"},
                     {Field::trackInitialTime, "track.time"},
                     {Field::trackInitialPositionX, "track.position.x"},

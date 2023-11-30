@@ -119,7 +119,9 @@ py::object Application::Run(int nEvents) {
     runManager->BeamOn(nEvents);
 
     auto& builder = RunAction::GetBuilder();
-    return geant4::data::SnapshotBuilder(builder);
+    auto events = geant4::data::SnapshotBuilder(builder);
+    builder.clear();
+    return events;
 }
 
 bool Application::IsSetup() const {
