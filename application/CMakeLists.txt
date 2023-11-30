@@ -44,7 +44,7 @@ endif ()
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
      "${PROJECT_SOURCE_DIR}/src/geant4/*.cpp")
 
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
+add_library(${PROJECT_NAME} STATIC ${SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY
                                                  ${PROJECT_BINARY_DIR}/lib)
 
@@ -54,14 +54,14 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include
 target_link_libraries(
     ${PROJECT_NAME}
     PUBLIC ${Geant4_LIBRARIES} awkward::layout-builder pybind11::embed
-           pybind11::module ${Python3_LIBRARIES} Python3::Module)
+           pybind11::module ${Python3_LIBRARY} Python3::Module)
 
 # add the pybind11 module
 set(PYTHON_MODULE_NAME geant4_cpp)
 file(GLOB_RECURSE PYTHON_SOURCES CONFIGURE_DEPENDS
      "${PROJECT_SOURCE_DIR}/src/python/*.cpp")
 pybind11_add_module(${PYTHON_MODULE_NAME} ${PYTHON_SOURCES})
-target_link_libraries(${PYTHON_MODULE_NAME} PUBLIC ${PROJECT_NAME})
+target_link_libraries(${PYTHON_MODULE_NAME} PRIVATE ${PROJECT_NAME})
 set_target_properties(
     ${PYTHON_MODULE_NAME}
     PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib
