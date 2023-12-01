@@ -73,8 +73,10 @@ from geant4_python_application._core import (
     Application,
     PrimaryGeneratorAction,
     StackingAction,
+    __awkward_version__,
     __doc__,
     __geant4_version__,
+    __pybind11_version__,
     __version__,
 )
 from geant4_python_application.gdml import basic_gdml
@@ -88,6 +90,8 @@ __all__ = [
     "__doc__",
     "__version__",
     "__geant4_version__",
+    "__awkward_version__",
+    "__pybind11_version__",
     "Application",
     "PrimaryGeneratorAction",
     "StackingAction",
