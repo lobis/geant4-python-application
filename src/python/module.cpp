@@ -93,6 +93,6 @@ void init_Application(py::module& m) {
             .def_static("ignore_particle_undo", &StackingAction::IgnoreParticleUndo, py::arg("name"));
 }
 
-PYBIND11_MODULE(geant4_cpp, m) {
+rm PYBIND11_MODULE(_core, m) {
     init_Application(m);
 }

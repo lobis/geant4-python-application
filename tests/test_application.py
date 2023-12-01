@@ -1,11 +1,13 @@
-import geant4
-import pytest
+from __future__ import annotations
 
 import numpy as np
+import pytest
+
+import geant4_python_application
 
 
 def test_setup_and_run():
-    app = geant4.Application()
+    app = geant4_python_application.Application()
     app.setup_manager()
     app.setup_detector()
     app.setup_physics()
@@ -16,14 +18,14 @@ def test_setup_and_run():
 
 
 def test_missing_setup():
-    app = geant4.Application()
+    app = geant4_python_application.Application()
 
     with pytest.raises(RuntimeError):
         app.initialize()
 
 
 def test_missing_manager():
-    app = geant4.Application()
+    app = geant4_python_application.Application()
 
     with pytest.raises(RuntimeError):
         app.setup_detector()
@@ -34,7 +36,7 @@ def test_multiple_apps():
     # Could this work somehow?
     with pytest.raises(RuntimeError):
         for _ in range(10):
-            app = geant4.Application()
+            app = geant4_python_application.Application()
             app.setup_manager()
             app.setup_detector()
             app.setup_physics()
@@ -45,7 +47,7 @@ def test_multiple_apps():
 
 # This may not hold for all Geant4 versions
 def test_seed_single_thread():
-    app = geant4.Application()
+    app = geant4_python_application.Application()
 
     app.setup_manager()
     app.random_seed = 137
@@ -89,7 +91,7 @@ def test_seed_single_thread():
 
 
 def test_event_data_is_cleared():
-    app = geant4.Application()
+    app = geant4_python_application.Application()
 
     app.setup_manager()
     app.setup_physics()

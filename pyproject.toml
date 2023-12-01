@@ -1,33 +1,69 @@
 [build-system]
-build-backend = "hatchling.build"
-requires = [
-  "hatchling"
-]
+build-backend = "scikit_build_core.build"
+requires = ["scikit-build-core>=0.3.3", "pybind11"]
+
+[dependencies]
+awkward = {extras = ["arrow"], version = "2.5.0"}
 
 [project]
-authors = [
-  {name = "Luis Antonio Obis Aparicio", email = "luis.antonio.obis@gmail.com"}
-]
-classifiers = [
-  "Programming Language :: Python :: 3",
-  "Operating System :: OS Independent"
-]
-dependencies = [
-  "awkward"
-]
-description = "A Pythonic Geant4 Application"
-dynamic = [
-  "version"
-]
-name = "geant4"
-readme = "README.md"
-requires-python = ">=3.8"
+description = "Geant4 Python Application"
+name = "geant4_python_application"
+version = "0.0.1"
 
 [project.optional-dependencies]
-test = [
-  "pytest",
-  "pre-commit"
-]
+test = ["pytest"]
 
-[tool.hatch.version]
-path = "src/geant4/version.py"
+[tool.cibuildwheel]
+build-verbosity = 1
+test-command = "pytest /tests"
+test-extras = ["test"]
+test-skip = ["*universal2:arm64"]
+
+[tool.pytest.ini_options]
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+filterwarnings = [
+  "error"
+]
+log_cli_level = "INFO"
+minversion = "6.0"
+testpaths = ["tests"]
+xfail_strict = true
+
+[tool.ruff]
+src = ["src"]
+
+[tool.ruff.lint]
+extend-select = [
+  "B",  # flake8-bugbear
+  "I",  # isort
+  "ARG",  # flake8-unused-arguments
+  "C4",  # flake8-comprehensions
+  "EM",  # flake8-errmsg
+  "ICN",  # flake8-import-conventions
+  "G",  # flake8-logging-format
+  "PGH",  # pygrep-hooks
+  "PIE",  # flake8-pie
+  "PL",  # pylint
+  "PT",  # flake8-pytest-style
+  "PTH",  # flake8-use-pathlib
+  "RET",  # flake8-return
+  "RUF",  # Ruff-specific
+  "SIM",  # flake8-simplify
+  "T20",  # flake8-print
+  "UP",  # pyupgrade
+  "YTT",  # flake8-2020
+  "EXE",  # flake8-executable
+  "NPY",  # NumPy specific rules
+  "PD"  # pandas-vet
+]
+ignore = [
+  "PLR09",  # Too many X
+  "PLR2004"  # Magic comparison
+]
+isort.required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["T20"]
+
+[tool.scikit-build]
+wheel.expand-macos-universal-tags = true

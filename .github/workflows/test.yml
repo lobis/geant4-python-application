@@ -68,26 +68,13 @@ jobs:
           mamba install -c conda-forge zlib
           conda list
 
-      # # This doesn't work in the CI for some reason. ctest is somewhat redundant, but it's useful during development.
-      #      - name: Build the C++ library and run tests
-      #        run: |
-      #          cd application
-      #          mkdir -p build
-      #          cd build
-      #          cmake .. -DCMAKE_BUILD_TYPE=Debug -DWITH_TESTS=ON -DCMAKE_PREFIX_PATH=${CONDA_PREFIX}
-      #          make
-      #          cd tests
-      #          ctest
-
-      - name: Build the C++ library
+      - name: pip
         run: |
-          cd application
-          mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${CONDA_PREFIX} -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX}
-          make install
+          pip install .[test]
 
-      - name: Install the python bindings
-        run: python -m pip install .[test]
+      - name: Check imports
+        run: |
+          python -c "import geant4_python_application; geant4_python_application.Application()"
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
@@ -97,5 +84,4 @@ jobs:
 
       - name: Run tests
         run: |
-          export PYTHONPATH=${CONDA_PREFIX}/lib
           python -m pytest -vv tests
