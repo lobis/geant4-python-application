@@ -70,7 +70,6 @@ jobs:
 
       - name: pip install the package
         run: |
-          echo ${CONDA_PREFIX}
           export CMAKE_PREFIX_PATH=${CONDA_PREFIX}
           mamba env list
           mamba list

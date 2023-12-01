@@ -24,7 +24,7 @@ RUN mamba install -y -c conda-forge  \
     cmake geant4 \
     # remove data package to reduce image size (we should not install them in the first place, how?)
     # && mamba remove -y $(mamba list | grep 'geant4-data' | awk '{print $1}') \
-    && rm -rf /opt/conda/share/Geant4/data/* \
+    # && rm -rf /opt/conda/share/Geant4/data/* \
     && mamba remove -y $(mamba list | grep 'geant4-data' | awk '{print $1}') \
     && mamba clean -ya
 
