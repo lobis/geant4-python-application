@@ -41,7 +41,7 @@ jobs:
           password: ${{ secrets.CONTAINER_REGISTRY_GITHUB_TOKEN }}
 
       - name: Build Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: false
