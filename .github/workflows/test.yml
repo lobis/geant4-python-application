@@ -70,6 +70,7 @@ jobs:
 
       - name: pip
         run: |
+          CMAKE_PREFIX_PATH=${CONDA_PREFIX}
           pip install .[test]
 
       - name: Check imports

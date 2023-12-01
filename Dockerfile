@@ -9,13 +9,15 @@ RUN apt-get update && apt-get install -y \
 
 # Install miniconda and activate base on startup
 ENV PATH /opt/conda/bin:/opt/conda/condabin:${PATH}
+ENV CMAKE_PREFIX_PATH=/opt/conda
+
 RUN curl -o miniconda_installer.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
     && bash miniconda_installer.sh -b -p /opt/conda \
     && rm miniconda_installer.sh \
     && conda install -y -c conda-forge mamba \
-    && conda init bash \
-    && conda config --set auto_activate_base true \
-    && conda clean -ya
+    && mamba init bash \
+    && mamba config --set auto_activate_base true \
+    && mamba clean -ya
 
 # Install conda packages (geant4 is not available for aarch64 at the time of writing)
 RUN mamba install -y -c conda-forge  \
