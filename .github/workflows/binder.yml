@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BINDER_URL: https://mybinder.org/v2/gh/lobis/geant4-pythonic-application/HEAD
+  BINDER_URL: https://mybinder.org/v2/gh/lobis/geant4-python-application/HEAD
 
 jobs:
   docker-image:

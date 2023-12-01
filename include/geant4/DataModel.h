@@ -1,5 +1,5 @@
-#ifndef GEANT4PYTHONICAPPLICATION_DATAMODEL_H
-#define GEANT4PYTHONICAPPLICATION_DATAMODEL_H
+
+#pragma once
 
 #include "awkward/LayoutBuilder.h"
 
@@ -152,6 +152,3 @@ static constexpr auto momentum = CLHEP::GeV / CLHEP::c_light;
 }// namespace units
 
 }// namespace geant4_app::data
-
-
-#endif// GEANT4PYTHONICAPPLICATION_DATAMODEL_H

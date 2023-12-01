@@ -1,6 +1,5 @@
 
-#ifndef GEANT4_APPLICATION_EVENTACTION_H
-#define GEANT4_APPLICATION_EVENTACTION_H
+#pragma once
 
 #include <G4Event.hh>
 #include <G4UserEventAction.hh>
@@ -17,4 +16,3 @@ public:
 };
 
 }// namespace geant4_app
-#endif// GEANT4_APPLICATION_EVENTACTION_H

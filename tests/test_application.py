@@ -16,6 +16,7 @@ def test_imports():
     assert geant4_python_application.__doc__
     assert geant4_python_application.__version__
 
+
 def test_setup_and_run():
     app = geant4_python_application.Application()
     app.setup_manager()
@@ -40,6 +41,7 @@ def test_missing_manager():
     with pytest.raises(RuntimeError):
         app.setup_detector(gdml="")
         app.setup_detector()
+
 
 @pytest.mark.skip(reason="Fix segfault")
 def test_multiple_apps():

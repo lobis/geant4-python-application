@@ -1,7 +1,5 @@
 
-
-#ifndef GEANT4_APPLICATION_H
-#define GEANT4_APPLICATION_H
+#pragma once
 
 #include <G4RunManager.hh>
 #include <G4UImanager.hh>
@@ -62,5 +60,3 @@ public:
 };
 
 }// namespace geant4_app
-
-#endif//GEANT4_APPLICATION_H

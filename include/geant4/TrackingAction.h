@@ -1,7 +1,4 @@
 
-#ifndef GEANT4_APPLICATION_TRACKINGACTION_H
-#define GEANT4_APPLICATION_TRACKINGACTION_H
-
 #include <G4UserTrackingAction.hh>
 
 namespace geant4_app {
@@ -15,5 +12,3 @@ public:
 };
 
 }// namespace geant4_app
-
-#endif// GEANT4_APPLICATION_TRACKINGACTION_H

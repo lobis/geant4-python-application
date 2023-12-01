@@ -1,6 +1,5 @@
 
-#ifndef LIBGEANT4PYTHONICAPPLICATION_STACKINGACTION_H
-#define LIBGEANT4PYTHONICAPPLICATION_STACKINGACTION_H
+#pragma once
 
 #include <G4ParticleDefinition.hh>
 #include <G4UserStackingAction.hh>
@@ -27,5 +26,3 @@ private:
 };
 
 }// namespace geant4_app
-
-#endif//LIBGEANT4PYTHONICAPPLICATION_STACKINGACTION_H

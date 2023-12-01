@@ -1,6 +1,5 @@
 
-#ifndef GEANT4_APPLICATION_PRIMARYGENERATORACTION_H
-#define GEANT4_APPLICATION_PRIMARYGENERATORACTION_H
+#pragma once
 
 #include <G4ParticleGun.hh>
 #include <G4VUserPrimaryGeneratorAction.hh>
@@ -22,4 +21,3 @@ public:
 };
 
 }// namespace geant4_app
-#endif// GEANT4_APPLICATION_PRIMARYGENERATORACTION_H

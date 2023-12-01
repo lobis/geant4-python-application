@@ -1,6 +1,5 @@
 
-#ifndef GEANT4_APPLICATION_PHYSICSLIST_H
-#define GEANT4_APPLICATION_PHYSICSLIST_H
+#pragma once
 
 #include <G4DecayPhysics.hh>
 #include <G4EmExtraPhysics.hh>
@@ -21,4 +20,3 @@ public:
     PhysicsList();
 };
 }// namespace geant4_app
-#endif// GEANT4_APPLICATION_PHYSICSLIST_H

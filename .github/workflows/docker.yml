@@ -19,7 +19,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE_NAME: ghcr.io/lobis/geant4-python-application:${{ github.event.inputs.tag }}
+  IMAGE_NAME:
+    ghcr.io/lobis/geant4-python-application:${{ github.event.inputs.tag }}
 
 jobs:
   docker-image:

@@ -1,6 +1,5 @@
 
-#ifndef GEANT4_APPLICATION_DETECTORCONSTRUCTION_H
-#define GEANT4_APPLICATION_DETECTORCONSTRUCTION_H
+#pragma once
 
 #include <G4GDMLParser.hh>
 #include <G4LogicalVolume.hh>
@@ -36,5 +35,3 @@ private:
 };
 
 }// namespace geant4_app
-
-#endif// GEANT4_APPLICATION_DETECTORCONSTRUCTION_H

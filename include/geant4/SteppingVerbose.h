@@ -1,6 +1,5 @@
 
-#ifndef GEANT4PYTHONICAPPLICATION_STEPPINGVERBOSE_H
-#define GEANT4PYTHONICAPPLICATION_STEPPINGVERBOSE_H
+#pragma once
 
 #include <G4SteppingManager.hh>
 #include <G4SteppingVerbose.hh>
@@ -19,5 +18,3 @@ public:
 };
 
 }// namespace geant4_app
-
-#endif//GEANT4PYTHONICAPPLICATION_STEPPINGVERBOSE_H

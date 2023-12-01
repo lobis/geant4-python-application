@@ -1,6 +1,5 @@
 
-#ifndef GEANT4_APPLICATION_RUNACTION_H
-#define GEANT4_APPLICATION_RUNACTION_H
+#pragma once
 
 #include <G4RunManager.hh>
 #include <G4UserRunAction.hh>
@@ -26,4 +25,3 @@ private:
 };
 
 }// namespace geant4_app
-#endif// GEANT4_APPLICATION_RUNACTION_H

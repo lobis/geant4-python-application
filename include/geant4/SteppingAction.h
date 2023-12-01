@@ -1,6 +1,5 @@
 
-#ifndef GEANT4_APPLICATION_STEPPINGACTION_H
-#define GEANT4_APPLICATION_STEPPINGACTION_H
+#pragma once
 
 #include <G4UserSteppingAction.hh>
 
@@ -14,5 +13,3 @@ public:
 };
 
 }// namespace geant4_app
-
-#endif// GEANT4_APPLICATION_STEPPINGACTION_H

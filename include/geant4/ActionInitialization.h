@@ -1,6 +1,5 @@
 
-#ifndef LIBGEANT4PYTHONICAPPLICATION_ACTIONINITIALIZATION_H
-#define LIBGEANT4PYTHONICAPPLICATION_ACTIONINITIALIZATION_H
+#pragma once
 
 #include <G4VSteppingVerbose.hh>
 #include <G4VUserActionInitialization.hh>
@@ -17,5 +16,3 @@ public:
     G4VSteppingVerbose* InitializeSteppingVerbose() const override;
 };
 }// namespace geant4_app
-
-#endif//LIBGEANT4PYTHONICAPPLICATION_ACTIONINITIALIZATION_H
