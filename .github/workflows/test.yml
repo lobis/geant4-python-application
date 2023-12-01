@@ -5,7 +5,9 @@ on:
     inputs:
       debug_enabled:
         type: boolean
-        description: Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)
+        description:
+          Run the build with tmate debugging enabled
+          (https://github.com/marketplace/actions/debugging-with-tmate)
         required: false
         default: false
   pull_request:
@@ -26,9 +28,9 @@ jobs:
         geant4-version:
           - 11.1.3
         python-version:
-          - '3.9'
-          - '3.10'
-          - '3.11'
+          - "3.9"
+          - "3.10"
+          - "3.11"
 
     runs-on: ${{ matrix.platform }}
     defaults:
@@ -79,7 +81,9 @@ jobs:
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+        if:
+          ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled
+          }}
         with:
           limit-access-to-actor: false
 

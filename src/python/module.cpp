@@ -1,60 +1,24 @@
 
+#include <pybind11/pybind11.h>
+
 #include "geant4/Application.h"
 
-#include "pybind11/chrono.h"
-#include "pybind11/complex.h"
-#include "pybind11/functional.h"
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
+#define STRINGIFY(x) #x
+#define MACRO_STRINGIFY(x) STRINGIFY(x)
 
-using namespace geant4_app;
 namespace py = pybind11;
+using namespace geant4_app;
 
-constexpr const char* basicGdml = R"(
-<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+PYBIND11_MODULE(_core, m) {
+    m.doc() = R"pbdoc(
+        Geant4 Python Application
+        -------------------------
+    )pbdoc";
 
-<gdml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:noNamespaceSchemaLocation="http://service-spi.web.cern.ch/service-spi/app/releases/GDML/schema/gdml.xsd">
-
-    <define>
-        <constant name="worldSize" value="1000"/>
-        <constant name="boxSize" value="500"/>
-    </define>
-
-    <solids>
-        <box name="WorldSolid" x="worldSize" y="worldSize" z="worldSize" lunit="mm"/>
-        <box name="boxSolid" x="boxSize" y="boxSize" z="boxSize" lunit="mm"/>
-    </solids>
-
-    <structure>
-        <volume name="boxVolume">
-            <materialref ref="G4_WATER"/>
-            <solidref ref="boxSolid"/>
-        </volume>
-
-        <volume name="World">
-            <materialref ref="G4_AIR"/>
-            <solidref ref="WorldSolid"/>
-
-            <physvol name="box">
-                <volumeref ref="boxVolume"/>
-                <position name="boxPosition" unit="mm" x="0" y="0" z="0"/>
-            </physvol>
-
-        </volume>
-    </structure>
-
-    <setup name="Default" version="1.0">
-        <world ref="World"/>
-    </setup>
-</gdml>
-)";
-
-void init_Application(py::module& m) {
     py::class_<Application>(m, "Application")
             .def(py::init<>())
             .def("setup_manager", &Application::SetupManager, py::arg("n_threads") = 0)
-            .def("setup_detector", &Application::SetupDetector, py::arg("gdml") = basicGdml, py::arg("sensitive_volumes") = py::set())
+            .def("setup_detector", &Application::SetupDetector, py::arg("gdml"), py::arg("sensitive_volumes") = py::set())
             .def("setup_physics", &Application::SetupPhysics)
             .def("setup_action", &Application::SetupAction)
             .def("initialize", &Application::Initialize)
@@ -69,7 +33,7 @@ void init_Application(py::module& m) {
             .def_property("detector", &Application::GetDetectorConstruction, nullptr, py::return_value_policy::reference_internal)
             .def_property("stacking", &Application::GetStackingAction, nullptr, py::return_value_policy::reference_internal);
 
-    py::class_<PrimaryGeneratorAction>(m, "PrimaryGenerator")
+    py::class_<PrimaryGeneratorAction>(m, "PrimaryGeneratorAction")
             .def_static("set_energy", &PrimaryGeneratorAction::SetEnergy, py::arg("energy"))
             .def_static("set_position", &PrimaryGeneratorAction::SetPosition, py::arg("position"))
             .def_static("set_direction", &PrimaryGeneratorAction::SetDirection, py::arg("direction"))
@@ -91,8 +55,10 @@ void init_Application(py::module& m) {
             .def_static("get_ignored_particles", &StackingAction::GetIgnoredParticles)
             .def_static("ignore_particle", &StackingAction::IgnoreParticle, py::arg("name"))
             .def_static("ignore_particle_undo", &StackingAction::IgnoreParticleUndo, py::arg("name"));
-}
 
-rm PYBIND11_MODULE(_core, m) {
-    init_Application(m);
+#ifdef VERSION_INFO
+    m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
+#else
+    m.attr("__version__") = "dev";
+#endif
 }
