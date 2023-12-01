@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import os
-import sys
 import ctypes
-import subprocess
+import os
 import shutil
+import subprocess
+import sys
 import warnings
 
 geant4_config = shutil.which("geant4-config")
@@ -55,9 +55,7 @@ def datasets() -> list[(str, str, str)]:
     datasets = subprocess.check_output(
         [geant4_config, "--datasets"], encoding="utf-8"
     ).strip()
-    return [
-        tuple(line.split()) for line in datasets.split("\n") if line.strip() != ""
-    ]
+    return [tuple(line.split()) for line in datasets.split("\n") if line.strip() != ""]
 
 
 def check_datasets() -> bool:
