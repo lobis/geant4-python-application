@@ -52,9 +52,9 @@ jobs:
 
       - name: Install Geant4 via conda
         run: |
-          conda env list
+          mamba env list
           mamba install -c conda-forge geant4=${{ matrix.geant4-version }}
-          conda list
+          mamba list
 
       - name: Install additional dependencies (ubuntu)
         if: matrix.platform == 'ubuntu-latest'
@@ -66,13 +66,16 @@ jobs:
       - name: Install additional dependencies (macos)
         if: matrix.platform == 'macos-latest'
         run: |
-          conda env list
+          mamba env list
           mamba install -c conda-forge zlib
-          conda list
+          mamba list
 
-      - name: pip
+      - name: pip install the package
         run: |
-          CMAKE_PREFIX_PATH=${CONDA_PREFIX}
+          echo ${CONDA_PREFIX}
+          export CMAKE_PREFIX_PATH=${CONDA_PREFIX}
+          mamba env list
+          mamba list
           pip install .[test]
 
       - name: Check imports

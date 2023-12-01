@@ -1,6 +1,6 @@
-FROM ghcr.io/lobis/geant4:binder
+FROM ghcr.io/lobis/geant4-python-application:latest
 
-ARG NB_USER=jovyan
+ARG NB_USER=user
 ARG NB_UID=1000
 ENV USER ${NB_USER}
 ENV NB_UID ${NB_UID}
