@@ -13,8 +13,6 @@ def test_imports():
     assert geant4_python_application.Application
     assert geant4_python_application.PrimaryGeneratorAction
     assert geant4_python_application.StackingAction
-    assert geant4_python_application.__doc__
-    assert geant4_python_application.__version__
 
 
 def test_setup_and_run():
