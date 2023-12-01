@@ -4,33 +4,33 @@ requires = ["scikit-build-core>=0.3.3", "pybind11"]
 
 [project]
 authors = [
-  {name = "Luis Antonio Obis Aparicio", email = "luis.antonio.obis@gmail.com"}
+    { name = "Luis Antonio Obis Aparicio", email = "luis.antonio.obis@gmail.com" }
 ]
 classifiers = [
-  "Intended Audience :: Developers",
-  "Intended Audience :: Information Technology",
-  "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: BSD License",
-  "Operating System :: MacOS",
-  "Operating System :: POSIX",
-  "Operating System :: Unix",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Topic :: Scientific/Engineering",
-  "Topic :: Scientific/Engineering :: Information Analysis",
-  "Topic :: Scientific/Engineering :: Mathematics",
-  "Topic :: Scientific/Engineering :: Physics",
-  "Topic :: Software Development",
-  "Topic :: Utilities"
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Software Development",
+    "Topic :: Utilities"
 ]
 dependencies = [
-  "awkward",
-  "numpy"
+    "awkward",
+    "numpy"
 ]
 description = "Geant4 Python Application"
 name = "geant4_python_application"
@@ -40,16 +40,19 @@ version = "0.0.1"
 
 [project.optional-dependencies]
 dev = [
-  "boost_histogram",
-  "hist",
-  "pandas",
-  "awkward-pandas"
+    "boost_histogram",
+    "hist",
+    "pandas",
+    "awkward-pandas",
+    "pyarrow",
+    "uproot",
+    "fsspec",
 ]
 test = [
-  "pytest",
-  "pytest-xdist",
-  "pytest-timeout",
-  "pytest-rerunfailures"
+    "pytest",
+    "pytest-xdist",
+    "pytest-timeout",
+    "pytest-rerunfailures"
 ]
 
 [tool.cibuildwheel]
@@ -61,7 +64,7 @@ test-skip = ["*universal2:arm64"]
 [tool.pytest.ini_options]
 addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
 filterwarnings = [
-  "error"
+    "error"
 ]
 log_cli_level = "INFO"
 minversion = "6.0"
@@ -73,31 +76,31 @@ src = ["src"]
 
 [tool.ruff.lint]
 extend-select = [
-  "B",  # flake8-bugbear
-  "I",  # isort
-  "ARG",  # flake8-unused-arguments
-  "C4",  # flake8-comprehensions
-  "EM",  # flake8-errmsg
-  "ICN",  # flake8-import-conventions
-  "G",  # flake8-logging-format
-  "PGH",  # pygrep-hooks
-  "PIE",  # flake8-pie
-  "PL",  # pylint
-  "PT",  # flake8-pytest-style
-  "PTH",  # flake8-use-pathlib
-  "RET",  # flake8-return
-  "RUF",  # Ruff-specific
-  "SIM",  # flake8-simplify
-  "T20",  # flake8-print
-  "UP",  # pyupgrade
-  "YTT",  # flake8-2020
-  "EXE",  # flake8-executable
-  "NPY",  # NumPy specific rules
-  "PD"  # pandas-vet
+    "B", # flake8-bugbear
+    "I", # isort
+    "ARG", # flake8-unused-arguments
+    "C4", # flake8-comprehensions
+    "EM", # flake8-errmsg
+    "ICN", # flake8-import-conventions
+    "G", # flake8-logging-format
+    "PGH", # pygrep-hooks
+    "PIE", # flake8-pie
+    "PL", # pylint
+    "PT", # flake8-pytest-style
+    "PTH", # flake8-use-pathlib
+    "RET", # flake8-return
+    "RUF", # Ruff-specific
+    "SIM", # flake8-simplify
+    "T20", # flake8-print
+    "UP", # pyupgrade
+    "YTT", # flake8-2020
+    "EXE", # flake8-executable
+    "NPY", # NumPy specific rules
+    "PD"  # pandas-vet
 ]
 ignore = [
-  "PLR09",  # Too many X
-  "PLR2004"  # Magic comparison
+    "PLR09", # Too many X
+    "PLR2004"  # Magic comparison
 ]
 isort.required-imports = ["from __future__ import annotations"]
 
