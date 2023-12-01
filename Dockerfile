@@ -26,17 +26,9 @@ RUN mamba install -y -c conda-forge  \
 COPY . /source
 
 # Build and install
-RUN cd /source/application \
-    && mkdir build \
-    && cd build \
-    && /opt/conda/bin/cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/conda -DCMAKE_INSTALL_PREFIX=/opt/conda \
-    && make -j$(nproc) \
-    && make install \
-    && cd /source \
-    && /opt/conda/bin/pip install . \
-    && rm -rf /source
+RUN cd source && python -m pip install .
 
-ENV PYTHONPATH=/opt/conda/lib:${PYTHONPATH}
+# ENV PYTHONPATH=/opt/conda/lib:${PYTHONPATH}
 
 RUN echo "#!/bin/bash\nexec /opt/conda/bin/conda run --no-capture-output -n base /opt/conda/bin/python \"\$@\"" > /usr/local/bin/entrypoint.sh \
     && chmod +x /usr/local/bin/entrypoint.sh
