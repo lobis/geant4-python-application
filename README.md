@@ -1,8 +1,8 @@
 # Geant4 Python Application
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lobis/geant4-python-application/HEAD)
-[![Build and Test](https://github.com/lobis/geant4-python-application/actions/workflows/build-test.yml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/test.yml)
-[![Docker Image](https://github.com/lobis/geant4-python-application/actions/workflows/docker.yml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/docker.yml)
+[![Build and Test](https://github.com/lobis/geant4-python-application/actions/workflows/build-test.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/test.yaml)
+[![Docker Image](https://github.com/lobis/geant4-python-application/actions/workflows/docker.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/docker.yaml)
 
 ```python
 from geant4_python_application import Application, basic_gdml
