@@ -61,4 +61,5 @@ PYBIND11_MODULE(_core, m) {
 #else
     m.attr("__version__") = "dev";
 #endif
+    m.attr("__geant4_version__") = MACRO_STRINGIFY(GEANT4_VERSION);
 }
