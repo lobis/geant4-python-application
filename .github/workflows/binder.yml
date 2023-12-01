@@ -2,7 +2,7 @@ name: Trigger Binder Build
 
 on:
   workflow_run:
-    workflows: [Build and Publish the Docker Image]
+    workflows: [Docker Image]
     types:
       - completed
 

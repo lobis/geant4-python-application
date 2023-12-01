@@ -2,7 +2,7 @@
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lobis/geant4-python-application/HEAD)
 [![Build and Test](https://github.com/lobis/geant4-python-application/actions/workflows/test.yml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/test.yml)
-[![Build and Publish the Docker Image](https://github.com/lobis/geant4-python-application/actions/workflows/docker.yml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/docker.yml)
+[![Docker Image](https://github.com/lobis/geant4-python-application/actions/workflows/docker.yml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/docker.yml)
 
 ```python
 from geant4_python_application import Application, basic_gdml
