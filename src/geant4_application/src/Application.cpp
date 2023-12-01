@@ -6,12 +6,6 @@
 #include "geant4_application/RunAction.h"
 #include "geant4_application/SteppingVerbose.h"
 
-// TODO: conditional include
-#include <G4UIExecutive.hh>
-#include <G4VisExecutive.hh>
-#include <G4VisManager.hh>
-// TODO: conditional include
-
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
 
@@ -200,12 +194,5 @@ const DetectorConstruction& Application::GetDetectorConstruction() const {
 }
 
 void Application::StartGUI() {
-    throw runtime_error("Not working yet ):");
-
-    auto vis = new G4VisExecutive;
-    vis->Initialize();
-    auto uiExecutive = new G4UIExecutive(1, nullptr);
-
-    // start session
-    uiExecutive->SessionStart();
+    throw runtime_error("Not implemented");
 }
