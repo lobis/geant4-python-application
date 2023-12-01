@@ -1,5 +1,5 @@
 
-#include "geant4/PhysicsList.h"
+#include "geant4_application/PhysicsList.h"
 
 #include <G4DecayPhysics.hh>
 #include <G4EmExtraPhysics.hh>

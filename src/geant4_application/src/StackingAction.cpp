@@ -1,5 +1,5 @@
 
-#include "geant4/StackingAction.h"
+#include "geant4_application/StackingAction.h"
 
 #include <G4ParticlePropertyTable.hh>
 #include <G4Track.hh>

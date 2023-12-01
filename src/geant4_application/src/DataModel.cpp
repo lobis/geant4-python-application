@@ -1,5 +1,5 @@
 
-#include "geant4/DataModel.h"
+#include "geant4_application/DataModel.h"
 
 #include <G4HadronicProcess.hh>
 #include <G4Nucleus.hh>

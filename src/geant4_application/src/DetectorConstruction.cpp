@@ -1,7 +1,7 @@
 #include <utility>
 
-#include "geant4/DetectorConstruction.h"
-#include "geant4/SensitiveDetector.h"
+#include "geant4_application/DetectorConstruction.h"
+#include "geant4_application/SensitiveDetector.h"
 
 #include <G4LogicalVolume.hh>
 #include <G4LogicalVolumeStore.hh>

@@ -1,6 +1,6 @@
 
-#include "geant4/PrimaryGeneratorAction.h"
-#include "geant4/Application.h"
+#include "geant4_application/PrimaryGeneratorAction.h"
+#include "geant4_application/Application.h"
 
 #include <G4Event.hh>
 #include <G4ParticleDefinition.hh>

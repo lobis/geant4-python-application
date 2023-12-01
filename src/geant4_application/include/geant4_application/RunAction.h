@@ -4,7 +4,7 @@
 #include <G4RunManager.hh>
 #include <G4UserRunAction.hh>
 
-#include "geant4/DataModel.h"
+#include "geant4_application/DataModel.h"
 
 namespace geant4_app {
 

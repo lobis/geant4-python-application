@@ -1,5 +1,5 @@
 
-#include "geant4/SensitiveDetector.h"
+#include "geant4_application/SensitiveDetector.h"
 
 using namespace std;
 using namespace geant4_app;

@@ -1,7 +1,7 @@
 
-#include "geant4/EventAction.h"
-#include "geant4/DataModel.h"
-#include "geant4/RunAction.h"
+#include "geant4_application/EventAction.h"
+#include "geant4_application/DataModel.h"
+#include "geant4_application/RunAction.h"
 
 #include <iostream>
 

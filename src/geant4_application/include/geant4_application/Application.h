@@ -10,9 +10,9 @@
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 
-#include "geant4/DetectorConstruction.h"
-#include "geant4/PrimaryGeneratorAction.h"
-#include "geant4/StackingAction.h"
+#include "geant4_application/DetectorConstruction.h"
+#include "geant4_application/PrimaryGeneratorAction.h"
+#include "geant4_application/StackingAction.h"
 
 namespace py = pybind11;
 

@@ -1,8 +1,8 @@
 
-#include "geant4/SteppingAction.h"
+#include "geant4_application/SteppingAction.h"
 
-#include "geant4/DataModel.h"
-#include "geant4/RunAction.h"
+#include "geant4_application/DataModel.h"
+#include "geant4_application/RunAction.h"
 #include <G4Step.hh>
 #include <iostream>
 

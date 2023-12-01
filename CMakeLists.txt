@@ -29,7 +29,7 @@ add_subdirectory(external/awkward/header-only)
 add_subdirectory(external/pybind11)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
-     "${PROJECT_SOURCE_DIR}/src/geant4/*.cpp")
+     "${PROJECT_SOURCE_DIR}/src/geant4_application/src/*.cpp")
 
 file(GLOB_RECURSE PYTHON_SOURCES CONFIGURE_DEPENDS
      "${PROJECT_SOURCE_DIR}/src/python/*.cpp")
@@ -42,7 +42,7 @@ target_compile_definitions(
                                   )
 
 target_include_directories(
-    ${PYTHON_MODULE_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
+    ${PYTHON_MODULE_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src/geant4_application/include
                                   ${Geant4_INCLUDE_DIRS})
 
 target_link_libraries(

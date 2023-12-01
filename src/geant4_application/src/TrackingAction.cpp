@@ -1,6 +1,6 @@
 
-#include "geant4/TrackingAction.h"
-#include "geant4/RunAction.h"
+#include "geant4_application/TrackingAction.h"
+#include "geant4_application/RunAction.h"
 
 #include <G4ParticleDefinition.hh>
 #include <G4ParticleTypes.hh>

@@ -1,6 +1,6 @@
 
-#include "geant4/RunAction.h"
-#include "geant4/SteppingVerbose.h"
+#include "geant4_application/RunAction.h"
+#include "geant4_application/SteppingVerbose.h"
 
 #include <iostream>
 

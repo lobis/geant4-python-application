@@ -1,12 +1,12 @@
 
-#include "geant4/ActionInitialization.h"
-#include "geant4/EventAction.h"
-#include "geant4/PrimaryGeneratorAction.h"
-#include "geant4/RunAction.h"
-#include "geant4/StackingAction.h"
-#include "geant4/SteppingAction.h"
-#include "geant4/SteppingVerbose.h"
-#include "geant4/TrackingAction.h"
+#include "geant4_application/ActionInitialization.h"
+#include "geant4_application/EventAction.h"
+#include "geant4_application/PrimaryGeneratorAction.h"
+#include "geant4_application/RunAction.h"
+#include "geant4_application/StackingAction.h"
+#include "geant4_application/SteppingAction.h"
+#include "geant4_application/SteppingVerbose.h"
+#include "geant4_application/TrackingAction.h"
 
 #include <iostream>
 

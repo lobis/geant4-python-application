@@ -1,10 +1,10 @@
 
-#include "geant4/Application.h"
-#include "geant4/ActionInitialization.h"
-#include "geant4/DetectorConstruction.h"
-#include "geant4/PhysicsList.h"
-#include "geant4/RunAction.h"
-#include "geant4/SteppingVerbose.h"
+#include "geant4_application/Application.h"
+#include "geant4_application/ActionInitialization.h"
+#include "geant4_application/DetectorConstruction.h"
+#include "geant4_application/PhysicsList.h"
+#include "geant4_application/RunAction.h"
+#include "geant4_application/SteppingVerbose.h"
 
 // TODO: conditional include
 #include <G4UIExecutive.hh>

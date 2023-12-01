@@ -1,7 +1,7 @@
 
 #include <pybind11/pybind11.h>
 
-#include "geant4/Application.h"
+#include "geant4_application/Application.h"
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
