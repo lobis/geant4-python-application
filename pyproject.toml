@@ -7,7 +7,7 @@ version = "0.0.1"
 name = "geant4_python_application"
 description = "Geant4 Python Application"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 authors = [
     {name = "Luis Antonio Obis Aparicio", email = "luis.antonio.obis@gmail.com"},
