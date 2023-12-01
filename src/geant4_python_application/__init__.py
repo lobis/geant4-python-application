@@ -29,6 +29,8 @@ _geant4_prefix = subprocess.check_output(
 _geant4_libs_dir = os.path.join(_geant4_prefix, "lib")
 
 for lib in _geant4_libs.split()[1:]:
+    if not lib.startswith("-l"):
+        continue
     # lib has format -l<libname>, transform to file name which is lib<libname>
     library_absolute_path = os.path.join(_geant4_libs_dir, "lib" + lib[2:])
     if sys.platform == "darwin":
