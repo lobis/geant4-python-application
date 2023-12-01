@@ -54,6 +54,7 @@ def test_multiple_apps():
             app.initialize()
             app.run()
 
+
 @pytest.mark.skip(reason="Fix segfault")
 def test_seed_single_thread():
     app = geant4_python_application.Application()
