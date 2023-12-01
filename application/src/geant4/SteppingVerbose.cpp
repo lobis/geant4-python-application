@@ -8,15 +8,22 @@
 using namespace std;
 using namespace geant4_app;
 
-SteppingVerbose::SteppingVerbose() : G4SteppingVerbose() {
-    cout << "SteppingVerbose::SteppingVerbose" << endl;
-    fManager->SetVerboseLevel(1);
-}
+SteppingVerbose::SteppingVerbose() : G4SteppingVerbose() {}
 
 void SteppingVerbose::TrackingStarted() {
     CopyState();
-    cout << "SteppingVerbose::TrackingStarted" << endl;
+    if (fStep->GetTrack()->GetCurrentStepNumber() != 0) {
+        throw runtime_error("SteppingVerbose::TrackingStarted: fStep->GetTrack()->GetCurrentStepNumber() != 0");
+    }
     data::InsertStep(fStep, RunAction::GetBuilder());
 }
 
 void SteppingVerbose::StepInfo() {}
+
+void SteppingVerbose::Initialize() {
+    auto manager = fManager;
+    if (manager == nullptr) {
+        throw runtime_error("SteppingVerbose::Initialize: fManager is nullptr");
+    }
+    fManager->SetVerboseLevel(1);
+}

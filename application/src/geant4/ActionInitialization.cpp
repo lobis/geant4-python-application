@@ -20,8 +20,6 @@ void ActionInitialization::BuildForMaster() const {
 }
 
 void ActionInitialization::Build() const {
-    cout << "ActionInitialization::Build" << endl;
-
     SetUserAction(new PrimaryGeneratorAction);
     SetUserAction(new RunAction);
     SetUserAction(new EventAction);
@@ -33,6 +31,6 @@ void ActionInitialization::Build() const {
 }
 
 G4VSteppingVerbose* ActionInitialization::InitializeSteppingVerbose() const {
-    cout << "ActionInitialization::InitializeSteppingVerbose" << endl;
+    throw runtime_error("ActionInitialization::InitializeSteppingVerbose");
     return new SteppingVerbose;
 }

@@ -12,9 +12,11 @@ RunAction::RunAction() : G4UserRunAction() {}
 void RunAction::BeginOfRunAction(const G4Run*) {
     builder.clear();
 
-    // auto steppingVerbose = ((SteppingVerbose*) G4VSteppingVerbose::GetInstance());
-    // SteppingVerbose::SetSilent(1);
-    // steppingVerbose->SetSteppingVerbose(1);
+    auto steppingVerbose = ((SteppingVerbose*) G4VSteppingVerbose::GetInstance());
+    if (steppingVerbose == nullptr) {
+        throw std::runtime_error("SteppingVerbose is nullptr");
+    }
+    steppingVerbose->Initialize();
 
     if (IsMaster()) {
         builderMainPtr = &builder;

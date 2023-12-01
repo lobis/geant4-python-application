@@ -103,6 +103,7 @@ void Application::SetupManager(unsigned short nThreads) {
     if (runManager != nullptr || G4RunManager::GetRunManager() != nullptr) {
         throw runtime_error("RunManager is already set up");
     }
+    G4VSteppingVerbose::SetInstance(new SteppingVerbose);
     const auto runManagerType = nThreads > 0 ? G4RunManagerType::MTOnly : G4RunManagerType::SerialOnly;
     runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));
     if (nThreads > 0) {
@@ -120,7 +121,6 @@ void Application::Initialize() {
     }
 
     SetupRandomEngine();
-    // G4VSteppingVerbose::SetInstance(new SteppingVerbose);
 
     runManager->Initialize();
     isInitialized = true;

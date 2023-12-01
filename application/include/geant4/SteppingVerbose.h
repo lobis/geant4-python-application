@@ -14,6 +14,8 @@ public:
 
     void TrackingStarted() override;
     void StepInfo() override;
+
+    void Initialize();
 };
 
 }// namespace geant4_app

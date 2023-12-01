@@ -102,8 +102,6 @@ void InsertStep(const G4Step* step, Builder& builder) {
         processTypeName = G4VProcess::GetProcessTypeName(process->GetProcessType());
     }
 
-    cout << "STEP NUMBER: " << track->GetCurrentStepNumber() << " PROCESS: " << processName << endl;
-
     builder.content<Field::stepEnergy>().content().content().append(step->GetTotalEnergyDeposit() / units::energy);
     builder.content<Field::stepTime>().content().content().append(stepPost->GetGlobalTime() / units::time);
     // builder.content<Field::stepProcess>().content().content().append(processName);
