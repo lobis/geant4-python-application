@@ -16,10 +16,17 @@ using namespace std;
 using namespace geant4_app;
 namespace fs = std::filesystem;
 
-DetectorConstruction::DetectorConstruction(string gdml, const std::set<std::string>& sensitiveVolumes) : G4VUserDetectorConstruction(), gdml(std::move(gdml)), sensitiveVolumes(sensitiveVolumes) {
+DetectorConstruction::DetectorConstruction(string gdml) : G4VUserDetectorConstruction(), gdml(std::move(gdml)) {
     // Remove leading characters from gdml string, otherwise GDML parser will fail
     this->gdml.erase(0, this->gdml.find_first_not_of(" \n\r\t"));
     // TODO: store this string as compressed data?
+}
+
+void DetectorConstruction::SetSensitiveVolumes(const set<string>& volumes) {
+    if (sensitiveDetectorConstructed) {
+        throw runtime_error("Sensitive volumes cannot be set after sensitive detector construction");
+    }
+    sensitiveVolumes = volumes;
 }
 
 G4VPhysicalVolume* DetectorConstruction::Construct() {
@@ -40,7 +47,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
     // TODO: improve cleanup. Is it necessary to write a temporary file?
     filesystem::remove(gdmlTmpPath);
 
-
     world = parser.GetWorldVolume();
     return world;
 }
@@ -50,7 +56,6 @@ bool DetectorConstruction::CheckOverlaps() const {
 }
 
 void DetectorConstruction::ConstructSDandField() {
-
     for (const auto& volumeName: sensitiveVolumes) {
         auto sensitiveDetector = new SensitiveDetector(volumeName);
 
@@ -63,6 +68,7 @@ void DetectorConstruction::ConstructSDandField() {
         logicalVolume->SetSensitiveDetector(sensitiveDetector);
         // TODO: Regions
     }
+    sensitiveDetectorConstructed = true;
 }
 
 void DetectorConstruction::PrintMaterials() {
@@ -98,3 +104,6 @@ set<string> DetectorConstruction::GetPhysicalVolumeNames() {
     }
     return names;
 }
+
+set<string> DetectorConstruction::sensitiveVolumes;
+bool DetectorConstruction::sensitiveDetectorConstructed = false;

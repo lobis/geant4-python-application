@@ -36,7 +36,7 @@ public:
 
     void SetRandomSeed(long seed);
     void SetupManager(unsigned short nThreads = 0);
-    void SetupDetector(std::string gdml, const std::set<std::string>& sensitiveVolumes = {});
+    void SetupDetector(std::string gdml);
     void SetupPhysics();
     void SetupAction();
 

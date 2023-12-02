@@ -42,7 +42,7 @@ void Application::SetupRandomEngine() {
     CLHEP::HepRandom::setTheSeed(randomSeed);
 }
 
-void Application::SetupDetector(string gdml, const set<string>& sensitiveVolumes) {
+void Application::SetupDetector(string gdml) {
     if (runManager == nullptr) {
         throw runtime_error("RunManager needs to be set up first");
     }
@@ -51,13 +51,7 @@ void Application::SetupDetector(string gdml, const set<string>& sensitiveVolumes
         throw runtime_error("Detector is already set up");
     }
 
-    // sensitive volumes should be a set of strings
-    set<string> sensitiveVolumesSet;
-    for (const auto& volumeName: sensitiveVolumes) {
-        sensitiveVolumesSet.insert(volumeName);
-    }
-
-    runManager->SetUserInitialization(new DetectorConstruction(std::move(gdml), sensitiveVolumesSet));
+    runManager->SetUserInitialization(new DetectorConstruction(std::move(gdml)));
 }
 
 void Application::SetupPhysics() {

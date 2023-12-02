@@ -18,7 +18,7 @@ PYBIND11_MODULE(geant4_application, m) {
     py::class_<Application>(m, "Application")
             .def(py::init<>())
             .def("setup_manager", &Application::SetupManager, py::arg("n_threads") = 0)
-            .def("setup_detector", &Application::SetupDetector, py::arg("gdml"), py::arg("sensitive_volumes") = py::set())
+            .def("setup_detector", &Application::SetupDetector, py::arg("gdml"))
             .def("setup_physics", &Application::SetupPhysics)
             .def("setup_action", &Application::SetupAction)
             .def("initialize", &Application::Initialize)
@@ -43,15 +43,19 @@ PYBIND11_MODULE(geant4_application, m) {
             .def("check_overlaps", &DetectorConstruction::CheckOverlaps)
             .def_static("print_materials", &DetectorConstruction::PrintMaterials)
             // why are properties not working (due to sets?)
-            .def_property("materials", &DetectorConstruction::GetMaterialNames, nullptr)
+            .def_property_readonly_static("materials", &DetectorConstruction::GetMaterialNames)
             .def_static("get_materials", &DetectorConstruction::GetMaterialNames)
-            .def_property("logical_volumes", &DetectorConstruction::GetLogicalVolumeNames, nullptr)
+            .def_property_readonly_static("logical_volumes", &DetectorConstruction::GetLogicalVolumeNames)
             .def_static("get_logical_volumes", &DetectorConstruction::GetLogicalVolumeNames)
-            .def_property("physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames, nullptr)
-            .def_static("get_physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames);
+            .def_property_readonly_static("physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames)
+            .def_static("get_physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames)
+            .def_property_static("sensitive_volumes", &DetectorConstruction::GetSensitiveVolumes, &DetectorConstruction::SetSensitiveVolumes)
+            .def_static("get_sensitive_volumes", &DetectorConstruction::GetSensitiveVolumes)
+            .def_static("set_sensitive_volumes", &DetectorConstruction::SetSensitiveVolumes, py::arg("name"));
+
 
     py::class_<StackingAction>(m, "StackingAction")
-            .def_property("ignored_particles", &StackingAction::GetIgnoredParticles, &StackingAction::SetIgnoredParticles)
+            .def_property_static("ignored_particles", &StackingAction::GetIgnoredParticles, &StackingAction::SetIgnoredParticles)
             .def_static("get_ignored_particles", &StackingAction::GetIgnoredParticles)
             .def_static("ignore_particle", &StackingAction::IgnoreParticle, py::arg("name"))
             .def_static("ignore_particle_undo", &StackingAction::IgnoreParticleUndo, py::arg("name"));
