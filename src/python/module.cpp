@@ -9,7 +9,7 @@
 namespace py = pybind11;
 using namespace geant4_app;
 
-PYBIND11_MODULE(_core, m) {
+PYBIND11_MODULE(geant4_application, m) {
     m.doc() = R"pbdoc(
         Geant4 Python Application
         -------------------------

@@ -75,7 +75,8 @@ def install_datasets(always: bool = False) -> None:
 
 load_libs()
 
-from geant4_python_application._core import (
+from geant4_python_application.gdml import basic_gdml
+from geant4_python_application.geant4_application import (
     Application,
     PrimaryGeneratorAction,
     StackingAction,
@@ -85,7 +86,6 @@ from geant4_python_application._core import (
     __pybind11_version__,
     __version__,
 )
-from geant4_python_application.gdml import basic_gdml
 
 if _geant4_version != __geant4_version__:
     warnings.warn(

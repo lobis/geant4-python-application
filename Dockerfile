@@ -20,6 +20,7 @@ RUN git clone https://github.com/Geant4/geant4.git /tmp/geant4 --branch=${GEANT4
     && cmake --build /tmp/geant4/build -j$(nproc) --target install \
     && rm -rf /tmp/geant4
 
+ENV LD_LIBRARY_PATH=/opt/conda/lib/:/usr/local/lib:$LD_LIBRARY_PATH
 # RUN geant4-config --install-datasets
 
 COPY . /source
