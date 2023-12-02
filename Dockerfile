@@ -34,3 +34,5 @@ COPY . /source
 
 # Build and install
 RUN pip install /source && rm -rf /source
+
+ENTRYPOINT ["python"]

@@ -54,7 +54,7 @@ jobs:
 
       - name: Test image
         run: |
-          docker run --rm ${{ env.IMAGE_NAME }} -c 'from geant4_python_application import Application; geant4_python_application.check_datasets()'
+          docker run --rm ${{ env.IMAGE_NAME }} -c 'import geant4_python_application; geant4_python_application.check_datasets()'
 
       - name: Publish
         run: docker push ${{ env.IMAGE_NAME }}
