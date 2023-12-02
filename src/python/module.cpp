@@ -8,6 +8,7 @@
 
 namespace py = pybind11;
 using namespace geant4_app;
+using namespace std;
 
 PYBIND11_MODULE(geant4_application, m) {
     m.doc() = R"pbdoc(
@@ -29,9 +30,9 @@ PYBIND11_MODULE(geant4_application, m) {
             .def_static("command", &Application::Command, py::arg("command"))
             .def_static("list_commands", &Application::ListCommands, py::arg("directory") = "/")
             .def_static("start_gui", &Application::StartGUI)
-            .def_property("generator", &Application::GetPrimaryGeneratorAction, nullptr, py::return_value_policy::reference_internal)
-            .def_property("detector", &Application::GetDetectorConstruction, nullptr, py::return_value_policy::reference_internal)
-            .def_property("stacking", &Application::GetStackingAction, nullptr, py::return_value_policy::reference_internal);
+            .def_property_readonly("generator", &Application::GetPrimaryGeneratorAction, py::return_value_policy::reference_internal)
+            .def_property_readonly("detector", &Application::GetDetectorConstruction, py::return_value_policy::reference_internal)
+            .def_property_readonly("stacking", &Application::GetStackingAction, py::return_value_policy::reference_internal);
 
     py::class_<PrimaryGeneratorAction>(m, "PrimaryGeneratorAction")
             .def_static("set_energy", &PrimaryGeneratorAction::SetEnergy, py::arg("energy"))
@@ -43,22 +44,20 @@ PYBIND11_MODULE(geant4_application, m) {
             .def("check_overlaps", &DetectorConstruction::CheckOverlaps)
             .def_static("print_materials", &DetectorConstruction::PrintMaterials)
             // why are properties not working (due to sets?)
-            .def_property_readonly_static("materials", &DetectorConstruction::GetMaterialNames)
-            .def_static("get_materials", &DetectorConstruction::GetMaterialNames)
-            .def_property_readonly_static("logical_volumes", &DetectorConstruction::GetLogicalVolumeNames)
-            .def_static("get_logical_volumes", &DetectorConstruction::GetLogicalVolumeNames)
-            .def_property_readonly_static("physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames)
-            .def_static("get_physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames)
-            .def_property_static("sensitive_volumes", &DetectorConstruction::GetSensitiveVolumes, &DetectorConstruction::SetSensitiveVolumes)
-            .def_static("get_sensitive_volumes", &DetectorConstruction::GetSensitiveVolumes)
-            .def_static("set_sensitive_volumes", &DetectorConstruction::SetSensitiveVolumes, py::arg("name"));
+            .def_property_readonly_static("materials", [](const py::object&) { return DetectorConstruction::GetMaterialNames(); })
+            .def_property_readonly_static("logical_volumes", [](const py::object&) { return DetectorConstruction::GetLogicalVolumeNames(); })
+            .def_property_readonly_static("physical_volumes", [](const py::object&) { return DetectorConstruction::GetPhysicalVolumeNames(); })
+            .def_property_static(
+                    "sensitive_volumes",
+                    [](const py::object&) { return DetectorConstruction::GetSensitiveVolumes(); },
+                    [](const py::object&, const set<string>& sensitiveVolumes) { return DetectorConstruction::SetSensitiveVolumes(sensitiveVolumes); });
 
 
     py::class_<StackingAction>(m, "StackingAction")
-            .def_property_static("ignored_particles", &StackingAction::GetIgnoredParticles, &StackingAction::SetIgnoredParticles)
-            .def_static("get_ignored_particles", &StackingAction::GetIgnoredParticles)
-            .def_static("ignore_particle", &StackingAction::IgnoreParticle, py::arg("name"))
-            .def_static("ignore_particle_undo", &StackingAction::IgnoreParticleUndo, py::arg("name"));
+            .def_property_static(
+                    "particles_to_ignore",
+                    [](const py::object&) { return StackingAction::GetParticlesToIgnore(); },
+                    [](const py::object&, const set<string>& particles) { return StackingAction::SetParticlesToIgnore(particles); });
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
