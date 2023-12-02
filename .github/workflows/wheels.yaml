@@ -39,6 +39,7 @@ jobs:
             { os: ubuntu-latest, arch: x86_64 },
           ]
         python-version: [3.11]
+    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v4
@@ -69,6 +70,11 @@ jobs:
           mamba env list
           mamba install -c conda-forge zlib
           mamba list
+
+      - name: Install package (DEBUG)
+        run: |
+          export CMAKE_PREFIX_PATH=${CONDA_PREFIX}
+          python -m pip install .
 
       - name: Build the wheel
         run: |
