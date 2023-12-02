@@ -1,4 +1,4 @@
-name: Packaging
+name: Wheels
 
 on:
   workflow_dispatch:
