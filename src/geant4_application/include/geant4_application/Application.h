@@ -35,12 +35,12 @@ public:
     Application& operator=(const Application&) = delete;
 
     void SetRandomSeed(long seed);
-    void SetupManager(unsigned short nThreads = 0);
-    void SetupDetector(std::string gdml);
-    void SetupPhysics();
-    void SetupAction();
+    Application& SetupManager(unsigned short nThreads = 0);
+    Application& SetupDetector(std::string gdml);
+    Application& SetupPhysics();
+    Application& SetupAction();
 
-    void Initialize();
+    Application& Initialize();
     py::object Run(int nEvents);
 
     bool IsSetup() const;

@@ -18,11 +18,11 @@ def test_imports():
 
 def test_setup_and_run():
     app = Application()
-    app.setup_manager()
-    app.setup_detector(gdml=basic_gdml)
-    app.setup_physics()
-    app.setup_action()
-    app.initialize()
+
+    app.setup_manager().setup_detector(
+        gdml=basic_gdml
+    ).setup_physics().setup_action().initialize()
+
     events = app.run(100)
     assert len(events) == 100
 
@@ -49,7 +49,7 @@ def test_multiple_apps():
         for _ in range(10):
             app = Application()
             app.setup_manager()
-            app.setup_detector()
+            app.setup_detector(gdml=basic_gdml)
             app.setup_physics()
             app.setup_action()
             app.initialize()
@@ -63,7 +63,7 @@ def test_seed_single_thread():
     app.setup_manager()
     app.random_seed = 137
     app.setup_physics()
-    app.setup_detector()
+    app.setup_detector(gdml=basic_gdml)
     app.setup_action()
 
     app.initialize()
@@ -107,7 +107,7 @@ def test_event_data_is_cleared():
 
     app.setup_manager()
     app.setup_physics()
-    app.setup_detector()
+    app.setup_detector(gdml=basic_gdml)
     app.setup_action()
 
     app.initialize()
@@ -134,7 +134,7 @@ def test_complex_gdml():
 
     # primary generator action can be modified after initialization
     app.generator.set_particle("neutron")
-    app.generator.set_energy(1e6)
+    app.generator.set_energy(100)
     app.generator.set_position((0, 0, 1e3))
     app.generator.set_direction((0, 0, -1))
 

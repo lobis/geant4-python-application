@@ -18,7 +18,11 @@ PrimaryGeneratorAction::PrimaryGeneratorAction() : G4VUserPrimaryGeneratorAction
     particleGun.SetParticleMomentumDirection(G4ThreeVector(0.0, 0.0, -1.0));
 }
 
-void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) { particleGun.GeneratePrimaryVertex(event); }
+void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
+    particleGun.GeneratePrimaryVertex(event);
+    // const auto& primary = event->GetPrimaryVertex(0)->GetPrimary(0);
+    // cout << "PrimaryGeneratorAction::GeneratePrimaries - particle: " << primary->GetParticleDefinition()->GetParticleName() << " energy: " << primary->GetKineticEnergy() / MeV << " MeV" << endl;
+}
 
 void PrimaryGeneratorAction::SetEnergy(double energy) {
     auto ui = Application::GetUIManager();

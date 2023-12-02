@@ -42,7 +42,7 @@ void Application::SetupRandomEngine() {
     CLHEP::HepRandom::setTheSeed(randomSeed);
 }
 
-void Application::SetupDetector(string gdml) {
+Application& Application::SetupDetector(string gdml) {
     if (runManager == nullptr) {
         throw runtime_error("RunManager needs to be set up first");
     }
@@ -52,9 +52,10 @@ void Application::SetupDetector(string gdml) {
     }
 
     runManager->SetUserInitialization(new DetectorConstruction(std::move(gdml)));
+    return *this;
 }
 
-void Application::SetupPhysics() {
+Application& Application::SetupPhysics() {
     if (runManager == nullptr) {
         throw runtime_error("RunManager needs to be set up first");
     }
@@ -64,9 +65,10 @@ void Application::SetupPhysics() {
     }
 
     runManager->SetUserInitialization(new PhysicsList());
+    return *this;
 }
 
-void Application::SetupAction() {
+Application& Application::SetupAction() {
     if (runManager == nullptr) {
         throw runtime_error("RunManager needs to be set up first");
     }
@@ -85,9 +87,10 @@ void Application::SetupAction() {
     }
 
     runManager->SetUserInitialization(new ActionInitialization());
+    return *this;
 }
 
-void Application::SetupManager(unsigned short nThreads) {
+Application& Application::SetupManager(unsigned short nThreads) {
     if (runManager != nullptr || G4RunManager::GetRunManager() != nullptr) {
         throw runtime_error("RunManager is already set up");
     }
@@ -97,9 +100,10 @@ void Application::SetupManager(unsigned short nThreads) {
     if (nThreads > 0) {
         runManager->SetNumberOfThreads((G4int) nThreads);
     }
+    return *this;
 }
 
-void Application::Initialize() {
+Application& Application::Initialize() {
     if (!IsSetup()) {
         throw runtime_error("Application needs to be set up first");
     }
@@ -112,6 +116,7 @@ void Application::Initialize() {
 
     runManager->Initialize();
     isInitialized = true;
+    return *this;
 }
 
 py::object Application::Run(int nEvents) {
