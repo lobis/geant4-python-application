@@ -24,7 +24,7 @@ env:
 
 jobs:
   docker-image:
-    timeout-minutes: 30
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     permissions:
       contents: read
