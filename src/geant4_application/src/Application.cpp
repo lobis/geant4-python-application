@@ -161,7 +161,9 @@ void Application::ListCommands(const string& directory) {
 }
 
 const PrimaryGeneratorAction& Application::GetPrimaryGeneratorAction() const {
-    // mostly to give Python easy access to the static methods
+    if (runManager == nullptr) {
+        throw runtime_error("RunManager needs to be set up first");
+    }
     const auto primaryGeneratorAction = dynamic_cast<const PrimaryGeneratorAction*>(runManager->GetUserPrimaryGeneratorAction());
     if (primaryGeneratorAction == nullptr) {
         throw runtime_error("Primary generator action is not available");
@@ -170,7 +172,9 @@ const PrimaryGeneratorAction& Application::GetPrimaryGeneratorAction() const {
 }
 
 const StackingAction& Application::GetStackingAction() const {
-    // mostly to give Python easy access to the static methods
+    if (runManager == nullptr) {
+        throw runtime_error("RunManager needs to be set up first");
+    }
     const auto stackingAction = dynamic_cast<const StackingAction*>(runManager->GetUserStackingAction());
     if (stackingAction == nullptr) {
         throw runtime_error("Stacking action is not available");
@@ -179,7 +183,9 @@ const StackingAction& Application::GetStackingAction() const {
 }
 
 const DetectorConstruction& Application::GetDetectorConstruction() const {
-    // mostly to give Python easy access to the static methods
+    if (runManager == nullptr) {
+        throw runtime_error("RunManager needs to be set up first");
+    }
     const auto detectorConstruction = dynamic_cast<const DetectorConstruction*>(runManager->GetUserDetectorConstruction());
     if (detectorConstruction == nullptr) {
         throw runtime_error("Detector construction is not available");
