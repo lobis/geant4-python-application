@@ -1,0 +1,80 @@
+name: Packaging
+
+on:
+  workflow_dispatch:
+  release:
+    types:
+      - published
+
+jobs:
+  sdist:
+    name: Source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Build sdist
+        run: python -m build --sdist
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  wheel:
+    name: ${{ matrix.config.os }} ${{ matrix.config.arch }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          [
+            { os: macos-latest, arch: arm64 },
+            { os: ubuntu-latest, arch: x86_64 },
+          ]
+        python-version: [3.11]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: 3.11
+          miniforge-variant: Mambaforge
+          use-mamba: true
+
+      - name: Install Geant4 via conda
+        run: |
+          mamba env list
+          mamba install -c conda-forge geant4=${{ matrix.geant4-version }}
+          mamba list
+
+      - name: Install additional dependencies (ubuntu)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mesa-common-dev libglu1-mesa-dev python3-dev
+
+      - name: Install additional dependencies (macos)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          mamba env list
+          mamba install -c conda-forge zlib
+          mamba list
+
+      - name: Build the wheel
+        run: |
+          export CMAKE_PREFIX_PATH=${CONDA_PREFIX}
+          mamba install build
+          python -m build --wheel .
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: wheel
+          path: dist/*.whl

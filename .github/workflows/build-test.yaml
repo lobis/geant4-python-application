@@ -56,7 +56,6 @@ jobs:
 
       - name: Install additional dependencies (ubuntu)
         if: matrix.platform == 'ubuntu-latest'
-        # TODO: fix the cmake so it doesn't try to find graphical libraries
         run: |
           sudo apt-get update
           sudo apt-get install -y mesa-common-dev libglu1-mesa-dev python3-dev
