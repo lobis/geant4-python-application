@@ -85,6 +85,7 @@ endif ()
 set_target_properties(
     ${PYTHON_MODULE_NAME}
     PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${PROJECT_NAME}
+               COMPILE_FLAGS "-fPIC"
                CXX_VISIBILITY_PRESET "hidden"
                CUDA_VISIBILITY_PRESET "hidden")
 
