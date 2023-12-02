@@ -57,6 +57,14 @@ jobs:
           make install -j$(nproc)
           rm -rf ${{ github.workspace }}/geant4-source
 
+      - name: Check before cache
+        run: |
+          ls -l ${{ github.workspace }}/geant4-install
+          source ${{ github.workspace }}/geant4-install/bin/geant4.sh
+          geant4-config --version
+          geant4-config --prefix
+          geant4-config --datasets
+
       - name: Cache Geant4 Installation
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/cache@v2
@@ -65,3 +73,11 @@ jobs:
           key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
           restore-keys: |
             geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+
+      - name: Check after cache
+        run: |
+          ls -l ${{ github.workspace }}/geant4-install
+          source ${{ github.workspace }}/geant4-install/bin/geant4.sh
+          geant4-config --version
+          geant4-config --prefix
+          geant4-config --datasets
