@@ -53,8 +53,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: >
           git clone https://github.com/Geant4/geant4.git geant4 --depth 1
-            --branch v${{ matrix.geant4-version }}
-          cmake -G Ninja -B geant4/build
+          --branch v${{ matrix.geant4-version }} cmake -G Ninja -B geant4/build
             -S geant4 -DCMAKE_INSTALL_PREFIX=geant4-install
             -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release
             -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF
