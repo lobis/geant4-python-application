@@ -49,23 +49,12 @@ jobs:
 
       - name: Build and Install Geant4
         if: steps.cache.outputs.cache-hit != 'true'
-        run: >
-          git clone https://github.com/Geant4/geant4.git ${{ github.workspace
-          }}/geant4-source --depth 1 --branch v${{ matrix.geant4-version }}
-
-          mkdir -p ${{ github.workspace }}/geant4-source/build mkdir -p ${{
-          github.workspace }}/geant4-install
-
+        run: |
+          git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ matrix.geant4-version }}
+          mkdir -p ${{ github.workspace }}/geant4-source/build mkdir -p ${{ github.workspace }}/geant4-install
           cd ${{ github.workspace }}/geant4-source/build
-
-          cmake ..
-            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/geant4-install
-            -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release
-            -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF
-            -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic
-
+          cmake .. -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/geant4-install -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic
           make install -j$(nproc)
-
           rm -rf ${{ github.workspace }}/geant4-source
 
       - name: Cache Geant4 Installation
