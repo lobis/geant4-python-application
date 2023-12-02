@@ -16,8 +16,13 @@ COPY ./examples ${HOME}/examples
 USER root
 RUN chown -R ${NB_UID} ${HOME}
 
+# User needs to write to data directory (Install Geant4 datasets)
+RUN data_dir=/opt/geant4/share/Geant4/data && mkdir -p $data_dir && chmod -R 777 $data_dir
+
 USER ${NB_USER}
 
 RUN pip install notebook jupyterlab
+
+WORKDIR ${HOME}/examples
 
 ENTRYPOINT []
