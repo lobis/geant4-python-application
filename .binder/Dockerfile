@@ -11,13 +11,13 @@ RUN adduser --disabled-password \
     --uid ${NB_UID} \
     ${NB_USER}
 
-RUN pip install notebook jupyterlab
-
 COPY ./examples ${HOME}/examples
 
 USER root
 RUN chown -R ${NB_UID} ${HOME}
 
 USER ${NB_USER}
+
+RUN pip install notebook jupyterlab
 
 ENTRYPOINT []
