@@ -11,17 +11,13 @@ RUN adduser --disabled-password \
     --uid ${NB_UID} \
     ${NB_USER}
 
-RUN mamba install -y \
-    notebook jupyterlab \
-    && mamba clean -ya
+RUN pip install notebook jupyterlab
 
 COPY ./examples ${HOME}/examples
+
 USER root
 RUN chown -R ${NB_UID} ${HOME}
 
 USER ${NB_USER}
-
-RUN /opt/conda/bin/conda init bash \
-    && /opt/conda/bin/conda config --set auto_activate_base true
 
 ENTRYPOINT []
