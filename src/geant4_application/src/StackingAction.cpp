@@ -21,6 +21,12 @@ G4ClassificationOfNewTrack StackingAction::ClassifyNewTrack(const G4Track* track
 void StackingAction::NewStage() {}
 
 void StackingAction::SetParticlesToIgnore(const std::set<string>& particles) {
+    const auto table = G4ParticleTable::GetParticleTable();
+    for (const auto& particle: particles) {
+        if (table->FindParticle(particle) == nullptr) {
+            throw invalid_argument("Particle '" + particle + "' not found in particle table.");
+        }
+    }
     particlesToIgnore = particles;
 }
 
