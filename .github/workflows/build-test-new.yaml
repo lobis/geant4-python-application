@@ -51,11 +51,12 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: >
           git clone https://github.com/Geant4/geant4.git ${{ github.workspace
-          }}/geant4 --depth 1 --branch v${{ matrix.geant4-version }}
+          }}/geant4-source --depth 1 --branch v${{ matrix.geant4-version }}
 
-          mkdir -p ${{ github.workspace }}/geant4/build
+          mkdir -p ${{ github.workspace }}/geant4-source/build mkdir -p ${{
+          github.workspace }}/geant4-install
 
-          cd ${{ github.workspace }}/geant4/build
+          cd ${{ github.workspace }}/geant4-source/build
 
           cmake ..
             -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/geant4-install
@@ -65,7 +66,7 @@ jobs:
 
           make install -j$(nproc)
 
-          rm -rf geant4
+          rm -rf ${{ github.workspace }}/geant4-source
 
       - name: Cache Geant4 Installation
         if: steps.cache.outputs.cache-hit != 'true'
