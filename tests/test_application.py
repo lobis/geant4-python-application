@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+import requests
 
 import geant4_python_application
 from geant4_python_application import Application, basic_gdml
@@ -16,7 +17,7 @@ def test_imports():
 
 
 def test_setup_and_run():
-    app = geant4_python_application.Application()
+    app = Application()
     app.setup_manager()
     app.setup_detector(gdml=basic_gdml)
     app.setup_physics()
@@ -27,14 +28,14 @@ def test_setup_and_run():
 
 
 def test_missing_setup():
-    app = geant4_python_application.Application()
+    app = Application()
 
     with pytest.raises(RuntimeError):
         app.initialize()
 
 
 def test_missing_manager():
-    app = geant4_python_application.Application()
+    app = Application()
 
     with pytest.raises(RuntimeError):
         app.setup_detector(gdml="")
@@ -46,7 +47,7 @@ def test_multiple_apps():
     # Could this work somehow?
     with pytest.raises(RuntimeError):
         for _ in range(10):
-            app = geant4_python_application.Application()
+            app = Application()
             app.setup_manager()
             app.setup_detector()
             app.setup_physics()
@@ -57,7 +58,7 @@ def test_multiple_apps():
 
 @pytest.mark.skip(reason="Fix segfault")
 def test_seed_single_thread():
-    app = geant4_python_application.Application()
+    app = Application()
 
     app.setup_manager()
     app.random_seed = 137
@@ -102,7 +103,7 @@ def test_seed_single_thread():
 
 @pytest.mark.skip(reason="Fix segfault")
 def test_event_data_is_cleared():
-    app = geant4_python_application.Application()
+    app = Application()
 
     app.setup_manager()
     app.setup_physics()
@@ -114,3 +115,31 @@ def test_event_data_is_cleared():
     for _ in range(10):
         events = app.run(100)
         assert len(events) == 100
+
+
+@pytest.mark.skip(reason="Fix segfault")
+def test_complex_gdml():
+    url = "https://raw.githubusercontent.com/rest-for-physics/restG4/dc3a8f42cea4978206a13325261fa85ec1b26261/examples/13.IAXO/geometry/setup.gdml"
+
+    app = Application()
+
+    app.setup_manager()
+    app.setup_physics()
+    app.setup_detector(gdml=requests.get(url).text)
+    app.setup_action()
+
+    app.detector.sensitive_volumes = {"gasVolume"}
+
+    app.initialize()
+
+    # primary generator action can be modified after initialization
+    app.generator.set_particle("neutron")
+    app.generator.set_energy(1e6)
+    app.generator.set_position((0, 0, 1e3))
+    app.generator.set_direction((0, 0, -1))
+
+    assert len(app.detector.logical_volumes) == 22
+    assert len(app.detector.physical_volumes) == 309
+
+    events = app.run(1)
+    print(events)

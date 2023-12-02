@@ -47,10 +47,8 @@ PYBIND11_MODULE(geant4_application, m) {
             .def_property_readonly_static("materials", [](const py::object&) { return DetectorConstruction::GetMaterialNames(); })
             .def_property_readonly_static("logical_volumes", [](const py::object&) { return DetectorConstruction::GetLogicalVolumeNames(); })
             .def_property_readonly_static("physical_volumes", [](const py::object&) { return DetectorConstruction::GetPhysicalVolumeNames(); })
-            .def_property_static(
-                    "sensitive_volumes",
-                    [](const py::object&) { return DetectorConstruction::GetSensitiveVolumes(); },
-                    [](const py::object&, const set<string>& sensitiveVolumes) { return DetectorConstruction::SetSensitiveVolumes(sensitiveVolumes); });
+            .def_property("sensitive_volumes", &DetectorConstruction::GetSensitiveVolumes, &DetectorConstruction::SetSensitiveVolumes)
+            .def_property("gdml", &DetectorConstruction::GetGDML, &DetectorConstruction::SetGDML);
 
 
     py::class_<StackingAction>(m, "StackingAction")

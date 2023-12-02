@@ -15,27 +15,32 @@ namespace geant4_app {
 class DetectorConstruction : public G4VUserDetectorConstruction {
 
 public:
-    DetectorConstruction(std::string gdml);
+    DetectorConstruction(const std::string& gdml);
     G4VPhysicalVolume* Construct() override;
     G4VPhysicalVolume* GetWorld() const { return world; }
 
     bool CheckOverlaps() const;
     void ConstructSDandField() override;
 
-    static void SetSensitiveVolumes(const std::set<std::string>& sensitiveVolumes);
-    static std::set<std::string> GetSensitiveVolumes() { return sensitiveVolumes; }
+    void SetSensitiveVolumes(const std::set<std::string>& sensitiveVolumes);
+    std::set<std::string> GetSensitiveVolumes() const { return sensitiveVolumes; }
+
+    std::string GetGDML() const { return gdml; }
+    void SetGDML(const std::string& gdml);
 
     static void PrintMaterials();
     static std::set<std::string> GetMaterialNames();
     static std::set<std::string> GetLogicalVolumeNames();
     static std::set<std::string> GetPhysicalVolumeNames();
 
+    bool IsConstructed() const { return world != nullptr; }
+
 private:
     std::string gdml;
     G4VPhysicalVolume* world = nullptr;
 
-    static std::set<std::string> sensitiveVolumes;
-    static bool sensitiveDetectorConstructed;
+    std::set<std::string> sensitiveVolumes;
+    bool sensitiveDetectorConstructed = false;
 };
 
 }// namespace geant4_app

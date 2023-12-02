@@ -1,9 +1,7 @@
-#include <utility>
 
 #include "geant4_application/DetectorConstruction.h"
 #include "geant4_application/SensitiveDetector.h"
 
-#include <G4LogicalVolume.hh>
 #include <G4LogicalVolumeStore.hh>
 #include <G4NistManager.hh>
 #include <G4PhysicalVolumeStore.hh>
@@ -16,10 +14,18 @@ using namespace std;
 using namespace geant4_app;
 namespace fs = std::filesystem;
 
-DetectorConstruction::DetectorConstruction(string gdml) : G4VUserDetectorConstruction(), gdml(std::move(gdml)) {
-    // Remove leading characters from gdml string, otherwise GDML parser will fail
-    this->gdml.erase(0, this->gdml.find_first_not_of(" \n\r\t"));
+DetectorConstruction::DetectorConstruction(const string& gdml) : G4VUserDetectorConstruction() {
+    SetGDML(gdml);
     // TODO: store this string as compressed data?
+}
+
+void DetectorConstruction::SetGDML(const string& gdmlContents) {
+    // Remove leading characters from gdml string, otherwise GDML parser will fail
+    if (IsConstructed()) {
+        throw runtime_error("Detector is already constructed");
+    }
+    gdml = gdmlContents;
+    gdml.erase(0, this->gdml.find_first_not_of(" \n\r\t"));
 }
 
 void DetectorConstruction::SetSensitiveVolumes(const set<string>& volumes) {
@@ -42,16 +48,22 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
     gdmlTmpFile.close();
 
     parser.Read(gdmlTmpPath.string(), false);
-    gdml.clear();
+    // we are storing a copy of the gdml string!
 
     // TODO: improve cleanup. Is it necessary to write a temporary file?
     filesystem::remove(gdmlTmpPath);
 
     world = parser.GetWorldVolume();
+    if (world == nullptr) {
+        throw runtime_error("Error constructing world volume from GDML");
+    }
     return world;
 }
 
 bool DetectorConstruction::CheckOverlaps() const {
+    if (!IsConstructed()) {
+        throw runtime_error("Detector is not constructed");
+    }
     return world->CheckOverlaps();
 }
 
@@ -62,7 +74,7 @@ void DetectorConstruction::ConstructSDandField() {
         // TODO: Support physical volumes too
         auto logicalVolume = G4LogicalVolumeStore::GetInstance()->GetVolume(volumeName, false);
         if (logicalVolume == nullptr) {
-            throw runtime_error("Could not find logical volume " + volumeName);
+            throw runtime_error("Could not find logical volume '" + volumeName + "'");
         }
 
         logicalVolume->SetSensitiveDetector(sensitiveDetector);
@@ -104,6 +116,3 @@ set<string> DetectorConstruction::GetPhysicalVolumeNames() {
     }
     return names;
 }
-
-set<string> DetectorConstruction::sensitiveVolumes;
-bool DetectorConstruction::sensitiveDetectorConstructed = false;
