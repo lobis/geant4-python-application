@@ -31,8 +31,6 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Install additional dependencies (ubuntu)
         if: matrix.platform == 'ubuntu-latest'
         run: |
