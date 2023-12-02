@@ -28,36 +28,38 @@ _geant4_prefix = subprocess.check_output(
 
 _geant4_libs_dir = os.path.join(_geant4_prefix, "lib")
 
-for lib in _geant4_libs.split():
-    if not lib.startswith("-l"):
-        continue
-    # lib has format -l<libname>, transform to file name which is lib<libname>
-    library_absolute_path = os.path.join(_geant4_libs_dir, "lib" + lib[2:])
-    if sys.platform == "darwin":
-        library_absolute_path += ".dylib"
-    elif sys.platform == "linux":
-        library_absolute_path += ".so"
-    else:
-        raise RuntimeError("Unsupported platform: ", sys.platform)
 
-    if not os.path.exists(library_absolute_path):
-        raise ImportError(
-            f"Could not find library {lib} ({library_absolute_path}) in {_geant4_libs_dir}."
-        )
+def load_libs():
+    for lib in _geant4_libs.split():
+        if not lib.startswith("-l"):
+            continue
+        # lib has format -l<libname>, transform to file name which is lib<libname>
+        library_absolute_path = os.path.join(_geant4_libs_dir, "lib" + lib[2:])
+        if sys.platform == "darwin":
+            library_absolute_path += ".dylib"
+        elif sys.platform == "linux":
+            library_absolute_path += ".so"
+        else:
+            raise RuntimeError("Unsupported platform: ", sys.platform)
 
-    try:
-        ctypes.cdll.LoadLibrary(library_absolute_path)
-    except Exception as e:
-        print("Could not load library: ", library_absolute_path)
-        print("Exception: ", e)
-        raise e
+        if not os.path.exists(library_absolute_path):
+            raise ImportError(
+                f"Could not find library {lib} ({library_absolute_path}) in {_geant4_libs_dir}."
+            )
+
+        try:
+            ctypes.cdll.LoadLibrary(library_absolute_path)
+        except Exception as e:
+            warnings.warn(
+                f"Could not load library: {library_absolute_path}. Error: {e}"
+            )
 
 
 def datasets() -> list[(str, str, str)]:
-    datasets = subprocess.check_output(
+    _datasets = subprocess.check_output(
         [geant4_config, "--datasets"], encoding="utf-8"
     ).strip()
-    return [tuple(line.split()) for line in datasets.split("\n") if line.strip() != ""]
+    return [tuple(line.split()) for line in _datasets.split("\n") if line.strip() != ""]
 
 
 def check_datasets() -> bool:
@@ -70,6 +72,8 @@ def install_datasets(always: bool = False) -> None:
         return
     subprocess.run([geant4_config, "--install-datasets"], check=True)
 
+
+load_libs()
 
 from geant4_python_application._core import (
     Application,

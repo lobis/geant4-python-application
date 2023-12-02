@@ -2,7 +2,7 @@ FROM continuumio/miniconda3:latest
 
 # Install dependencies and upgrade
 RUN apt-get update -qq && apt-get install -q -y --no-install-recommends \
-    build-essential libxerces-c-dev \
+    build-essential curl vim libxerces-c-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -19,7 +19,7 @@ RUN git clone https://github.com/Geant4/geant4.git /tmp/geant4 --branch=${GEANT4
     && cmake --build /tmp/geant4/build -j$(nproc) --target install \
     && rm -rf /tmp/geant4
 
-# RUN geant4-config --instal-datasets
+# RUN geant4-config --install-datasets
 
 COPY . /source
 
