@@ -1,6 +1,8 @@
 name: Build and Test
 
 on:
+  schedule:
+    - cron: 0 */24 * * *
   workflow_dispatch:
     inputs:
       debug_enabled:
@@ -19,7 +21,89 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build-geant4:
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest]
+        geant4-version:
+          - 11.1.3
+
+    steps:
+      - name: Install additional dependencies (ubuntu)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential git curl libexpat-dev libxerces-c-dev
+          pip install cmake
+
+      - name: Check Cache
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/geant4-install
+          key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+          restore-keys: |
+            geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+
+      - name: Build and Install Geant4 (without data)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ matrix.geant4-version }}
+          mkdir -p ${{ github.workspace }}/geant4-source/build mkdir -p ${{ github.workspace }}/geant4-install
+          cd ${{ github.workspace }}/geant4-source/build
+          cmake .. -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/geant4-install -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic
+          make install -j$(nproc)
+          rm -rf ${{ github.workspace }}/geant4-source
+          source ${{ github.workspace }}/geant4-install/bin/geant4.sh
+          geant4-config --version
+
+      - name: Cache Geant4 Installation
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/geant4-install
+          key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+          restore-keys: |
+            geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+
+      - name: Check after cache
+        run: |
+          ls -l ${{ github.workspace }}/geant4-install
+          source ${{ github.workspace }}/geant4-install/bin/geant4.sh
+          geant4-config --version
+          geant4-config --prefix
+          geant4-config --datasets
+
+      - name: Check Cache
+        id: cache-geant4-data
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/geant4-install/share/Geant4/data
+          key: geant4-${{ matrix.geant4-version }}-data
+          restore-keys: |
+            geant4-${{ matrix.geant4-version }}-data
+
+      - name: Install Geant4 data
+        if: steps.cache-geant4-data.outputs.cache-hit != 'true'
+        run: |
+          source ${{ github.workspace }}/geant4-install/bin/geant4.sh
+          geant4-config --install-datasets
+          geant4-config --check-datasets
+
+      - name: Cache Geant4 data
+        if: steps.cache-geant4-data.outputs.cache-hit != 'true'
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/geant4-install/share/Geant4/data
+          key: geant4-${{ matrix.geant4-version }}-data
+          restore-keys: |
+            geant4-${{ matrix.geant4-version }}-data
+
   build-test:
+    needs: [build-geant4]
     timeout-minutes: 30
     strategy:
       fail-fast: false
