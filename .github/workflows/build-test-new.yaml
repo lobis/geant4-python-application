@@ -51,13 +51,14 @@ jobs:
 
       - name: Build and Install Geant4
         if: steps.cache.outputs.cache-hit != 'true'
-        run: >-
+        run: >
           git clone https://github.com/Geant4/geant4.git geant4 --depth 1
-          --branch v${{ matrix.geant4-version }} cmake -G Ninja -B geant4/build
-          -S geant4 -DCMAKE_INSTALL_PREFIX=geant4-install
-          -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release
-          -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF
-          -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic
+            --branch v${{ matrix.geant4-version }}
+          cmake -G Ninja -B geant4/build
+            -S geant4 -DCMAKE_INSTALL_PREFIX=geant4-install
+            -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release
+            -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF
+            -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic
           cmake --build geant4/build -j$(nproc) --target install rm -rf geant4
 
       - name: Cache Geant4 Installation
