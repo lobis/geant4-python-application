@@ -73,7 +73,7 @@ jobs:
       - name: Build the wheel
         run: |
           export CMAKE_PREFIX_PATH=${CONDA_PREFIX}
-          mamba install build
+          python -m pip install build
           python -m build --wheel .
 
       - uses: actions/upload-artifact@v3

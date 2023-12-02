@@ -73,7 +73,40 @@ def install_datasets(always: bool = False) -> None:
     subprocess.run([geant4_config, "--install-datasets"], check=True)
 
 
+_minimum_geant4_version = "11.1.0"
+
+
+def _parse_geant4_version(version: str) -> (int, int, int):
+    return tuple([int(part) for part in version.split(".")])
+
+
+try:
+    available_geant4_version_parsed = _parse_geant4_version(_geant4_version)
+    minimum_geant4_version_parsed = _parse_geant4_version(_minimum_geant4_version)
+    if available_geant4_version_parsed < minimum_geant4_version_parsed:
+        warnings.warn(
+            f"Geant4 version {_geant4_version} is lower than the minimum required version {_minimum_geant4_version}."
+        )
+except Exception as e:
+    raise RuntimeError(
+        f"Error comparing Geant4 version '{_geant4_version}' with '{_minimum_geant4_version}': {e}"
+    )
+
 load_libs()
+
+# environment variable GEANT4_DATA_DIR is a recent addition to Geant4
+if "GEANT4_DATA_DIR" not in os.environ:
+    os.environ["GEANT4_DATA_DIR"] = os.path.join(
+        _geant4_prefix, "share", "Geant4", "data"
+    )
+
+_geant4_data_dir = os.environ["GEANT4_DATA_DIR"]
+if not os.path.exists(_geant4_data_dir) or not os.listdir(_geant4_data_dir):
+    warnings.warn(
+        f"""Geant4 data directory {_geant4_data_dir} does not exist or is empty. Please set the
+    GEANT4_DATA_DIR environment variable to the correct directory or install the datasets via `geant4-config
+    --install-datasets` or calling `geant4_python_application.install_datasets()`."""
+    )
 
 from geant4_python_application.gdml import basic_gdml
 from geant4_python_application.geant4_application import (
@@ -89,7 +122,8 @@ from geant4_python_application.geant4_application import (
 
 if _geant4_version != __geant4_version__:
     warnings.warn(
-        f"Geant4 version mismatch. Python module was compiled with Geant4 version {__geant4_version__}, but the available Geant4 version is {geant4_version}."
+        f"""Geant4 version mismatch. Python module was compiled with Geant4 version {__geant4_version__}
+        , but the available Geant4 version is {_geant4_version}."""
     )
 
 __all__ = [

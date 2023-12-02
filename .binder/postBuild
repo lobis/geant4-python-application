@@ -1,3 +1,5 @@
 
 mkdir -p /home/${USER}/examples
 echo "cd /home/${USER}/examples" > /home/${USER}/.bashrc
+
+python -c "import geant4_python_application; geant4_python_application.install_datasets()"
