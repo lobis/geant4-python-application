@@ -89,6 +89,7 @@ jobs:
           key: geant4-${{ matrix.geant4-version }}-data
           restore-keys: |
             geant4-${{ matrix.geant4-version }}-data
+          enableCrossOsArchive: true
 
       - name: Install Geant4 Datasets
         if: steps.cache-geant4-data.outputs.cache-hit != 'true'
@@ -163,6 +164,7 @@ jobs:
           key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
           restore-keys: |
             geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+          fail-on-missing: true
 
       - name: Check Cache for Geant4 Datasets
         id: cache-geant4-data
@@ -172,6 +174,8 @@ jobs:
           key: geant4-${{ matrix.geant4-version }}-data
           restore-keys: |
             geant4-${{ matrix.geant4-version }}-data
+          fail-on-missing: true
+          enableCrossOsArchive: true
 
       - name: Check Geant4
         run: |
