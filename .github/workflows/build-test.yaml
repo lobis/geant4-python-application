@@ -74,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest]
+        platform: [ubuntu-latest, macos-latest]
         geant4-version:
           - 11.1.3
 
