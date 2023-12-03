@@ -17,6 +17,7 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -35,7 +36,7 @@ dependencies = [
 description = "Geant4 Python Application"
 name = "geant4_python_application"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 version = "0.0.1"
 
 [project.optional-dependencies]
