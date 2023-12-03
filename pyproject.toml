@@ -52,7 +52,8 @@ test = [
     "pytest",
     "pytest-xdist",
     "pytest-timeout",
-    "pytest-rerunfailures"
+    "pytest-rerunfailures",
+    "requests",
 ]
 
 [tool.cibuildwheel]
