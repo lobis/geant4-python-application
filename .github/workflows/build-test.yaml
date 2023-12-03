@@ -77,6 +77,7 @@ jobs:
             geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
 
   install-geant4-datasets:
+    needs: [build-geant4-without-datasets]
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 60
     strategy:
@@ -125,7 +126,7 @@ jobs:
           enableCrossOsArchive: true
 
   build-test:
-    needs: [build-geant4]
+    needs: [install-geant4-datasets]
     timeout-minutes: 30
     strategy:
       fail-fast: false
