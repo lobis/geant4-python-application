@@ -27,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-latest]
+        platform: [ubuntu-latest, macos-latest]
         geant4-version:
           - 11.1.3
 
@@ -39,8 +39,13 @@ jobs:
           sudo apt-get install -y build-essential git curl libexpat-dev libxerces-c-dev
           pip install cmake
 
-      - name: Check Cache
-        id: cache
+      - name: Install additional dependencies (macos)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          brew install git curl cmake xerces-c expat
+
+      - name: Check Cache for Geant4 Installation
+        id: cache-geant4
         uses: actions/cache@v2
         with:
           path: ${{ github.workspace }}/geant4
@@ -49,7 +54,7 @@ jobs:
             geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
 
       - name: Build and Install Geant4 (without data)
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache-geant4.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ matrix.geant4-version }}
           mkdir -p ${{ github.workspace }}/geant4-source/build mkdir -p ${{ github.workspace }}/geant4
@@ -61,7 +66,7 @@ jobs:
           geant4-config --version
 
       - name: Cache Geant4 Installation
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache-geant4.outputs.cache-hit != 'true'
         uses: actions/cache@v2
         with:
           path: ${{ github.workspace }}/geant4
@@ -69,15 +74,14 @@ jobs:
           restore-keys: |
             geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
 
-      - name: Check after cache
+      - name: Check After Geant4 Installation
         run: |
           ls -l ${{ github.workspace }}/geant4
           source ${{ github.workspace }}/geant4/bin/geant4.sh
           geant4-config --version
-          geant4-config --prefix
-          geant4-config --datasets
+          geant4-config --check-datasets
 
-      - name: Check Cache
+      - name: Check Cache for Geant4 Datasets
         id: cache-geant4-data
         uses: actions/cache@v2
         with:
@@ -86,14 +90,14 @@ jobs:
           restore-keys: |
             geant4-${{ matrix.geant4-version }}-data
 
-      - name: Install Geant4 data
+      - name: Install Geant4 Datasets
         if: steps.cache-geant4-data.outputs.cache-hit != 'true'
         run: |
           source ${{ github.workspace }}/geant4/bin/geant4.sh
           geant4-config --install-datasets
           geant4-config --check-datasets
 
-      - name: Cache Geant4 data
+      - name: Cache Geant4 Datasets
         if: steps.cache-geant4-data.outputs.cache-hit != 'true'
         uses: actions/cache@v2
         with:
@@ -102,6 +106,13 @@ jobs:
           restore-keys: |
             geant4-${{ matrix.geant4-version }}-data
           enableCrossOsArchive: true
+
+      - name: Check After Geant4 Datasets Installation
+        run: |
+          ls -l ${{ github.workspace }}/geant4
+          source ${{ github.workspace }}/geant4/bin/geant4.sh
+          geant4-config --version
+          geant4-config --check-datasets
 
   build-test:
     needs: [build-geant4]
