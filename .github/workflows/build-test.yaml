@@ -36,13 +36,13 @@ jobs:
         if: matrix.platform == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git curl libexpat-dev libxerces-c-dev
+          sudo apt-get install -y build-essential git curl libxerces-c-dev
           python -m pip install cmake
 
       - name: Install additional dependencies (macos)
         if: matrix.platform == 'macos-latest'
         run: |
-          brew install xerces-c expat
+          brew install xerces-c
 
       - name: Check Cache for Geant4 Installation
         id: cache-geant4
@@ -59,7 +59,7 @@ jobs:
           git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ matrix.geant4-version }}
           mkdir -p ${{ github.workspace }}/geant4-source/build mkdir -p ${{ github.workspace }}/geant4
           cd ${{ github.workspace }}/geant4-source/build
-          cmake .. -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/geant4 -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic
+          cmake .. -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/geant4 -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release -DGEANT4_USE_GDML=ON -DGEANT4_USE_SYSTEM_EXPAT=OFF -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic
           make install -j$(nproc)
           rm -rf ${{ github.workspace }}/geant4-source
           source ${{ github.workspace }}/geant4/bin/geant4.sh
@@ -148,13 +148,13 @@ jobs:
         if: matrix.platform == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git curl libexpat-dev libxerces-c-dev
+          sudo apt-get install -y build-essential git curl libxerces-c-dev
           python -m pip install cmake
 
       - name: Install additional dependencies (macos)
         if: matrix.platform == 'macos-latest'
         run: |
-          brew install xerces-c expat
+          brew install xerces-c
 
       - name: Check Cache for Geant4 Installation
         id: cache-geant4
