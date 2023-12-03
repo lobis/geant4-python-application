@@ -42,11 +42,11 @@ jobs:
       - name: Install additional dependencies (macos)
         if: matrix.platform == 'macos-latest'
         run: |
-          brew install git curl cmake xerces-c expat
+          brew install xerces-c expat
 
       - name: Check Cache for Geant4 Installation
         id: cache-geant4
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/geant4
           key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
@@ -67,7 +67,7 @@ jobs:
 
       - name: Cache Geant4 Installation
         if: steps.cache-geant4.outputs.cache-hit != 'true'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/geant4
           key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
@@ -83,7 +83,7 @@ jobs:
 
       - name: Check Cache for Geant4 Datasets
         id: cache-geant4-data
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/geant4/share/Geant4/data
           key: geant4-${{ matrix.geant4-version }}-data
@@ -99,7 +99,7 @@ jobs:
 
       - name: Cache Geant4 Datasets
         if: steps.cache-geant4-data.outputs.cache-hit != 'true'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/geant4/share/Geant4/data
           key: geant4-${{ matrix.geant4-version }}-data
