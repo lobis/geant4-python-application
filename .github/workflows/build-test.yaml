@@ -22,6 +22,7 @@ concurrency:
 
 jobs:
   build-geant4-without-datasets:
+    name: "Geant4 Install - No Datasets"
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 60
     strategy:
@@ -44,7 +45,7 @@ jobs:
         run: |
           brew install xerces-c
 
-      - name: Check Cache for Geant4 Installation
+      - name: Cache Geant4 Installation
         id: cache-geant4
         uses: actions/cache@v3
         with:
@@ -53,7 +54,7 @@ jobs:
           restore-keys: |
             geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
 
-      - name: Build and Install Geant4 (without data)
+      - name: Build and Install Geant4 (without datasets)
         if: steps.cache-geant4.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ matrix.geant4-version }}
@@ -68,6 +69,7 @@ jobs:
           geant4-config --check-datasets
 
   install-geant4-datasets:
+    name: "Geant4 Datasets"
     needs: [build-geant4-without-datasets]
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 60
@@ -79,7 +81,7 @@ jobs:
           - 11.1.3
 
     steps:
-      - name: Check Cache for Geant4 Installation
+      - name: Cache Geant4 Installation
         id: cache-geant4
         uses: actions/cache@v3
         with:
@@ -87,8 +89,9 @@ jobs:
           key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
           restore-keys: |
             geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+          fail-on-cache-miss: true
 
-      - name: Check Cache for Geant4 Datasets
+      - name: Cache Geant4 Datasets
         id: cache-geant4-data
         uses: actions/cache@v3
         with:
@@ -107,6 +110,7 @@ jobs:
           mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
 
   build-test:
+    name: "Build and Test"
     needs: [install-geant4-datasets]
     timeout-minutes: 30
     strategy:
@@ -144,7 +148,7 @@ jobs:
         run: |
           brew install xerces-c
 
-      - name: Check Cache for Geant4 Installation
+      - name: Cache Geant4 Installation
         id: cache-geant4
         uses: actions/cache@v3
         with:
@@ -154,7 +158,7 @@ jobs:
             geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
           fail-on-cache-miss: true
 
-      - name: Check Cache for Geant4 Datasets
+      - name: Cache Geant4 Datasets
         id: cache-geant4-data
         uses: actions/cache@v3
         with:
