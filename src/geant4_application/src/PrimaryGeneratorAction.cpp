@@ -5,23 +5,42 @@
 #include <G4Event.hh>
 #include <G4ParticleDefinition.hh>
 #include <G4ParticleTable.hh>
+#include <G4RunManager.hh>
 #include <G4SystemOfUnits.hh>
+#include <G4Threading.hh>
 #include <G4VUserPrimaryGeneratorAction.hh>
 
 using namespace std;
 using namespace geant4_app;
 
-PrimaryGeneratorAction::PrimaryGeneratorAction() : G4VUserPrimaryGeneratorAction(), particleGun(1) {
-    particleGun.SetParticleDefinition(G4ParticleTable::GetParticleTable()->FindParticle("e-"));
-    particleGun.SetParticleEnergy(1.0 * MeV);
-    particleGun.SetParticlePosition(G4ThreeVector(0.0, 0.0, 0.0));
-    particleGun.SetParticleMomentumDirection(G4ThreeVector(0.0, 0.0, -1.0));
-}
+PrimaryGeneratorAction::PrimaryGeneratorAction() : G4VUserPrimaryGeneratorAction() {}
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
-    particleGun.GeneratePrimaryVertex(event);
-    // const auto& primary = event->GetPrimaryVertex(0)->GetPrimary(0);
-    // cout << "PrimaryGeneratorAction::GeneratePrimaries - particle: " << primary->GetParticleDefinition()->GetParticleName() << " energy: " << primary->GetKineticEnergy() / MeV << " MeV" << endl;
+    if (generatorType == "python") {
+        lock_guard<mutex> lock(pythonMutex);
+        auto result = pythonGenerator();
+        cout << "PrimaryGeneratorAction::GeneratePrimaries - result: " << result << endl;
+        throw runtime_error("PrimaryGeneratorAction::GeneratePrimaries - pythonGenerator not implemented");
+    } else if (generatorType == "gun") {
+        gun.GeneratePrimaryVertex(event);
+    } else if (generatorType == "gps") {
+        gps.GeneratePrimaryVertex(event);
+    } else {
+        throw runtime_error("PrimaryGeneratorAction::GeneratePrimaries - generatorType must be 'gun', 'gps', or 'python'");
+    }
+}
+
+void PrimaryGeneratorAction::SetGeneratorType(const string& type) {
+    if (!set<string>({"gun", "gps", "python"}).contains(type)) {
+        throw runtime_error("PrimaryGeneratorAction::SetGeneratorType - type must be 'gun', 'gps', or 'python'");
+    }
+    generatorType = type;
+}
+
+void PrimaryGeneratorAction::SetPythonGenerator(const py::function& generator) {
+    lock_guard<mutex> lock(pythonMutex);
+    pythonGenerator = generator;
+    SetGeneratorType("python");
 }
 
 void PrimaryGeneratorAction::SetEnergy(double energy) {
@@ -45,3 +64,6 @@ void PrimaryGeneratorAction::SetParticle(const string& particle) {
     auto ui = Application::GetUIManager();
     ui->ApplyCommand("/gun/particle " + particle);
 }
+
+string PrimaryGeneratorAction::generatorType = "gun";
+py::function PrimaryGeneratorAction::pythonGenerator = py::function();
