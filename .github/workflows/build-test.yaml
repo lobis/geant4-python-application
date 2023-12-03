@@ -37,7 +37,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential git curl libexpat-dev libxerces-c-dev
-          pip install cmake
+          python -m pip install cmake
 
       - name: Install additional dependencies (macos)
         if: matrix.platform == 'macos-latest'
@@ -124,9 +124,11 @@ jobs:
         geant4-version:
           - 11.1.3
         python-version:
+          - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
+          - "3.12"
 
     runs-on: ${{ matrix.platform }}
     defaults:
@@ -136,41 +138,54 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get conda
-        uses: conda-incubator/setup-miniconda@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-          miniforge-variant: Mambaforge
-          use-mamba: true
-
-      - name: Install Geant4 via conda
-        run: |
-          mamba env list
-          mamba install -c conda-forge geant4=${{ matrix.geant4-version }}
-          mamba list
 
       - name: Install additional dependencies (ubuntu)
         if: matrix.platform == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y mesa-common-dev libglu1-mesa-dev python3-dev
+          sudo apt-get install -y build-essential git curl libexpat-dev libxerces-c-dev
+          python -m pip install cmake
 
       - name: Install additional dependencies (macos)
         if: matrix.platform == 'macos-latest'
         run: |
-          mamba env list
-          mamba install -c conda-forge zlib
-          mamba list
+          brew install xerces-c expat
+
+      - name: Check Cache for Geant4 Installation
+        id: cache-geant4
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/geant4
+          key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+          restore-keys: |
+            geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+
+      - name: Check Cache for Geant4 Datasets
+        id: cache-geant4-data
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/geant4/share/Geant4/data
+          key: geant4-${{ matrix.geant4-version }}-data
+          restore-keys: |
+            geant4-${{ matrix.geant4-version }}-data
+
+      - name: Check Geant4
+        run: |
+          ls -l ${{ github.workspace }}/geant4
+          source ${{ github.workspace }}/geant4/bin/geant4.sh
+          geant4-config --version
+          geant4-config --check-datasets
 
       - name: pip install the package
         run: |
-          export CMAKE_PREFIX_PATH=${CONDA_PREFIX}
-          mamba env list
-          mamba list
-          pip install .[test]
+          source ${{ github.workspace }}/geant4/bin/geant4.sh
+          python -m pip install .[test]
 
-      - name: Check imports
+      - name: Check import
         run: |
           python -c "import geant4_python_application; geant4_python_application.Application()"
 
