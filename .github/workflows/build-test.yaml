@@ -67,15 +67,6 @@ jobs:
           mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
           geant4-config --check-datasets
 
-      - name: Cache Geant4 Installation
-        if: steps.cache-geant4.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/geant4
-          key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
-          restore-keys: |
-            geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
-
   install-geant4-datasets:
     needs: [build-geant4-without-datasets]
     runs-on: ${{ matrix.platform }}
@@ -114,16 +105,6 @@ jobs:
           geant4-config --install-datasets
           geant4-config --check-datasets
           mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
-
-      - name: Cache Geant4 Datasets
-        if: steps.cache-geant4-data.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/geant4-data
-          key: geant4-${{ matrix.geant4-version }}-data
-          restore-keys: |
-            geant4-${{ matrix.geant4-version }}-data
-          enableCrossOsArchive: true
 
   build-test:
     needs: [install-geant4-datasets]
@@ -213,7 +194,3 @@ jobs:
         run: |
           source ${{ github.workspace }}/geant4/bin/geant4.sh
           python -m pytest -vv tests --reruns 3 --reruns-delay 30 --only-rerun "(?i)http|timeout|connection|socket|resolve"
-
-      - name: Move datasets back
-        run: |
-          mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
