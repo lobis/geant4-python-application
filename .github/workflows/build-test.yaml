@@ -51,8 +51,6 @@ jobs:
         with:
           path: ${{ github.workspace }}/geant4
           key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
-          restore-keys: |
-            geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
 
       - name: Build and Install Geant4 (without datasets)
         if: steps.cache-geant4.outputs.cache-hit != 'true'
@@ -82,8 +80,6 @@ jobs:
         with:
           path: ${{ github.workspace }}/geant4
           key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
-          restore-keys: |
-            geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
           fail-on-cache-miss: true
 
       - name: Cache Geant4 Datasets
@@ -92,8 +88,6 @@ jobs:
         with:
           path: ${{ github.workspace }}/geant4-data
           key: geant4-${{ matrix.geant4-version }}-data
-          restore-keys: |
-            geant4-${{ matrix.geant4-version }}-data
           enableCrossOsArchive: true
 
       - name: Install Geant4 Datasets
@@ -149,8 +143,6 @@ jobs:
         with:
           path: ${{ github.workspace }}/geant4
           key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
-          restore-keys: |
-            geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
           fail-on-cache-miss: true
 
       - name: Cache Geant4 Datasets
@@ -159,8 +151,6 @@ jobs:
         with:
           path: ${{ github.workspace }}/geant4-data
           key: geant4-${{ matrix.geant4-version }}-data
-          restore-keys: |
-            geant4-${{ matrix.geant4-version }}-data
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
