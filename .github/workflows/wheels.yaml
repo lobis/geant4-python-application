@@ -87,5 +87,5 @@ jobs:
       - name: Upload Wheel
         uses: actions/upload-artifact@v3
         with:
-          name: wheel
+          name: wheels
           path: dist/*.whl
