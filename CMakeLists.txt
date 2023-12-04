@@ -23,7 +23,10 @@ find_package(
     Python
     COMPONENTS Interpreter Development.Module
     REQUIRED)
-find_package(Geant4 REQUIRED CONFIG COMPONENTS gdml)
+find_package(
+    Geant4 CONFIG
+    COMPONENTS gdml
+    REQUIRED)
 
 message(STATUS "Using Geant4 ${Geant4_VERSION} from ${Geant4_DIR}")
 message(STATUS "Using Python ${Python_VERSION} from ${Python_EXECUTABLE}")
