@@ -125,6 +125,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install additional dependencies (ubuntu)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxerces-c-dev
+          python -m pip install cmake
+
+      - name: Install additional dependencies (macos)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          brew install xerces-c
+
       - name: Cache Geant4 Installation
         id: cache-geant4
         uses: actions/cache@v3
