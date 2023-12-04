@@ -44,45 +44,48 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: conda
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          auto-update-conda: true
-          python-version: 3.11
-          miniforge-variant: Mambaforge
-          use-mamba: true
-
-      - name: Install Geant4 via conda
-        run: |
-          mamba env list
-          mamba install -c conda-forge geant4=${{ matrix.geant4-version }}
-          mamba list
+          python-version: ${{ matrix.python-version }}
 
       - name: Install additional dependencies (ubuntu)
         if: matrix.platform == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y mesa-common-dev libglu1-mesa-dev python3-dev
+          sudo apt-get install -y libxerces-c-dev
+          python -m pip install cmake
 
       - name: Install additional dependencies (macos)
         if: matrix.platform == 'macos-latest'
         run: |
-          mamba env list
-          mamba install -c conda-forge zlib
-          mamba list
+          brew install xerces-c
 
-      - name: Install package (DEBUG)
-        run: |
-          export CMAKE_PREFIX_PATH=${CONDA_PREFIX}
-          python -m pip install .
+      - name: Cache Geant4 Installation
+        id: cache-geant4
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/geant4
+          key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+          fail-on-cache-miss: true
 
-      - name: Build the wheel
+      - name: Cache Geant4 Datasets
+        id: cache-geant4-data
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/geant4-data
+          key: geant4-${{ matrix.geant4-version }}-data
+          fail-on-cache-miss: true
+          enableCrossOsArchive: true
+
+      - name: Build Wheel
         run: |
-          export CMAKE_PREFIX_PATH=${CONDA_PREFIX}
+          source ${{ github.workspace }}/geant4/bin/geant4.sh
           python -m pip install build
           python -m build --wheel .
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload Wheel
+        uses: actions/upload-artifact@v2
         with:
           name: wheel
           path: dist/*.whl
