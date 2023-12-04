@@ -50,7 +50,8 @@ jobs:
       - name: Build and Install Xerces-C
         if: steps.cache-xerces.outputs.cache-hit != 'true'
         run: |
-          git clone https://github.com/apache/xerces-c.git --depth 1 --branch v2.3.4
+          git clone https://github.com/apache/xerces-c.git --depth 1 xerces-c
+          git -C xerces-c checkout tags/v3.2.4
           mkdir -p ${{ github.workspace }}/xerces-source/build
           cd ${{ github.workspace }}/xerces-source/build
           cmake .. -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=20 -DXERCESC_BUILD_STATIC=ON -DXERCESC_BUILD_SHARED=OFF -DCMAKE_BUILD_TYPE=Release
