@@ -179,7 +179,8 @@ jobs:
         with:
           limit-access-to-actor: false
 
+      # Need to run each "run" test separately to avoid error (TODO: investigate)
       - name: Run tests
         run: |
           source ${{ github.workspace }}/geant4/bin/geant4.sh
-          python -m pytest -vv tests --reruns 3 --reruns-delay 30 --only-rerun "(?i)http|timeout|connection|socket|resolve"
+          find ./tests -name "test_*.py" -exec python -m pytest -vv --reruns 3 --reruns-delay 30 --only-rerun "(?i)http|timeout|connection|socket|resolve" {} \;
