@@ -16,17 +16,6 @@ def test_imports():
     assert geant4_python_application.StackingAction
 
 
-def test_setup_and_run():
-    app = Application()
-
-    app.setup_manager().setup_detector(
-        gdml=basic_gdml
-    ).setup_physics().setup_action().initialize()
-
-    events = app.run(100)
-    assert len(events) == 100
-
-
 def test_missing_setup():
     app = Application()
 
@@ -40,6 +29,17 @@ def test_missing_manager():
     with pytest.raises(RuntimeError):
         app.setup_detector(gdml="")
         app.setup_detector()
+
+
+def test_setup_and_run():
+    app = Application()
+
+    app.setup_manager().setup_detector(
+        gdml=basic_gdml
+    ).setup_physics().setup_action().initialize()
+
+    events = app.run(100)
+    assert len(events) == 100
 
 
 @pytest.mark.skip(reason="Fix segfault")
