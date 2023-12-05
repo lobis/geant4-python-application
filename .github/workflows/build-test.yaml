@@ -137,6 +137,17 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install additional dependencies (ubuntu)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+
+      - name: Install additional dependencies (macos)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          brew install curl
+
       - name: Install cmake
         run: |
           python -m pip install cmake
