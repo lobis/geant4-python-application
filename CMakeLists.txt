@@ -25,7 +25,7 @@ find_package(
     REQUIRED)
 find_package(
     Geant4 CONFIG
-    COMPONENTS gdml
+    COMPONENTS gdml static
     REQUIRED)
 
 message(STATUS "Using Geant4 ${Geant4_VERSION} from ${Geant4_DIR}")
