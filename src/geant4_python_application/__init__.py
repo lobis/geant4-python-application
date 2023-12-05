@@ -42,17 +42,13 @@ def load_libs():
         else:
             raise RuntimeError("Unsupported platform: ", sys.platform)
 
-        if not os.path.exists(library_absolute_path):
-            raise ImportError(
-                f"Could not find library {lib} ({library_absolute_path}) in {_geant4_libs_dir}."
-            )
-
-        try:
-            ctypes.cdll.LoadLibrary(library_absolute_path)
-        except Exception as e:
-            warnings.warn(
-                f"Could not load library: {library_absolute_path}. Error: {e}"
-            )
+        if os.path.exists(library_absolute_path):
+            try:
+                ctypes.cdll.LoadLibrary(library_absolute_path)
+            except Exception as e:
+                warnings.warn(
+                    f"Could not load shared library: {library_absolute_path}. Error: {e}"
+                )
 
 
 def datasets() -> list[(str, str, str)]:
