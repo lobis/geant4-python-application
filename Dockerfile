@@ -1,7 +1,7 @@
 FROM python:3.11-slim-bullseye
 
 RUN apt-get update -qq && apt-get install -q -y --no-install-recommends \
-    build-essential ninja-build git curl libexpat-dev libxerces-c-dev \
+    build-essential ninja-build git curl libxerces-c-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -18,7 +18,7 @@ RUN git clone https://github.com/Geant4/geant4.git /tmp/geant4 --branch=${GEANT4
     -DGEANT4_INSTALL_EXAMPLES=OFF \
     -DGEANT4_INSTALL_DATA=OFF \
     -DGEANT4_BUILD_TLS_MODEL=global-dynamic \
-    # -DGEANT4_USE_SYSTEM_EXPAT=OFF \
+    -DGEANT4_USE_SYSTEM_EXPAT=OFF \
     # -DBUILD_STATIC_LIBS=ON \
     # -DBUILD_SHARED_LIBS=OFF \
     # -DGEANT4_BUILD_STORE_TRAJECTORY=OFF -DGEANT4_BUILD_VERBOSE_CODE=OFF \
