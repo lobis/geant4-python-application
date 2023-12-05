@@ -92,7 +92,10 @@ except Exception as e:
         f"Error comparing Geant4 version '{_geant4_version}' with '{_minimum_geant4_version}': {e}"
     )
 
-load_libs()
+try:
+    load_libs()
+except Exception as e:
+    print(f"Could not load Geant4 dynamic libraries: {e}")
 
 # environment variable GEANT4_DATA_DIR is a recent addition to Geant4
 if "GEANT4_DATA_DIR" not in os.environ:
