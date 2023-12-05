@@ -51,7 +51,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/geant4
-          key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+          key: geant4-shared-${{ matrix.geant4-version }}-${{ matrix.platform }}
 
       - name: Build and Install Geant4 (without datasets)
         if: steps.cache-geant4.outputs.cache-hit != 'true'
@@ -80,7 +80,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/geant4
-          key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+          key: geant4-shared-${{ matrix.geant4-version }}-${{ matrix.platform }}
           fail-on-cache-miss: true
 
       - name: Cache Geant4 Datasets
@@ -144,7 +144,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/geant4
-          key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+          key: geant4-shared-${{ matrix.geant4-version }}-${{ matrix.platform }}
           fail-on-cache-miss: true
 
       - name: Cache Geant4 Datasets
