@@ -163,13 +163,6 @@ jobs:
           key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
           fail-on-cache-miss: true
 
-      - name: Check Geant4
-        run: |
-          mv ${{ github.workspace }}/geant4-data ${{ github.workspace }}/geant4/share/Geant4/data
-          source ${{ github.workspace }}/geant4/bin/geant4.sh
-          geant4-config --version
-          geant4-config --check-datasets
-
       - name: pip install the package
         run: |
           source ${{ github.workspace }}/geant4/bin/geant4.sh
@@ -263,6 +256,23 @@ jobs:
       - name: Install wheel
         run: |
           python -m pip install dist/*.whl
+
+      - name: Save datasets location to env
+        run: |
+          GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.datasets.data_dir)")
+          echo "GEANT4_DATA_DIR=${GEANT4_DATA_DIR}" >> $GITHUB_ENV
+
+      # test ability to download datasets in one job and use the cache in the others
+      - name: Cache Geant4 Datasets
+        if:
+          matrix.python-version != '3.11' || matrix.platform != 'ubuntu-latest'
+        id: cache-geant4-data
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.env.GEANT4_DATA_DIR }}
+          key: geant4-${{ matrix.geant4-version }}-data
+          fail-on-cache-miss: true
+          enableCrossOsArchive: true
 
       - name: Run tests
         run: |
