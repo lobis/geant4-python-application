@@ -16,7 +16,6 @@ RUN git clone https://github.com/apache/xerces-c.git /tmp/xerces \
     && git -C /tmp/xerces checkout tags/v${XERCES_VERSION} \
     && cmake -G Ninja -B /tmp/xerces/build -S /tmp/xerces \
     -DCMAKE_INSTALL_PREFIX=/opt/xerces \
-    -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces \
     -DCMAKE_CXX_STANDARD=23 \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=OFF \
