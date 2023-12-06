@@ -24,7 +24,7 @@ RUN git clone https://github.com/apache/xerces-c.git /tmp/xerces \
     -DCMAKE_CXX_FLAGS=-fPIC \
     -DCMAKE_C_FLAGS=-fPIC \
     && cmake --build /tmp/xerces/build -j$(nproc) --target install \
-    && rm -rf /tmp/xerces \
+    && rm -rf /tmp/xerces
 
 RUN git clone https://github.com/Geant4/geant4.git /tmp/geant4 --branch=v${GEANT4_VERSION} --depth=1 \
     && cmake -G Ninja -B /tmp/geant4/build -S /tmp/geant4 \
