@@ -198,7 +198,6 @@ jobs:
 
       - name: Run tests
         run: |
-          source ${{ github.workspace }}/geant4/bin/geant4.sh
           find ./tests -name "test_*.py" -exec python -m pytest -vv --reruns 3 --reruns-delay 30 --only-rerun "(?i)http|timeout|connection|socket|resolve" {} \;
 
       - name: Build Wheel
