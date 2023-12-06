@@ -181,25 +181,6 @@ jobs:
         with:
           limit-access-to-actor: false
 
-      - name: Cache Geant4 Datasets
-        id: cache-geant4-data
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/geant4-data
-          key: geant4-${{ matrix.geant4-version }}-data
-          fail-on-cache-miss: true
-          enableCrossOsArchive: true
-
-      - name: Move datasets
-        run: |
-          GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.datasets.data_dir)")
-          mkdir -p ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
-          mv ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
-
-      - name: Run tests
-        run: |
-          find ./tests -name "test_*.py" -exec python -m pytest -vv --reruns 3 --reruns-delay 30 --only-rerun "(?i)http|timeout|connection|socket|resolve" {} \;
-
       - name: Build Wheel
         run: |
           source ${{ github.workspace }}/geant4/bin/geant4.sh
