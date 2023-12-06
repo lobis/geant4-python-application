@@ -38,7 +38,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential git
-          python -m pip install cmake
+
+      - uses: lukka/get-cmake@latest
 
       - name: Cache Xerces-C Installation
         id: cache-xerces
