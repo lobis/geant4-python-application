@@ -1,7 +1,7 @@
 FROM python:3.11-slim-bullseye as builder
 
 RUN apt-get update -qq && apt-get install -q -y --no-install-recommends \
-    build-essential ninja-build git curl libxerces-c-dev \
+    build-essential ninja-build git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
