@@ -47,7 +47,7 @@ RUN git clone https://github.com/Geant4/geant4.git /tmp/geant4 --branch=v${GEANT
 COPY . /source
 
 # Build and install
-RUN source /opt/geant4/bin/geant4.sh \
+RUN bash /opt/geant4/bin/geant4.sh \
     && pip install /source \
     && rm -rf /source
 
