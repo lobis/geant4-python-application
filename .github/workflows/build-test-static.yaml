@@ -54,7 +54,7 @@ jobs:
           git -C xerces-source checkout tags/v3.2.4
           mkdir -p ${{ github.workspace }}/xerces-source/build
           cd ${{ github.workspace }}/xerces-source/build
-          cmake .. -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=20 -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-fPIC
+          cmake .. -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=20 -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -Dnetwork-accessor=socket -Dtranscoder=iconv -DCMAKE_CXX_FLAGS=-fPIC
           make install -j$(nproc)
 
       - name: Cache Geant4 Installation
