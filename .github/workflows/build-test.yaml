@@ -101,8 +101,9 @@ jobs:
           path: ${{ github.workspace }}/geant4-data
           key: geant4-${{ matrix.geant4-version }}-data
           enableCrossOsArchive: true
+          lookup-only: true
 
-      - name: Install Geant4 Datasets
+      - name: Move Geant4 Datasets
         if: steps.cache-geant4-data.outputs.cache-hit != 'true'
         run: |
           source ${{ github.workspace }}/geant4/bin/geant4.sh
@@ -180,19 +181,20 @@ jobs:
         with:
           limit-access-to-actor: false
 
-      - name: Save datasets location to env
-        run: |
-          GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.datasets.data_dir)")
-          echo "GEANT4_DATA_DIR=${GEANT4_DATA_DIR}" >> $GITHUB_ENV
-
       - name: Cache Geant4 Datasets
         id: cache-geant4-data
         uses: actions/cache@v3
         with:
-          path: ${{ github.env.GEANT4_DATA_DIR }}
+          path: ${{ github.workspace }}/geant4-data
           key: geant4-${{ matrix.geant4-version }}-data
           fail-on-cache-miss: true
           enableCrossOsArchive: true
+
+      - name: Move datasets
+        run: |
+          mkdir -p ${{ github.workspace }}/geant4-data
+          GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.datasets.data_dir)")
+          mv ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
 
       - name: Run tests
         run: |
@@ -269,10 +271,16 @@ jobs:
         id: cache-geant4-data
         uses: actions/cache@v3
         with:
-          path: ${{ github.env.GEANT4_DATA_DIR }}
+          path: ${{ github.workspace }}/geant4-data
           key: geant4-${{ matrix.geant4-version }}-data
           fail-on-cache-miss: true
           enableCrossOsArchive: true
+
+      - name: Move datasets
+        run: |
+          mkdir -p ${{ github.workspace }}/geant4-data
+          GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.datasets.data_dir)")
+          mv ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
 
       - name: Run tests
         run: |
