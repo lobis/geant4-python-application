@@ -9,8 +9,8 @@ RUN apt-get update -qq && apt-get install -q -y --no-install-recommends \
 RUN pip install cmake
 
 ARG CMAKE_CXX_STANDARD=23
-ARG GEANT4_VERSION=v11.1.3
-ARG XERCES_VERSION=v3.2.4
+ARG GEANT4_VERSION=11.1.3
+ARG XERCES_VERSION=3.2.4
 
 RUN git clone https://github.com/apache/xerces-c.git /tmp/xerces \
     && git -C /tmp/xerces checkout tags/v${XERCES_VERSION} \
@@ -26,7 +26,7 @@ RUN git clone https://github.com/apache/xerces-c.git /tmp/xerces \
     && cmake --build /tmp/xerces/build -j$(nproc) --target install \
     && rm -rf /tmp/xerces \
 
-RUN git clone https://github.com/Geant4/geant4.git /tmp/geant4 --branch=${GEANT4_VERSION} --depth=1 \
+RUN git clone https://github.com/Geant4/geant4.git /tmp/geant4 --branch=v${GEANT4_VERSION} --depth=1 \
     && cmake -G Ninja -B /tmp/geant4/build -S /tmp/geant4 \
     -DCMAKE_INSTALL_PREFIX=/opt/geant4 \
     -DXERCESC_ROOT_DIR=/opt/xerces \
