@@ -32,6 +32,7 @@ classifiers = [
 dependencies = [
     "awkward",
     "numpy",
+    "requests",
     "tqdm",
 ]
 description = "Geant4 Python Application"
