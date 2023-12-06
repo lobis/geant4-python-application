@@ -28,7 +28,7 @@ __all__ = [
 
 def _setup_manager(self, *args, **kwargs):
     install_datasets()
-    self._setup_manager(*args, **kwargs)
+    return self._setup_manager(*args, **kwargs)
 
 
 Application._setup_manager = Application.setup_manager
