@@ -8,7 +8,7 @@ RUN apt-get update -qq && apt-get install -q -y --no-install-recommends \
 # Install a more recent CMake version
 RUN pip install cmake
 
-ARG CMAKE_CXX_STANDARD=20
+ARG CMAKE_CXX_STANDARD=23
 ARG GEANT4_VERSION=v11.1.3
 
 RUN git clone https://github.com/Geant4/geant4.git /tmp/geant4 --branch=${GEANT4_VERSION} --depth=1 \
