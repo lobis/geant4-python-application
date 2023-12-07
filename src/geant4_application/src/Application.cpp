@@ -71,8 +71,8 @@ void Application::SetupAction() {
         throw runtime_error("The physics list to be set up before the action initialization");
     }
 
-    delete runManager->GetUserActionInitialization();
     delete G4VSteppingVerbose::GetInstance();
+    delete runManager->GetUserActionInitialization();
     runManager->SetUserInitialization(new ActionInitialization());
 }
 
