@@ -19,10 +19,15 @@ def _start_application(pipe: multiprocessing.Pipe):
         # verify that the method exists on app
         if not hasattr(app, method):
             raise ValueError(f"Unknown method: {method}")
-        # call the method
-        result = getattr(app, method)(*message.args, **message.kwargs)
-        # send the result back
-        pipe.send(result)
+
+        try:
+            # call the method
+            result = getattr(app, method)(*message.args, **message.kwargs)
+            # send the result back
+            pipe.send(result)
+        except Exception as e:
+            print(f"Exception in {method}: {e}")
+            break
 
 
 class App:
@@ -37,35 +42,39 @@ class App:
         # check for broken pipe
         try:
             self.pipe.send(message)
-        except BrokenPipeError:
+        except Exception as e:
             raise RuntimeError(
-                "Application has been destroyed. Please create a new one."
+                f"Application has been destroyed. Please create a new one: {e}"
             )
 
     def _recv(self):
         try:
             return self.pipe.recv()
-        except BrokenPipeError:
+        except Exception as e:
             raise RuntimeError(
-                "Application has been destroyed. Please create a new one."
+                f"Application has been destroyed. Please create a new one: {e}"
             )
 
     def setup_manager(self):
-        self._send(Message(self, "setup_manager", (), {}))
-        assert self._recv() is None
+        self._send(Message("self", "setup_manager", (), {}))
+        self._recv()
 
     def setup_physics(self):
-        self._send(Message(self, "setup_physics", (), {}))
-        assert self._recv() is None
+        self._send(Message("self", "setup_physics", (), {}))
+        self._recv()
 
     def setup_detector(self, gdml: str):
-        self._send(Message(self, "setup_detector", (gdml,), {}))
-        assert self._recv() is None
+        self._send(Message("self", "setup_detector", (gdml,), {}))
+        self._recv()
+
+    def setup_action(self):
+        self._send(Message("self", "setup_action", (), {}))
+        self._recv()
 
     def initialize(self):
-        self._send(Message(self, "initialize", (), {}))
-        assert self._recv() is None
+        self._send(Message("self", "initialize", (), {}))
+        self._recv()
 
     def run(self, n_events: int):
-        self._send(Message(self, "run", (n_events,), {}))
+        self._send(Message("self", "run", (n_events,), {}))
         return self._recv()
