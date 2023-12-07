@@ -73,7 +73,7 @@ PYBIND11_MODULE(_geant4_application, m) {
 #else
     m.attr("__version__") = "dev";
 #endif
-    m.attr("__geant4_version__") = MACRO_STRINGIFY(GEANT4_VERSION);
-    m.attr("__awkward_version__") = MACRO_STRINGIFY(AWKWARD_VERSION);
-    m.attr("__pybind11_version__") = MACRO_STRINGIFY(PYBIND11_VERSION);
+    m.attr("geant4_version") = MACRO_STRINGIFY(GEANT4_VERSION);
+    m.attr("awkward_version") = MACRO_STRINGIFY(AWKWARD_VERSION);
+    m.attr("pybind11_version") = MACRO_STRINGIFY(PYBIND11_VERSION);
 }

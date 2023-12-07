@@ -7,12 +7,26 @@ import shutil
 import tarfile
 import tempfile
 from collections import namedtuple
+from pathlib import Path
 
 import requests
 from tqdm import tqdm
 
+import geant4_python_application
+
 url = "https://cern.ch/geant4-data/datasets"
-data_dir = os.path.join(os.path.dirname(__file__), "geant4/data")
+
+# It is discouraged to use the package directory to store data
+# data_dir = os.path.join(os.path.dirname(__file__), "geant4/data")
+# another idea is to use 'platformdirs' to store data in a platform-specific location
+
+data_dir = os.path.join(
+    tempfile.gettempdir(),
+    geant4_python_application.__name__,
+    "geant4",
+    geant4_python_application.geant4_version,
+    "data",
+)
 
 # https://github.com/HaarigerHarald/geant4_pybind/blob/9bc90bc7f93df0d4966f29c90ffed5655e8d5904/source/datainit.py
 Dataset = namedtuple("Dataset", ["name", "version", "filename", "env", "md5sum"])
@@ -144,8 +158,6 @@ def _download_extract_dataset(dataset: Dataset, pbar: tqdm):
 
 
 def install_datasets(force: bool = False, show_progress: bool = True):
-    os.makedirs(data_dir, exist_ok=True)
-
     os.environ["GEANT4_DATA_DIR"] = data_dir
     datasets_to_download = []
     for dataset in datasets:
@@ -156,6 +168,12 @@ def install_datasets(force: bool = False, show_progress: bool = True):
 
     if len(datasets_to_download) == 0:
         return
+
+    os.makedirs(data_dir, exist_ok=True)
+    if show_progress:
+        print(
+            f"""The following Geant4 datasets will be installed to {data_dir}: {", ".join([f"{dataset.name}@{dataset.version}" for dataset in datasets_to_download])}"""
+        )
 
     with tqdm(
         total=_get_total_download_size(datasets_to_download),
@@ -174,7 +192,10 @@ def install_datasets(force: bool = False, show_progress: bool = True):
             concurrent.futures.wait(futures)
 
     if show_progress:
-        print(f"Geant4 datasets installed to {data_dir}")
+        total_size_gb = sum(fp.stat().st_size for fp in Path(data_dir).rglob("*")) / (
+            1024**3
+        )
+        print(f"Geant4 datasets size on disk after extraction: {total_size_gb:.2f} GB")
 
 
 def uninstall_datasets():
