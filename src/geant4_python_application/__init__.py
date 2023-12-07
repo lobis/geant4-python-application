@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from geant4_python_application.application import App
 from geant4_python_application.datasets import install_datasets
 from geant4_python_application.gdml import basic_gdml
 from geant4_python_application.geant4_application import (
@@ -20,6 +21,7 @@ __all__ = [
     "__awkward_version__",
     "__pybind11_version__",
     "Application",
+    "App",
     "PrimaryGeneratorAction",
     "StackingAction",
     "basic_gdml",
