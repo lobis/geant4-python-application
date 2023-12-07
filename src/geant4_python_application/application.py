@@ -3,13 +3,16 @@ from __future__ import annotations
 import multiprocessing
 from collections import namedtuple
 
-from geant4_python_application.geant4_application import Application
+import geant4_python_application.datasets
+from geant4_python_application._geant4_application import (
+    Application as Geant4Application,
+)
 
 Message = namedtuple("Message", ["target", "method", "args", "kwargs"])
 
 
 def _start_application(pipe: multiprocessing.Pipe):
-    app = Application()
+    app = Geant4Application()
 
     while message := pipe.recv():
         if message is None:
@@ -30,51 +33,52 @@ def _start_application(pipe: multiprocessing.Pipe):
             break
 
 
-class App:
+class Application:
     def __init__(self):
+        geant4_python_application.datasets.install_datasets(show_progress=False)
         self.pipe, child_pipe = multiprocessing.Pipe()
         multiprocessing.Process(target=_start_application, args=(child_pipe,)).start()
 
     def __del__(self):
-        self._send(None)
+        try:
+            self._send(None)
+        except Exception:
+            pass
 
     def _send(self, message: Message | None):
-        # check for broken pipe
-        try:
-            self.pipe.send(message)
-        except Exception as e:
-            raise RuntimeError(
-                f"Application has been destroyed. Please create a new one: {e}"
-            )
+        self.pipe.send(message)
 
     def _recv(self):
+        return self.pipe.recv()
+
+    def _send_and_recv(self, message: Message):
         try:
-            return self.pipe.recv()
+            self._send(message)
+            return self._recv()
         except Exception as e:
             raise RuntimeError(
                 f"Application has been destroyed. Please create a new one: {e}"
             )
 
-    def setup_manager(self):
-        self._send(Message("self", "setup_manager", (), {}))
-        self._recv()
+    def setup_manager(self, n_threads: int = 0) -> Application:
+        self._send_and_recv(Message("self", "setup_manager", (n_threads,), {}))
+        return self
 
-    def setup_physics(self):
-        self._send(Message("self", "setup_physics", (), {}))
-        self._recv()
+    def setup_physics(self) -> Application:
+        self._send_and_recv(Message("self", "setup_physics", (), {}))
+        return self
 
-    def setup_detector(self, gdml: str):
-        self._send(Message("self", "setup_detector", (gdml,), {}))
-        self._recv()
+    def setup_detector(self, gdml: str) -> Application:
+        self._send_and_recv(Message("self", "setup_detector", (gdml,), {}))
+        return self
 
-    def setup_action(self):
-        self._send(Message("self", "setup_action", (), {}))
-        self._recv()
+    def setup_action(self) -> Application:
+        self._send_and_recv(Message("self", "setup_action", (), {}))
+        return self
 
-    def initialize(self):
-        self._send(Message("self", "initialize", (), {}))
-        self._recv()
+    def initialize(self) -> Application:
+        self._send_and_recv(Message("self", "initialize", (), {}))
+        return self
 
     def run(self, n_events: int):
-        self._send(Message("self", "run", (n_events,), {}))
-        return self._recv()
+        return self._send_and_recv(Message("self", "run", (n_events,), {}))

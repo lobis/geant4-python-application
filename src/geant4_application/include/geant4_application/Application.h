@@ -37,7 +37,7 @@ public:
     Application& operator=(const Application&) = delete;
 
     void SetRandomSeed(long seed);
-    void SetupManager(unsigned short nThreads = 0);
+    void SetupManager(unsigned short nThreads);
     void SetupDetector(const std::string& gdml);
     void SetupPhysics();
     void SetupAction();

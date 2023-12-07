@@ -10,7 +10,7 @@ namespace py = pybind11;
 using namespace geant4_app;
 using namespace std;
 
-PYBIND11_MODULE(geant4_application, m) {
+PYBIND11_MODULE(_geant4_application, m) {
     m.doc() = R"pbdoc(
         Geant4 Python Application
         -------------------------
@@ -18,12 +18,12 @@ PYBIND11_MODULE(geant4_application, m) {
 
     py::class_<Application>(m, "Application")
             .def(py::init<>())
-            .def("setup_manager", &Application::SetupManager, py::arg("n_threads") = 0)
+            .def("setup_manager", &Application::SetupManager, py::arg("n_threads"))
             .def("setup_detector", &Application::SetupDetector, py::arg("gdml"))
             .def("setup_physics", &Application::SetupPhysics)
             .def("setup_action", &Application::SetupAction)
             .def("initialize", &Application::Initialize)
-            .def("run", &Application::Run, py::arg("n_events") = 1)
+            .def("run", &Application::Run, py::arg("n_events"))
             .def("is_setup", &Application::IsSetup)
             .def("is_initialized", &Application::IsInitialized)
             .def_property("random_seed", &Application::GetRandomSeed, &Application::SetRandomSeed)

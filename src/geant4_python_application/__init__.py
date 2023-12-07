@@ -1,10 +1,6 @@
 from __future__ import annotations
 
-from geant4_python_application.application import App
-from geant4_python_application.datasets import install_datasets
-from geant4_python_application.gdml import basic_gdml
-from geant4_python_application.geant4_application import (
-    Application,
+from geant4_python_application._geant4_application import (
     PrimaryGeneratorAction,
     StackingAction,
     __awkward_version__,
@@ -13,6 +9,8 @@ from geant4_python_application.geant4_application import (
     __pybind11_version__,
     __version__,
 )
+from geant4_python_application.application import Application
+from geant4_python_application.gdml import basic_gdml
 
 __all__ = [
     "__doc__",
@@ -21,17 +19,7 @@ __all__ = [
     "__awkward_version__",
     "__pybind11_version__",
     "Application",
-    "App",
     "PrimaryGeneratorAction",
     "StackingAction",
     "basic_gdml",
 ]
-
-
-def _setup_manager(self, *args, **kwargs):
-    install_datasets(show_progress=False)
-    return self._setup_manager(*args, **kwargs)
-
-
-Application._setup_manager = Application.setup_manager
-Application.setup_manager = _setup_manager

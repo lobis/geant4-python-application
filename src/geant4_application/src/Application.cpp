@@ -72,7 +72,7 @@ void Application::SetupAction() {
     }
 
     delete runManager->GetUserActionInitialization();
-
+    delete G4VSteppingVerbose::GetInstance();
     runManager->SetUserInitialization(new ActionInitialization());
 }
 

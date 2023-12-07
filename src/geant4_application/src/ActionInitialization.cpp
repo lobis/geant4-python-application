@@ -31,6 +31,5 @@ void ActionInitialization::Build() const {
 }
 
 G4VSteppingVerbose* ActionInitialization::InitializeSteppingVerbose() const {
-    throw runtime_error("ActionInitialization::InitializeSteppingVerbose");
     return new SteppingVerbose;
 }
