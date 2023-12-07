@@ -83,13 +83,6 @@ void DetectorConstruction::ConstructSDandField() {
     sensitiveDetectorConstructed = true;
 }
 
-void DetectorConstruction::PrintMaterials() {
-    const auto materialTable = G4Material::GetMaterialTable();
-    for (const auto& material: *materialTable) {
-        cout << material->GetName() << ", " << material->GetDensity() << endl;
-    }
-}
-
 set<string> DetectorConstruction::GetMaterialNames() {
     set<string> names;
     const auto materialTable = G4Material::GetMaterialTable();

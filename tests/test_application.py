@@ -59,14 +59,14 @@ def test_seed_single_thread():
     app = Application()
 
     app.setup_manager()
-    app.random_seed = 1100
+    app.seed = 1100
     app.setup_physics()
     app.setup_detector(gdml=basic_gdml)
     app.setup_action()
 
     app.initialize()
 
-    assert app.random_seed == 1100
+    assert app.seed == 1100
 
     app.command("/gun/particle e-")
     app.command("/gun/energy 100 MeV")
@@ -84,6 +84,7 @@ def test_seed_single_thread():
         1.22345221e00,
     ]
     energy = np.array(events["track.step.energy"][0][0][0:5])
+    print(energy, reference_value)
     assert np.allclose(energy, reference_value, atol=1e-5)
 
 
@@ -105,11 +106,9 @@ def test_complex_gdml():
     url = "https://raw.githubusercontent.com/rest-for-physics/restG4/dc3a8f42cea4978206a13325261fa85ec1b26261/examples/13.IAXO/geometry/setup.gdml"
 
     app = Application()
-
-    app.setup_manager()
-    app.setup_physics()
-    app.setup_detector(gdml=requests.get(url).text)
-    app.setup_action()
+    app.setup_manager().setup_physics().setup_detector(
+        gdml=requests.get(url).text
+    ).setup_action()
 
     app.detector.sensitive_volumes = {"gasVolume"}
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import multiprocessing
 from collections import namedtuple
 
+import geant4_python_application
 import geant4_python_application.datasets
 from geant4_python_application._geant4_application import (
     Application as Geant4Application,
@@ -17,15 +18,22 @@ def _start_application(pipe: multiprocessing.Pipe):
     while message := pipe.recv():
         if message is None:
             break
-        target = message.target  # assume it's self for now
+        target = app
+        target_list = message.target.split(".")
+        target_list = [element for element in target_list if element]
+        for target_name in target_list:
+            if not hasattr(target, target_name):
+                raise ValueError(f"{target} has no attribute {target_name}")
+            target = getattr(target, target_name)
+
         method = message.method
         # verify that the method exists on app
-        if not hasattr(app, method):
+        if not hasattr(target, method):
             raise ValueError(f"Unknown method: {method}")
 
         try:
             # call the method
-            result = getattr(app, method)(*message.args, **message.kwargs)
+            result = getattr(target, method)(*message.args, **message.kwargs)
             # send the result back
             pipe.send(result)
         except Exception as e:
@@ -36,8 +44,13 @@ def _start_application(pipe: multiprocessing.Pipe):
 class Application:
     def __init__(self):
         geant4_python_application.datasets.install_datasets(show_progress=False)
-        self.pipe, child_pipe = multiprocessing.Pipe()
-        multiprocessing.Process(target=_start_application, args=(child_pipe,)).start()
+        self._detector = geant4_python_application.Detector(self)
+
+        self._pipe, child_pipe = multiprocessing.Pipe()
+        self._process = multiprocessing.Process(
+            target=_start_application, args=(child_pipe,), daemon=True
+        )
+        self._process.start()
 
     def __del__(self):
         try:
@@ -46,10 +59,10 @@ class Application:
             pass
 
     def _send(self, message: Message | None):
-        self.pipe.send(message)
+        self._pipe.send(message)
 
     def _recv(self):
-        return self.pipe.recv()
+        return self._pipe.recv()
 
     def _send_and_recv(self, message: Message):
         try:
@@ -61,24 +74,42 @@ class Application:
             )
 
     def setup_manager(self, n_threads: int = 0) -> Application:
-        self._send_and_recv(Message("self", "setup_manager", (n_threads,), {}))
+        self._send_and_recv(Message("", "setup_manager", (n_threads,), {}))
         return self
 
     def setup_physics(self) -> Application:
-        self._send_and_recv(Message("self", "setup_physics", (), {}))
+        self._send_and_recv(Message("", "setup_physics", (), {}))
         return self
 
     def setup_detector(self, gdml: str) -> Application:
-        self._send_and_recv(Message("self", "setup_detector", (gdml,), {}))
+        self._send_and_recv(Message("", "setup_detector", (gdml,), {}))
         return self
 
     def setup_action(self) -> Application:
-        self._send_and_recv(Message("self", "setup_action", (), {}))
+        self._send_and_recv(Message("", "setup_action", (), {}))
         return self
 
     def initialize(self) -> Application:
-        self._send_and_recv(Message("self", "initialize", (), {}))
+        self._send_and_recv(Message("", "initialize", (), {}))
         return self
 
     def run(self, n_events: int):
-        return self._send_and_recv(Message("self", "run", (n_events,), {}))
+        return self._send_and_recv(Message("", "run", (n_events,), {}))
+
+    @property
+    def seed(self):
+        return self._send_and_recv(Message("", "get_seed", (), {}))
+
+    @seed.setter
+    def seed(self, seed: int):
+        self._send_and_recv(Message("", "set_seed", (seed,), {}))
+
+    def command(self, command: str) -> str:
+        return self._send_and_recv(Message("", "command", (command,), {}))
+
+    def list_commands(self, directory="/") -> str:
+        return self._send_and_recv(Message("", "list_commands", (directory,), {}))
+
+    @property
+    def detector(self) -> geant4_python_application.Detector:
+        return self._detector

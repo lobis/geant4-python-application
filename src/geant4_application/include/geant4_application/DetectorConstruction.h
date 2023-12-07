@@ -28,7 +28,6 @@ public:
     std::string GetGDML() const { return gdml; }
     void SetGDML(const std::string& gdml);
 
-    static void PrintMaterials();
     static std::set<std::string> GetMaterialNames();
     static std::set<std::string> GetLogicalVolumeNames();
     static std::set<std::string> GetPhysicalVolumeNames();

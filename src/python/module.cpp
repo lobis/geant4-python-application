@@ -26,7 +26,8 @@ PYBIND11_MODULE(_geant4_application, m) {
             .def("run", &Application::Run, py::arg("n_events"))
             .def("is_setup", &Application::IsSetup)
             .def("is_initialized", &Application::IsInitialized)
-            .def_property("random_seed", &Application::GetRandomSeed, &Application::SetRandomSeed)
+            .def("get_seed", &Application::GetRandomSeed)
+            .def("set_seed", &Application::SetRandomSeed)
             .def_static("command", &Application::Command, py::arg("command"))
             .def_static("list_commands", &Application::ListCommands, py::arg("directory") = "/")
             .def_property_readonly("generator", &Application::GetPrimaryGeneratorAction, py::return_value_policy::reference_internal)
@@ -53,13 +54,12 @@ PYBIND11_MODULE(_geant4_application, m) {
 
     py::class_<DetectorConstruction>(m, "DetectorConstruction")
             .def("check_overlaps", &DetectorConstruction::CheckOverlaps)
-            .def_static("print_materials", &DetectorConstruction::PrintMaterials)
-            // why are properties not working (due to sets?)
-            .def_property_readonly_static("materials", [](const py::object&) { return DetectorConstruction::GetMaterialNames(); })
-            .def_property_readonly_static("logical_volumes", [](const py::object&) { return DetectorConstruction::GetLogicalVolumeNames(); })
-            .def_property_readonly_static("physical_volumes", [](const py::object&) { return DetectorConstruction::GetPhysicalVolumeNames(); })
-            .def_property("sensitive_volumes", &DetectorConstruction::GetSensitiveVolumes, &DetectorConstruction::SetSensitiveVolumes)
-            .def_property("gdml", &DetectorConstruction::GetGDML, &DetectorConstruction::SetGDML);
+            .def_static("get_materials", &DetectorConstruction::GetMaterialNames)
+            .def_static("get_logical_volumes", &DetectorConstruction::GetLogicalVolumeNames)
+            .def_static("get_physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames)
+            .def("get_sensitive_volumes", &DetectorConstruction::GetSensitiveVolumes)
+            .def("set_sensitive_volumes", &DetectorConstruction::SetSensitiveVolumes, py::arg("volumes"))
+            .def("get_gdml", &DetectorConstruction::GetGDML);
 
 
     py::class_<StackingAction>(m, "StackingAction")
