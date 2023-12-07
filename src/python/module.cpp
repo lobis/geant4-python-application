@@ -29,7 +29,6 @@ PYBIND11_MODULE(geant4_application, m) {
             .def_property("random_seed", &Application::GetRandomSeed, &Application::SetRandomSeed)
             .def_static("command", &Application::Command, py::arg("command"))
             .def_static("list_commands", &Application::ListCommands, py::arg("directory") = "/")
-            .def_static("start_gui", &Application::StartGUI)
             .def_property_readonly("generator", &Application::GetPrimaryGeneratorAction, py::return_value_policy::reference_internal)
             .def_property_readonly("detector", &Application::GetDetectorConstruction, py::return_value_policy::reference_internal)
             .def_property_readonly("stacking", &Application::GetStackingAction, py::return_value_policy::reference_internal);

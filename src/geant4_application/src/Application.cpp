@@ -18,21 +18,16 @@ namespace py = pybind11;
 Application* Application::pInstance = nullptr;
 
 Application::Application() {
-    // if the instance already exists, return it, otherwise create one
+    // only a single Application can ever be created (geant4 limitation)
     if (pInstance != nullptr) {
         throw runtime_error("Application can only be created once");
-        return;
-    }
-    if (G4RunManager::GetRunManager() != nullptr) {
-        throw runtime_error("RunManager already exists on Application creation");
     }
     pInstance = this;
 }
 
-Application::~Application() {
-    // Recreating the Application may cause a segfault
-    pInstance = nullptr;
-}
+/// We cannot clean up everything, creating a new application will fail after initializing the kernel, so we don't allow it.
+/// We don't want to clear the pointer, this would suggest it's okay to create a new application.
+Application::~Application() = default;
 
 void Application::SetupRandomEngine() {
     CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);
@@ -42,68 +37,58 @@ void Application::SetupRandomEngine() {
     CLHEP::HepRandom::setTheSeed(randomSeed);
 }
 
-Application& Application::SetupDetector(string gdml) {
-    if (runManager == nullptr) {
-        throw runtime_error("RunManager needs to be set up first");
+void Application::SetupDetector(const string& gdml) {
+    if (G4RunManager::GetRunManager() == nullptr) {
+        throw runtime_error("The run manager needs to be set up before the detector");
     }
 
-    if (runManager->GetUserDetectorConstruction() != nullptr) {
-        throw runtime_error("Detector is already set up");
-    }
-
-    runManager->SetUserInitialization(new DetectorConstruction(std::move(gdml)));
-    return *this;
+    delete runManager->GetUserDetectorConstruction();
+    runManager->SetUserInitialization(new DetectorConstruction(gdml));
 }
 
-Application& Application::SetupPhysics() {
-    if (runManager == nullptr) {
-        throw runtime_error("RunManager needs to be set up first");
+void Application::SetupPhysics() {
+    if (G4RunManager::GetRunManager() == nullptr) {
+        throw runtime_error("The run manager needs to be set up before the physics list");
     }
 
     if (runManager->GetUserPhysicsList() != nullptr) {
-        throw runtime_error("Physics is already set up");
+        throw runtime_error("Physics list can only be set up once");
     }
 
     runManager->SetUserInitialization(new PhysicsList());
-    return *this;
 }
 
-Application& Application::SetupAction() {
-    if (runManager == nullptr) {
-        throw runtime_error("RunManager needs to be set up first");
+void Application::SetupAction() {
+    if (G4RunManager::GetRunManager() == nullptr) {
+        throw runtime_error("The run manager needs to be set up before the action initialization");
     }
 
-    // check detector and physics are set up
     if (runManager->GetUserDetectorConstruction() == nullptr) {
-        throw runtime_error("Detector needs to be set up first");
+        throw runtime_error("The detector needs to be set up before the action initialization");
     }
 
     if (runManager->GetUserPhysicsList() == nullptr) {
-        throw runtime_error("Physics needs to be set up first");
+        throw runtime_error("The physics list to be set up before the action initialization");
     }
 
-    if (runManager->GetUserActionInitialization() != nullptr) {
-        throw runtime_error("Action is already set up");
-    }
+    delete runManager->GetUserActionInitialization();
 
     runManager->SetUserInitialization(new ActionInitialization());
-    return *this;
 }
 
-Application& Application::SetupManager(unsigned short nThreads) {
-    if (runManager != nullptr || G4RunManager::GetRunManager() != nullptr) {
-        throw runtime_error("RunManager is already set up");
+void Application::SetupManager(unsigned short nThreads) {
+    if (G4RunManager::GetRunManager() != nullptr) {
+        throw runtime_error("The run manager can only be set up once");
     }
-    G4VSteppingVerbose::SetInstance(new SteppingVerbose);
+
     const auto runManagerType = nThreads > 0 ? G4RunManagerType::MTOnly : G4RunManagerType::SerialOnly;
     runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));
     if (nThreads > 0) {
         runManager->SetNumberOfThreads((G4int) nThreads);
     }
-    return *this;
 }
 
-Application& Application::Initialize() {
+void Application::Initialize() {
     if (!IsSetup()) {
         throw runtime_error("Application needs to be set up first");
     }
@@ -116,7 +101,6 @@ Application& Application::Initialize() {
 
     runManager->Initialize();
     isInitialized = true;
-    return *this;
 }
 
 py::object Application::Run(int nEvents) {
@@ -147,7 +131,7 @@ void Application::SetRandomSeed(long seed) {
 G4UImanager* Application::GetUIManager() {
     auto ui = G4UImanager::GetUIpointer();
     if (ui == nullptr) {
-        throw runtime_error("UI manager is not available");
+        throw runtime_error("The UI manager is not available");
     }
     return ui;
 }
@@ -196,8 +180,4 @@ const DetectorConstruction& Application::GetDetectorConstruction() const {
         throw runtime_error("Detector construction is not available");
     }
     return *detectorConstruction;
-}
-
-void Application::StartGUI() {
-    throw runtime_error("Not implemented");
 }

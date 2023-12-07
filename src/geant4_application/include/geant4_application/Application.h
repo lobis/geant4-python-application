@@ -10,7 +10,9 @@
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 
+#include "geant4_application/ActionInitialization.h"
 #include "geant4_application/DetectorConstruction.h"
+#include "geant4_application/PhysicsList.h"
 #include "geant4_application/PrimaryGeneratorAction.h"
 #include "geant4_application/StackingAction.h"
 
@@ -35,12 +37,12 @@ public:
     Application& operator=(const Application&) = delete;
 
     void SetRandomSeed(long seed);
-    Application& SetupManager(unsigned short nThreads = 0);
-    Application& SetupDetector(std::string gdml);
-    Application& SetupPhysics();
-    Application& SetupAction();
+    void SetupManager(unsigned short nThreads = 0);
+    void SetupDetector(const std::string& gdml);
+    void SetupPhysics();
+    void SetupAction();
 
-    Application& Initialize();
+    void Initialize();
     py::object Run(int nEvents);
 
     bool IsSetup() const;
@@ -55,8 +57,6 @@ public:
     const PrimaryGeneratorAction& GetPrimaryGeneratorAction() const;
     const StackingAction& GetStackingAction() const;
     const DetectorConstruction& GetDetectorConstruction() const;
-
-    static void StartGUI();
 };
 
 }// namespace geant4_app
