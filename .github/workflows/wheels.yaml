@@ -22,7 +22,8 @@ jobs:
     name: Source distribution
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -32,7 +33,8 @@ jobs:
           python -m pip install build
           python -m build --sdist .
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload sdist
+        uses: actions/upload-artifact@v3
         with:
           name: dist
           path: dist/*.tar.gz
@@ -90,14 +92,17 @@ jobs:
             platform_id: macosx_arm64
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: lukka/get-cmake@v3.27.9
+      - name: Setup CMake
+        uses: lukka/get-cmake@v3.27.9
 
       - name: Setup Python
         uses: actions/setup-python@v5
 
-      - uses: pypa/cibuildwheel@v2.16.2
+      - name: Build wheel
+        uses: pypa/cibuildwheel@v2.16.2
         env:
           CIBW_TEST_COMMAND:
             python -m pytest {project}/tests -vv --reruns 3 --reruns-delay 30
@@ -134,7 +139,7 @@ jobs:
             cmake -G Ninja -B /tmp/geant4/build -S /tmp/geant4 -DCMAKE_OSX_ARCHITECTURES=${{ matrix.platform_id == 'macosx_x86_64' && 'x86_64' || 'arm64' }} -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DCMAKE_BUILD_TYPE=Release -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF
             cmake --build /tmp/geant4/build --parallel $(nproc) --target install > /dev/null 2>&1
             rm -rf /tmp/geant4
-      - name: Upload Wheels
+      - name: Upload wheel
         uses: actions/upload-artifact@v3
         with:
           name: dist
@@ -149,8 +154,10 @@ jobs:
       github.event.inputs.publish_to_test_pypi
 
     steps:
-      - uses: actions/setup-python@v4
-      - uses: actions/download-artifact@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+      - name: Download wheels
+        uses: actions/download-artifact@v3
         with:
           name: dist
           path: dist
@@ -168,8 +175,10 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
 
     steps:
-      - uses: actions/setup-python@v4
-      - uses: actions/download-artifact@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+      - name: Download wheels
+        uses: actions/download-artifact@v3
         with:
           name: dist
           path: dist
