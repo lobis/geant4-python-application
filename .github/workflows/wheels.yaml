@@ -109,7 +109,7 @@ jobs:
       - uses: pypa/cibuildwheel@v2.16.2
         env:
           CIBW_TEST_REQUIRES: pytest
-          CIBW_TEST_COMMAND: python {project}/tests
+          CIBW_TEST_COMMAND: python -m pytest {project}/tests
           CIBW_ENVIRONMENT:
             SKLEARN_SKIP_NETWORK_TESTS=1 SKLEARN_BUILD_PARALLEL=3
           CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
