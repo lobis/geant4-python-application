@@ -152,10 +152,6 @@ jobs:
           source ${{ github.workspace }}/geant4/bin/geant4.sh
           python -m pip install .[test]
 
-      - name: Check import
-        run: |
-          python -c "import geant4_python_application; geant4_python_application.Application()"
-
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if:
@@ -180,6 +176,10 @@ jobs:
           GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.data_dir)")
           mkdir -p ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
           mv ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
+
+      - name: Check import
+        run: |
+          python -c "import geant4_python_application; geant4_python_application.Application()"
 
       - name: Run tests
         run: |
