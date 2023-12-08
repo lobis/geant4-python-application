@@ -35,7 +35,7 @@ jobs:
         platform: [ubuntu-latest, macos-latest]
 
     steps:
-      - uses: lukka/get-cmake@latest
+      - uses: lukka/get-cmake@v3.27.9
 
       - name: Cache Xerces-C Installation
         id: cache-xerces
@@ -127,7 +127,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: lukka/get-cmake@latest
+      - uses: lukka/get-cmake@v3.27.9
 
       - name: Cache Xerces-C Installation
         id: cache-xerces
