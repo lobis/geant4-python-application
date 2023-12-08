@@ -20,6 +20,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  GEANT4_VERSION: 11.1.3
+  XERCES_VERSION: 3.2.4
+
 jobs:
   build-geant4:
     name: "Geant4 Install - No Datasets"
@@ -29,8 +33,6 @@ jobs:
       fail-fast: false
       matrix:
         platform: [ubuntu-latest, macos-latest]
-        geant4-version:
-          - 11.1.3
 
     steps:
       - uses: lukka/get-cmake@latest
@@ -46,7 +48,7 @@ jobs:
         if: steps.cache-xerces.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/apache/xerces-c.git xerces-source
-          git -C xerces-source checkout tags/v3.2.4
+          git -C xerces-source checkout tags/v${{ env.XERCES_VERSION }}
           cmake -G Ninja -B xerces-build -S xerces-source -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=20 -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -Dnetwork-accessor=socket -Dtranscoder=iconv -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC
           cmake --build xerces-build -j$(nproc) --target install
 
@@ -55,12 +57,12 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/geant4
-          key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+          key: geant4-${{ env.GEANT4_VERSION }}-${{ matrix.platform }}
 
       - name: Build and Install Geant4 (without datasets)
         if: steps.cache-geant4.outputs.cache-hit != 'true'
         run: |
-          git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ matrix.geant4-version }}
+          git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}
           cmake -G Ninja -B geant4-build -S geant4-source -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/geant4 -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF
           cmake --build geant4-build -j$(nproc) --target install
 
@@ -82,7 +84,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/geant4
-          key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+          key: geant4-${{ env.GEANT4_VERSION }}-${{ matrix.platform }}
           fail-on-cache-miss: true
 
       - name: Cache Geant4 Datasets
@@ -90,7 +92,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/geant4-data
-          key: geant4-${{ matrix.geant4-version }}-data
+          key: geant4-${{ env.GEANT4_VERSION }}-data
           enableCrossOsArchive: true
           lookup-only: true
 
@@ -144,7 +146,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/geant4
-          key: geant4-${{ matrix.geant4-version }}-${{ matrix.platform }}
+          key: geant4-${{ env.GEANT4_VERSION }}-${{ matrix.platform }}
           fail-on-cache-miss: true
 
       - name: pip install the package
@@ -167,7 +169,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/geant4-data
-          key: geant4-${{ matrix.geant4-version }}-data
+          key: geant4-${{ env.GEANT4_VERSION }}-data
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
