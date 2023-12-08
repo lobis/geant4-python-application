@@ -27,7 +27,7 @@ env:
 
 jobs:
   build-geant4:
-    name: "Geant4 Install - No Datasets"
+    name: Build Geant4 on ${{ matrix.platform }}
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 60
     strategy:
@@ -70,7 +70,7 @@ jobs:
           cmake --build geant4-build --parallel $(nproc) --target install
 
   install-geant4-datasets:
-    name: "Geant4 Datasets"
+    name: Geant4 Datasets
     needs: [build-geant4]
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 60
@@ -108,7 +108,7 @@ jobs:
           mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
 
   build-test:
-    name: "Build and Test"
+    name: Build and Test
     needs: [install-geant4-datasets]
     timeout-minutes: 30
     strategy:
