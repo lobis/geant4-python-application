@@ -173,7 +173,10 @@ def install_datasets(force: bool = False, show_progress: bool = True):
     os.makedirs(data_dir, exist_ok=True)
     if show_progress:
         print(
-            f"""The following Geant4 datasets will be installed to {data_dir}: {", ".join([f"{dataset.name}@{dataset.version}" for dataset in datasets_to_download])}"""
+            f"Geant4 datasets (< 2GB) will be installed to temporary directory {data_dir}. This may take a while but only needs to be done once."
+        )
+        print(
+            f"""The following Geant4 datasets will be installed: {", ".join([f"{dataset.name}@{dataset.version}" for dataset in datasets_to_download])}"""
         )
 
     with tqdm(
@@ -196,7 +199,7 @@ def install_datasets(force: bool = False, show_progress: bool = True):
         total_size_gb = sum(fp.stat().st_size for fp in Path(data_dir).rglob("*")) / (
             1024**3
         )
-        print(f"Geant4 datasets size on disk after extraction: {total_size_gb:.2f} GB")
+        print(f"Geant4 datasets size on disk after extraction: {total_size_gb:.2f}GB")
 
 
 def uninstall_datasets():
