@@ -21,7 +21,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GEANT4_VERSION: 11.1.3
+  GEANT4_VERSION: 11.2.0
   XERCES_VERSION: 3.2.4
 
 jobs:
@@ -75,8 +75,6 @@ jobs:
       fail-fast: false
       matrix:
         platform: [ubuntu-latest, macos-latest]
-        geant4-version:
-          - 11.1.3
 
     steps:
       - name: Cache Geant4 Installation
@@ -112,8 +110,6 @@ jobs:
       fail-fast: false
       matrix:
         platform: [ubuntu-latest, macos-latest]
-        geant4-version:
-          - 11.1.3
         python-version:
           - "3.8"
           - "3.9"

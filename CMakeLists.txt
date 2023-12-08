@@ -24,7 +24,7 @@ find_package(
     COMPONENTS Interpreter Development.Module
     REQUIRED)
 find_package(
-    Geant4 CONFIG
+    Geant4 11.2.0 CONFIG
     COMPONENTS gdml static
     REQUIRED)
 

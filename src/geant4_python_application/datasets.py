@@ -28,7 +28,8 @@ data_dir = os.path.join(
     "data",
 )
 
-# https://github.com/HaarigerHarald/geant4_pybind/blob/9bc90bc7f93df0d4966f29c90ffed5655e8d5904/source/datainit.py
+# the datasets versions should be updated with each Geant4 version
+# https://geant4.web.cern.ch/download/11.2.0.html#datasets
 Dataset = namedtuple("Dataset", ["name", "version", "filename", "env", "md5sum"])
 
 datasets = (
@@ -41,10 +42,10 @@ datasets = (
     ),
     Dataset(
         name="G4EMLOW",
-        version="8.2",
+        version="8.",
         filename="G4EMLOW",
         env="G4LEDATA",
-        md5sum="07773e57be3f6f2ebb744da5ed574f6d",
+        md5sum="146d0625d8d39f294056e1618271bc46",
     ),
     Dataset(
         name="PhotonEvaporation",
@@ -90,17 +91,17 @@ datasets = (
     ),
     Dataset(
         name="G4ABLA",
-        version="3.1",
+        version="3.3",
         filename="G4ABLA",
         env="G4ABLADATA",
-        md5sum="180f1f5d937733b207f8d5677f76296e",
+        md5sum="b25d093339e1e4532e31038653580ca6",
     ),
     Dataset(
         name="G4INCL",
-        version="1.0",
+        version="1.2",
         filename="G4INCL",
         env="G4INCLDATA",
-        md5sum="85fe937b6df46d41814f07175d3f5b51",
+        md5sum="0a76df936839bb557dae7254117eb58e",
     ),
     Dataset(
         name="G4ENSDFSTATE",
