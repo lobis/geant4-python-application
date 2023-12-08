@@ -29,10 +29,18 @@ Application::Application() {
 /// We don't want to clear the pointer, this would suggest it's okay to create a new application.
 Application::~Application() = default;
 
+long GetRandomSeed() {
+    auto now = std::chrono::high_resolution_clock::now();
+    auto duration = now.time_since_epoch();
+    long seed = static_cast<long>(std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count());
+    seed ^= static_cast<long>(getpid());
+    return seed;
+}
+
 void Application::SetupRandomEngine() {
     G4Random::setTheEngine(new CLHEP::RanecuEngine);
     if (randomSeed == 0) {
-        randomSeed = std::random_device()();
+        randomSeed = GetRandomSeed();
     }
     G4Random::setTheSeed(randomSeed);
 }
