@@ -84,7 +84,6 @@ def test_seed_single_thread():
         1.22345221e00,
     ]
     energy = np.array(events["track.step.energy"][0][0][0:5])
-    print(energy, reference_value)
     assert np.allclose(energy, reference_value, atol=1e-5)
 
 
@@ -102,11 +101,12 @@ def test_event_data_is_cleared():
         assert len(events) == 100
 
 
-def test_complex_gdml():
+@pytest.mark.parametrize("n_threads", [0, 1, 2, 500])
+def test_complex_gdml(n_threads):
     url = "https://raw.githubusercontent.com/rest-for-physics/restG4/dc3a8f42cea4978206a13325261fa85ec1b26261/examples/13.IAXO/geometry/setup.gdml"
 
     app = Application()
-    app.setup_manager().setup_physics().setup_detector(
+    app.setup_manager(n_threads=n_threads).setup_physics().setup_detector(
         gdml=requests.get(url).text
     ).setup_action()
 
@@ -122,5 +122,4 @@ def test_complex_gdml():
     assert len(app.detector.logical_volumes) == 22
     assert len(app.detector.physical_volumes) == 309
 
-    events = app.run(1)
-    print(events)
+    events = app.run(1000)

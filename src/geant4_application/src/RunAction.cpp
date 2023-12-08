@@ -33,6 +33,7 @@ void RunAction::EndOfRunAction(const G4Run*) {
 
     if (isMaster) {
         // snapshot not working on worker threads, why?
+        py::gil_scoped_acquire acquire;
         for (auto& builderToSnapshot: buildersToSnapshot) {
             events->push_back(data::SnapshotBuilder(*builderToSnapshot));
             builderToSnapshot->clear();
