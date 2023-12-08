@@ -30,11 +30,11 @@ Application::Application() {
 Application::~Application() = default;
 
 void Application::SetupRandomEngine() {
-    CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);
+    G4Random::setTheEngine(new CLHEP::RanecuEngine);
     if (randomSeed == 0) {
         randomSeed = std::random_device()();
     }
-    CLHEP::HepRandom::setTheSeed(randomSeed);
+    G4Random::setTheSeed(randomSeed);
 }
 
 void Application::SetupDetector(const string& gdml) {
