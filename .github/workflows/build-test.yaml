@@ -177,7 +177,7 @@ jobs:
 
       - name: Move datasets
         run: |
-          GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.datasets.data_dir)")
+          GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.data_dir)")
           mkdir -p ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
           mv ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
 

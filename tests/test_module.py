@@ -13,3 +13,6 @@ def test_imports():
     assert pybind11_version
     geant4_version = geant4_python_application.geant4_version
     assert geant4_version
+    assert geant4_python_application
+    assert geant4_python_application.Application
+    assert geant4_python_application.Detector

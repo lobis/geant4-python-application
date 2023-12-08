@@ -4,16 +4,7 @@ import numpy as np
 import pytest
 import requests
 
-import geant4_python_application
 from geant4_python_application import Application, basic_gdml
-
-
-def test_imports():
-    assert Application
-    assert geant4_python_application
-    assert geant4_python_application.Application
-    assert geant4_python_application.PrimaryGeneratorAction
-    assert geant4_python_application.StackingAction
 
 
 def test_missing_setup():

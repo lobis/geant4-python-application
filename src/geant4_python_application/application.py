@@ -46,6 +46,7 @@ def _start_application(pipe: multiprocessing.Pipe):
 class Application:
     def __init__(self):
         geant4_python_application.datasets.install_datasets(show_progress=True)
+
         self._detector = geant4_python_application.Detector(self)
 
         self._pipe, child_pipe = multiprocessing.Pipe()
