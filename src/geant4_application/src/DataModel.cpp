@@ -127,6 +127,7 @@ py::object SnapshotBuilder(Builder& builder) {
 
     // Write non-contiguous contents to memory
     builder.to_buffers(buffers);
+    // this line (below) throws an exception when run from a thread
     auto from_buffers = py::module::import("awkward").attr("from_buffers");
 
     // Build Python dictionary containing arrays

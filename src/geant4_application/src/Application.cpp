@@ -103,16 +103,14 @@ void Application::Initialize() {
     isInitialized = true;
 }
 
-py::object Application::Run(int nEvents) {
+vector<py::object> Application::Run(int nEvents) {
     if (!IsInitialized()) {
         throw runtime_error("Application needs to be initialized first");
     }
     runManager->BeamOn(nEvents);
 
-    auto& builder = RunAction::GetBuilder();
-    const auto events = data::SnapshotBuilder(builder);
-    builder.clear();
-    return events;
+    // we are not clearing the stored copy inside the cpp code when we pass it to python! TODO
+    return RunAction::GetEventCollection();
 }
 
 bool Application::IsSetup() const {

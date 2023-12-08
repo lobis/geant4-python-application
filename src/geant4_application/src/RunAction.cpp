@@ -13,7 +13,7 @@ void RunAction::BeginOfRunAction(const G4Run*) {
     builder.clear();
 
     if (IsMaster()) {
-        builderMainPtr = &builder;
+        awkwardArrays.clear();
     } else {
         // Worker
     }
@@ -25,12 +25,18 @@ void RunAction::EndOfRunAction(const G4Run*) {
         throw std::runtime_error("Builder is not valid: " + error);
     }
 
-    if (IsMaster()) {
-    } else {
-        // move the data into the main thread builder
+    if (!isMaster || !G4Threading::IsMultithreadedApplication()) {
         std::lock_guard<std::mutex> lock(mutex);
-        auto& builderMain = *builderMainPtr;
-        // TODO: implement
+        toSnapshot.push_back(&builder);
+    }
+
+    if (isMaster) {
+        // snapshot not working on worker threads, why?
+        for (auto& builderToSnapshot: toSnapshot) {
+            awkwardArrays.push_back(data::SnapshotBuilder(*builderToSnapshot));
+            builderToSnapshot->clear();
+        }
+        toSnapshot.clear();
     }
 }
 
@@ -39,4 +45,11 @@ data::Builder& RunAction::GetBuilder() {
     return runAction->builder;
 }
 
-data::Builder* RunAction::builderMainPtr = nullptr;
+std::vector<py::object> RunAction::awkwardArrays = {};
+
+std::vector<py::object>& RunAction::GetEventCollection() {
+    auto runAction = dynamic_cast<RunAction*>(const_cast<G4UserRunAction*>(G4RunManager::GetRunManager()->GetUserRunAction()));
+    return runAction->awkwardArrays;
+}
+
+std::vector<data::Builder*> RunAction::toSnapshot = {};

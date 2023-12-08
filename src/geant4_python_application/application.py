@@ -3,6 +3,8 @@ from __future__ import annotations
 import multiprocessing
 from collections import namedtuple
 
+import awkward as ak
+
 import geant4_python_application
 import geant4_python_application.datasets
 from geant4_python_application._geant4_application import (
@@ -93,8 +95,13 @@ class Application:
         self._send_and_recv(Message("", "initialize", (), {}))
         return self
 
-    def run(self, n_events: int):
-        return self._send_and_recv(Message("", "run", (n_events,), {}))
+    def run(self, n_events: int = 1):
+        # "run" returns a list of arrays, one for each thread
+        events = ak.concatenate(
+            self._send_and_recv(Message("", "run", (n_events,), {})), axis=0
+        )
+        # sort by event_id (events from different threads are mixed)
+        return events[ak.argsort(events.event_id)]
 
     @property
     def seed(self):
@@ -104,8 +111,14 @@ class Application:
     def seed(self, seed: int):
         self._send_and_recv(Message("", "set_seed", (seed,), {}))
 
-    def command(self, command: str) -> str:
-        return self._send_and_recv(Message("", "command", (command,), {}))
+    def command(self, command: str) -> Application:
+        self._send_and_recv(Message("", "command", (command,), {}))
+        return self
+
+    def commands(self, commands: list[str]) -> Application:
+        for command in commands:
+            self.command(command)
+        return self
 
     def list_commands(self, directory="/") -> str:
         return self._send_and_recv(Message("", "list_commands", (directory,), {}))

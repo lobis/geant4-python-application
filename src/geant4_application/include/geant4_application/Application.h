@@ -43,7 +43,7 @@ public:
     void SetupAction();
 
     void Initialize();
-    py::object Run(int nEvents);
+    std::vector<py::object> Run(int nEvents);
 
     bool IsSetup() const;
     bool IsInitialized() const;
