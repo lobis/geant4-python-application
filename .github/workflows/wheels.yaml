@@ -62,10 +62,6 @@ jobs:
             python: 311
             platform_id: manylinux_x86_64
             manylinux_image: manylinux2014
-          - os: ubuntu-latest
-            python: 312
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
 
           - os: macos-latest
             python: 38
@@ -128,7 +124,7 @@ jobs:
             cmake --build /tmp/geant4/build -j$(nproc) --target install > /dev/null 2>&1
             rm -rf /tmp/geant4
           CIBW_ENVIRONMENT_MACOS: |
-            MACOSX_DEPLOYMENT_TARGET=10.15
+            MACOSX_DEPLOYMENT_TARGET=13.6
           CIBW_BEFORE_ALL_MACOS: |
             python3 -m pip install cmake ninja
             git clone https://github.com/apache/xerces-c.git /tmp/xerces
