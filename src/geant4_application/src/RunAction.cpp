@@ -13,30 +13,28 @@ void RunAction::BeginOfRunAction(const G4Run*) {
     builder.clear();
 
     if (IsMaster()) {
-        awkwardArrays.clear();
-    } else {
-        // Worker
+        events = make_unique<std::vector<py::object>>();
     }
 }
 
 void RunAction::EndOfRunAction(const G4Run*) {
     string error;
     if (!builder.is_valid(error)) {
-        throw std::runtime_error("Builder is not valid: " + error);
+        throw runtime_error("Builder is not valid: " + error);
     }
 
     if (!isMaster || !G4Threading::IsMultithreadedApplication()) {
-        std::lock_guard<std::mutex> lock(mutex);
-        toSnapshot.push_back(&builder);
+        lock_guard<std::mutex> lock(mutex);
+        buildersToSnapshot.push_back(&builder);
     }
 
     if (isMaster) {
         // snapshot not working on worker threads, why?
-        for (auto& builderToSnapshot: toSnapshot) {
-            awkwardArrays.push_back(data::SnapshotBuilder(*builderToSnapshot));
+        for (auto& builderToSnapshot: buildersToSnapshot) {
+            events->push_back(data::SnapshotBuilder(*builderToSnapshot));
             builderToSnapshot->clear();
         }
-        toSnapshot.clear();
+        buildersToSnapshot.clear();
     }
 }
 
@@ -45,11 +43,11 @@ data::Builder& RunAction::GetBuilder() {
     return runAction->builder;
 }
 
-std::vector<py::object> RunAction::awkwardArrays = {};
+unique_ptr<std::vector<py::object>> RunAction::events = nullptr;
 
-std::vector<py::object>& RunAction::GetEventCollection() {
-    auto runAction = dynamic_cast<RunAction*>(const_cast<G4UserRunAction*>(G4RunManager::GetRunManager()->GetUserRunAction()));
-    return runAction->awkwardArrays;
+vector<py::object> RunAction::GetEvents() {
+    // how to avoid this copy?
+    return *std::move(RunAction::events);
 }
 
-std::vector<data::Builder*> RunAction::toSnapshot = {};
+vector<data::Builder*> RunAction::buildersToSnapshot = {};

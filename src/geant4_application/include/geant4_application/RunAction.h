@@ -19,13 +19,13 @@ public:
 
     /// Only one instance of RunAction is created for each thread.
     static data::Builder& GetBuilder();
-    static std::vector<py::object>& GetEventCollection();
+    static std::vector<py::object> GetEvents();
 
 private:
     data::Builder builder = data::MakeBuilder();
     std::mutex mutex;
-    static std::vector<py::object> awkwardArrays;
-    static std::vector<data::Builder*> toSnapshot;
+    static std::unique_ptr<std::vector<py::object>> events;
+    static std::vector<data::Builder*> buildersToSnapshot;
 };
 
 }// namespace geant4_app
