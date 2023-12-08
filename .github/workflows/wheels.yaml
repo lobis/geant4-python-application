@@ -114,7 +114,7 @@ jobs:
             python3 -m pip install cmake ninja
             git clone https://github.com/apache/xerces-c.git /tmp/xerces
             git -C /tmp/xerces checkout tags/v${{ env.XERCES_VERSION }}
-            cmake -G Ninja -B /tmp/xerces/build -S /tmp/xerces -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -Dnetwork-accessor=socket -Dtranscoder=iconv -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC
+            cmake -G Ninja -B /tmp/xerces/build -S /tmp/xerces -DCMAKE_OSX_ARCHITECTURES=${{ matrix.platform_id }} -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -Dnetwork-accessor=socket -Dtranscoder=iconv -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC
             cmake --build /tmp/xerces/build -j$(nproc) --target install > /dev/null 2>&1
             rm -rf /tmp/xerces
             git clone https://github.com/Geant4/geant4.git /tmp/geant4 --branch=v${{ env.GEANT4_VERSION }} --depth=1
@@ -128,7 +128,7 @@ jobs:
             python3 -m pip install cmake ninja
             git clone https://github.com/apache/xerces-c.git /tmp/xerces
             git -C /tmp/xerces checkout tags/v${{ env.XERCES_VERSION }}
-            cmake -G Ninja -B /tmp/xerces/build -S /tmp/xerces -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -Dnetwork-accessor=socket -Dtranscoder=iconv -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC
+            cmake -G Ninja -B /tmp/xerces/build -S /tmp/xerces -DCMAKE_OSX_ARCHITECTURES=${{ matrix.platform_id }} -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -Dnetwork-accessor=socket -Dtranscoder=iconv -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC
             cmake --build /tmp/xerces/build -j$(nproc) --target install > /dev/null 2>&1
             rm -rf /tmp/xerces
             git clone https://github.com/Geant4/geant4.git /tmp/geant4 --branch=v${{ env.GEANT4_VERSION }} --depth=1
