@@ -23,7 +23,7 @@ concurrency:
 env:
   GEANT4_VERSION: 11.2.0
   XERCES_VERSION: 3.2.4
-  CPP_STANDARD: 17
+  CPP_STANDARD: 20
 
 jobs:
   build-geant4:
@@ -67,7 +67,7 @@ jobs:
         if: steps.cache-geant4.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}
-          cmake -G Ninja -B geant4-build -S geant4-source -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/geant4 -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DCMAKE_BUILD_TYPE=Release -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ${{ matrix.platform == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded' || '' }}
+          cmake -G Ninja -B geant4-build -S geant4-source -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/geant4 -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DCMAKE_BUILD_TYPE=Release -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ${{ matrix.platform == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DGEANT4_USE_OPENGL_WIN32=ON' || '-DGEANT4_USE_SYSTEM_EXPAT=OFF' }}
           cmake --build geant4-build --parallel $(nproc) --target install
 
   install-geant4-datasets:
