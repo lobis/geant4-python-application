@@ -51,6 +51,7 @@ unique_ptr<std::vector<py::object>> RunAction::events = nullptr;
 
 vector<py::object> RunAction::GetEvents() {
     // how to avoid this copy?
+    py::gil_scoped_acquire acquire;
     return *std::move(RunAction::events);
 }
 

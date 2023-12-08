@@ -55,7 +55,10 @@ void Application::SetupPhysics() {
         throw runtime_error("Physics list can only be set up once");
     }
 
-    runManager->SetUserInitialization(new PhysicsList());
+    delete runManager->GetUserPhysicsList();
+    auto physics = new PhysicsList();
+    physics->SetVerboseLevel(0);
+    runManager->SetUserInitialization(physics);
 }
 
 void Application::SetupAction() {
@@ -110,6 +113,7 @@ vector<py::object> Application::Run(int nEvents) {
         throw runtime_error("Application needs to be initialized first");
     }
     runManager->BeamOn(nEvents);
+    py::gil_scoped_acquire acquire;
     return RunAction::GetEvents();
 }
 
