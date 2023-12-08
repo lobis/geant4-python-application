@@ -12,6 +12,9 @@ RunAction::RunAction() : G4UserRunAction() {}
 void RunAction::BeginOfRunAction(const G4Run*) {
     builder.clear();
 
+    auto steppingVerbose = ((SteppingVerbose*) G4VSteppingVerbose::GetInstance());
+    steppingVerbose->Initialize();
+
     if (IsMaster()) {
         events = make_unique<std::vector<py::object>>();
     }

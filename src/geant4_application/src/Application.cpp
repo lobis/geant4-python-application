@@ -71,7 +71,6 @@ void Application::SetupAction() {
         throw runtime_error("The physics list to be set up before the action initialization");
     }
 
-    delete G4VSteppingVerbose::GetInstance();
     delete runManager->GetUserActionInitialization();
     runManager->SetUserInitialization(new ActionInitialization());
 }
@@ -80,6 +79,9 @@ void Application::SetupManager(unsigned short nThreads) {
     if (G4RunManager::GetRunManager() != nullptr) {
         throw runtime_error("The run manager can only be set up once");
     }
+
+    delete G4VSteppingVerbose::GetInstance();
+    SteppingVerbose::SetInstance(new SteppingVerbose);
 
     const auto runManagerType = nThreads > 0 ? G4RunManagerType::MTOnly : G4RunManagerType::SerialOnly;
     runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));
