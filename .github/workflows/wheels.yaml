@@ -1,7 +1,5 @@
 name: Wheels
 
-# https://github.com/scikit-learn/scikit-learn/blob/main/.github/workflows/wheels.yml as template
-
 on:
   workflow_dispatch:
     inputs:
@@ -100,8 +98,9 @@ jobs:
 
       - uses: pypa/cibuildwheel@v2.16.2
         env:
-          CIBW_TEST_REQUIRES: pytest
-          CIBW_TEST_COMMAND: python -m pytest {project}/tests
+          CIBW_TEST_COMMAND:
+            python -m pytest {project}/tests -vv --reruns 3 --reruns-delay 30
+            --only-rerun "(?i)http|timeout|connection|socket|resolve"
           CIBW_ENVIRONMENT: >
             SKLEARN_SKIP_NETWORK_TESTS=1 SKLEARN_BUILD_PARALLEL=3
           CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
@@ -141,7 +140,7 @@ jobs:
           path: wheelhouse/*.whl
 
   upload-test-pypi:
-    name: Upload wheels to PyPI
+    name: Upload wheels to Test PyPI
     needs: [sdist, wheels]
     runs-on: ubuntu-latest
     if: github.event.inputs.publish_to_test_pypi
