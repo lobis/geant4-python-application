@@ -175,7 +175,7 @@ def install_datasets(force: bool = False, show_progress: bool = True):
         print(
             f"""
 Geant4 datasets (<2GB) will be installed to temporary directory {data_dir}
-This may take a few minutes but only needs to be done once.
+This may take a while but only needs to be done once.
 The following Geant4 datasets will be installed: {", ".join([f"{dataset.name}@v{dataset.version}" for dataset in datasets_to_download])}"""
         )
 

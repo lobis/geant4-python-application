@@ -143,7 +143,9 @@ jobs:
     name: Upload wheels to Test PyPI
     needs: [sdist, wheels]
     runs-on: ubuntu-latest
-    if: github.event.inputs.publish_to_test_pypi
+    if:
+      (github.event_name == 'release' && github.event.action == 'published') ||
+      github.event.inputs.publish_to_test_pypi
 
     steps:
       - uses: actions/setup-python@v4
