@@ -51,7 +51,7 @@ jobs:
         run: |
           git clone https://github.com/apache/xerces-c.git xerces-source
           git -C xerces-source checkout tags/v${{ env.XERCES_VERSION }}
-          cmake -B xerces-build -S xerces-source -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC ${{ matrix.platform == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded' || '-G Ninja -Dnetwork-accessor=socket -Dtranscoder=iconv' }}
+          cmake -B xerces-build -S xerces-source -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release ${{ matrix.platform == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv' }}
           cmake --build xerces-build --parallel $(nproc) --target install
 
       - name: Cache Geant4 Installation
@@ -67,7 +67,7 @@ jobs:
         if: steps.cache-geant4.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}
-          cmake -B geant4-build -S geant4-source -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/geant4 -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DCMAKE_BUILD_TYPE=Release -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ${{ matrix.platform == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded' || '-G Ninja -DGEANT4_USE_SYSTEM_EXPAT=OFF' }}
+          cmake -B geant4-build -S geant4-source -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/geant4 -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DCMAKE_BUILD_TYPE=Release -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ${{ matrix.platform == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF' }}
           cmake --build geant4-build --parallel $(nproc) --target install
 
   install-geant4-datasets:
