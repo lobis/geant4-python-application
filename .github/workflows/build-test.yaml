@@ -103,8 +103,11 @@ jobs:
       - name: Move Geant4 Datasets
         if: steps.cache-geant4-data.outputs.cache-hit != 'true'
         run: |
-          ls ${{ github.workspace }}/geant4/bin/
-          ${{ matrix.platform == 'windows-latest' && './${{ github.workspace }}/geant4/bin/geant4.bat' || 'source ${{ github.workspace }}/geant4/bin/geant4.sh' }}
+          if [ "${{ matrix.platform }}" == "windows-latest" ]; then
+            './${{ github.workspace }}/geant4/bin/geant4.bat'
+          else
+            source "${{ github.workspace }}/geant4/bin/geant4.sh"
+          fi
           geant4-config --install-datasets
           geant4-config --check-datasets
           mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
@@ -159,7 +162,11 @@ jobs:
 
       - name: pip install the package
         run: |
-          ${{ matrix.platform == 'windows-latest' && './${{ github.workspace }}/geant4/bin/geant4.bat' || 'source ${{ github.workspace }}/geant4/bin/geant4.sh' }}
+          if [ "${{ matrix.platform }}" == "windows-latest" ]; then
+            './${{ github.workspace }}/geant4/bin/geant4.bat'
+          else
+            source "${{ github.workspace }}/geant4/bin/geant4.sh"
+          fi
           python -m pip install .[test]
 
       - name: Setup tmate session
