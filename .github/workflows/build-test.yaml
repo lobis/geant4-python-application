@@ -71,7 +71,7 @@ jobs:
           cmake --build geant4-build --parallel $(nproc) --target install
 
   install-geant4-datasets:
-    name: Geant4 datasets for ${{ matrix.platform }}
+    name: Download Geant4 datasets for ${{ matrix.platform }}
     needs: [build-geant4]
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 30
@@ -103,7 +103,8 @@ jobs:
       - name: Move Geant4 Datasets
         if: steps.cache-geant4-data.outputs.cache-hit != 'true'
         run: |
-          source ${{ github.workspace }}/geant4/bin/geant4.sh
+          ls ${{ github.workspace }}/geant4/bin/
+          ${{ matrix.platform == 'windows-latest' && './${{ github.workspace }}/geant4/bin/geant4.bat' || 'source ${{ github.workspace }}/geant4/bin/geant4.sh' }}
           geant4-config --install-datasets
           geant4-config --check-datasets
           mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
@@ -158,7 +159,7 @@ jobs:
 
       - name: pip install the package
         run: |
-          source ${{ github.workspace }}/geant4/bin/geant4.sh
+          ${{ matrix.platform == 'windows-latest' && './${{ github.workspace }}/geant4/bin/geant4.bat' || 'source ${{ github.workspace }}/geant4/bin/geant4.sh' }}
           python -m pip install .[test]
 
       - name: Setup tmate session
