@@ -123,7 +123,7 @@ jobs:
           steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.platform
           == 'windows-latest'
         run: |
-          './${{ github.workspace }}/geant4/bin/geant4.bat'
+          './${{ github.workspace }}/geant4/bin/geant4.ps1'
           geant4-config --install-datasets
           geant4-config --check-datasets
           mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
