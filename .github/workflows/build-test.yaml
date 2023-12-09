@@ -100,14 +100,22 @@ jobs:
           enableCrossOsArchive: true
           lookup-only: true
 
-      - name: Move Geant4 Datasets
-        if: steps.cache-geant4-data.outputs.cache-hit != 'true'
+      - name: Move Geant4 Datasets (Ubuntu/MacOS)
+        if:
+          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.platform
+          != 'windows-latest'
         run: |
-          if [ "${{ matrix.platform }}" == "windows-latest" ]; then
-            './${{ github.workspace }}/geant4/bin/geant4.bat'
-          else
-            source "${{ github.workspace }}/geant4/bin/geant4.sh"
-          fi
+          source "${{ github.workspace }}/geant4/bin/geant4.sh"
+          geant4-config --install-datasets
+          geant4-config --check-datasets
+          mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
+
+      - name: Move Geant4 Datasets (Windows)
+        if:
+          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.platform
+          == 'windows-latest'
+        run: |
+          './${{ github.workspace }}/geant4/bin/geant4.bat'
           geant4-config --install-datasets
           geant4-config --check-datasets
           mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
@@ -162,11 +170,6 @@ jobs:
 
       - name: pip install the package
         run: |
-          if [ "${{ matrix.platform }}" == "windows-latest" ]; then
-            './${{ github.workspace }}/geant4/bin/geant4.bat'
-          else
-            source "${{ github.workspace }}/geant4/bin/geant4.sh"
-          fi
           python -m pip install .[test]
 
       - name: Setup tmate session
