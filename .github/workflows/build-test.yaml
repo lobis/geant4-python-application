@@ -124,8 +124,8 @@ jobs:
           == 'windows-latest'
         run: |
           powershell ${{ github.workspace }}\geant4\bin\geant4.bat
-          geant4-config --install-datasets
-          geant4-config --check-datasets
+          ${{ github.workspace }}\geant4\bin\geant4-config --install-datasets
+          ${{ github.workspace }}\geant4\bin\geant4-config --check-datasets
           mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
 
   build-test:
