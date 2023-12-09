@@ -23,7 +23,7 @@ concurrency:
 env:
   GEANT4_VERSION: 11.2.0
   XERCES_VERSION: 3.2.4
-  CPP_STANDARD: 20
+  CPP_STANDARD: 17
 
 jobs:
   build-geant4:
