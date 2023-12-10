@@ -25,6 +25,7 @@ env:
   XERCES_VERSION: 3.2.4
   CPP_STANDARD: 17
   Geant4_DIR: ${{ github.workspace }}/geant4
+  CMAKE_ARGS: -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
 
 jobs:
   build-geant4:
