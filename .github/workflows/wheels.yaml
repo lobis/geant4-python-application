@@ -122,7 +122,7 @@ jobs:
       - name: Setup MacOS environment variables
         if: matrix.os == 'macos-latest'
         run: |
-          echo "CMAKE_ARGS=${{ matrix.platform_id == 'macosx_x86_64' && 'x86_64' || 'arm64' }}" >> $GITHUB_ENV
+          echo "CMAKE_ARGS=-DCMAKE_OSX_ARCHITECTURES=${{ matrix.platform_id == 'macosx_x86_64' && 'x86_64' || 'arm64' }}" >> $GITHUB_ENV
 
       - name: Cache Xerces-C Installation
         if: matrix.os != 'ubuntu-latest'
