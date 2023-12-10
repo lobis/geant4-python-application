@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
       - name: Setup CMake
@@ -56,14 +56,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/xerces
-          key: xerces-${{ matrix.platform }}-cpp${{ env.CPP_STANDARD }}
+          key: xerces-${{ matrix.os }}-cpp${{ env.CPP_STANDARD }}
 
       - name: Build and Install Xerces-C
         if: steps.cache-xerces.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/apache/xerces-c.git xerces-source
           git -C xerces-source checkout tags/v${{ env.XERCES_VERSION }}
-          cmake -B xerces-build -S xerces-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DBUILD_SHARED_LIBS=OFF ${{ matrix.platform == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv' }}
+          cmake -B xerces-build -S xerces-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DBUILD_SHARED_LIBS=OFF ${{ matrix.os == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv' }}
           cmake --build xerces-build --parallel $(nproc) --config Release --target install
 
       - name: Cache Geant4 Installation
@@ -72,25 +72,25 @@ jobs:
         with:
           path: ${{ env.Geant4_DIR }}
           key:
-            geant4-${{ env.GEANT4_VERSION }}-${{ matrix.platform }}-cpp${{
+            geant4-${{ env.GEANT4_VERSION }}-${{ matrix.os }}-cpp${{
             env.CPP_STANDARD }}
 
       - name: Build and Install Geant4 (without datasets)
         if: steps.cache-geant4.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}
-          cmake -B geant4-build -S geant4-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ env.Geant4_DIR }} -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ${{ matrix.platform == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF' }}
+          cmake -B geant4-build -S geant4-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ env.Geant4_DIR }} -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ${{ matrix.os == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF' }}
           cmake --build geant4-build --parallel $(nproc) --config Release --target install
 
   install-geant4-datasets:
-    name: Download Geant4 datasets for ${{ matrix.platform }}
+    name: Download Geant4 datasets for ${{ matrix.os }}
     needs: [build-geant4]
-    runs-on: ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
       - name: Cache Geant4 Installation
@@ -99,7 +99,7 @@ jobs:
         with:
           path: ${{ github.workspace }}/geant4
           key:
-            geant4-${{ env.GEANT4_VERSION }}-${{ matrix.platform }}-cpp${{
+            geant4-${{ env.GEANT4_VERSION }}-${{ matrix.os }}-cpp${{
             env.CPP_STANDARD }}
           fail-on-cache-miss: true
 
@@ -114,8 +114,8 @@ jobs:
 
       - name: Move Geant4 Datasets (Ubuntu/MacOS)
         if:
-          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.platform
-          != 'windows-latest'
+          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os !=
+          'windows-latest'
         run: |
           source ${{ github.workspace }}/geant4/bin/geant4.sh
           geant4-config --install-datasets
@@ -124,8 +124,8 @@ jobs:
 
       - name: Move Geant4 Datasets (Windows)
         if:
-          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.platform
-          == 'windows-latest'
+          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os ==
+          'windows-latest'
         run: |
           .\geant4\bin\geant4-config --install-datasets
           ls .\geant4\share\Geant4\data
@@ -134,15 +134,14 @@ jobs:
 
   build-test:
     name:
-      Build and Test for ${{ matrix.platform }} (Python ${{
-      matrix.python-version }})
+      Build and Test for ${{ matrix.os }} (Python ${{ matrix.python-version }})
     needs: [install-geant4-datasets]
     timeout-minutes: 30
-    runs-on: ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version:
           - "3.8"
           - "3.9"
@@ -167,7 +166,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/xerces
-          key: xerces-${{ matrix.platform }}-cpp${{ env.CPP_STANDARD }}
+          key: xerces-${{ matrix.os }}-cpp${{ env.CPP_STANDARD }}
           fail-on-cache-miss: true
 
       - name: Cache Geant4 Installation
@@ -176,13 +175,13 @@ jobs:
         with:
           path: ${{ github.workspace }}/geant4
           key:
-            geant4-${{ env.GEANT4_VERSION }}-${{ matrix.platform }}-cpp${{
+            geant4-${{ env.GEANT4_VERSION }}-${{ matrix.os }}-cpp${{
             env.CPP_STANDARD }}
           fail-on-cache-miss: true
 
       - name: pip install the package
         run: |
-          ${{ matrix.platform == 'windows-latest' && '$env:CMAKE_ARGS="-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"' || ''}}
+          ${{ matrix.os == 'windows-latest' && '$env:CMAKE_ARGS="-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"' || ''}}
           python -m pip install .[test]
 
       # test ability to download datasets in one job and use the cache in the others
@@ -197,16 +196,14 @@ jobs:
           enableCrossOsArchive: true
 
       - name: Move datasets (Ubuntu/MacOS)
-        if:
-          matrix.python-version != '3.11' && matrix.platform != 'windows-latest'
+        if: matrix.python-version != '3.11' && matrix.os != 'windows-latest'
         run: |
           GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.data_dir)")
           mkdir -p ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
           mv ${{ github.workspace }}/geant4-data/* $GEANT4_DATA_DIR
 
       - name: Move datasets (Windows)
-        if:
-          matrix.python-version != '3.11' && matrix.platform == 'windows-latest'
+        if: matrix.python-version != '3.11' && matrix.os == 'windows-latest'
         run: |
           $env:GEANT4_DATA_DIR = python -c "import geant4_python_application; print(geant4_python_application.data_dir)"
           New-Item -ItemType Directory -Path "${{ github.workspace }}\geant4-data" -Force
