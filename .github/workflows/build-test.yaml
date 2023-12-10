@@ -179,6 +179,7 @@ jobs:
 
       - name: pip install the package
         run: |
+          ${{ matrix.platform == 'windows-latest' && '$env:CMAKE_ARGS=-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded' || ''}}
           python -m pip install .[test]
 
       # test ability to download datasets in one job and use the cache in the others
