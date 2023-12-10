@@ -156,6 +156,13 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
 
+      # TODO: How to pass this directly into cibuildwheel (CIBW_BEFORE_ALL_WINDOWS)?
+      - name: Setup Windows environment variables
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          echo "CMAKE_ARGS=-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" >> $GITHUB_ENV
+
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.16.2
         env:
@@ -183,8 +190,6 @@ jobs:
           CIBW_ENVIRONMENT_MACOS: >
             MACOSX_DEPLOYMENT_TARGET=10.15 ${{ matrix.platform_id ==
             'macosx_arm64' && 'SKIP_PYBIND11_STUBGEN=1' || '' }}
-          CIBW_BEFORE_ALL_WINDOWS: |
-            $env:CMAKE_ARGS="-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"
 
       - name: Upload wheel
         uses: actions/upload-artifact@v3
