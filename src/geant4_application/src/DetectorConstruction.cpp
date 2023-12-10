@@ -1,14 +1,14 @@
 
 #include "geant4_application/DetectorConstruction.h"
+#include "geant4_application/Application.h"
 #include "geant4_application/SensitiveDetector.h"
 
 #include <G4LogicalVolumeStore.hh>
 #include <G4NistManager.hh>
 #include <G4PhysicalVolumeStore.hh>
-#include <G4VisAttributes.hh>
 
 #include <filesystem>
-#include <unistd.h>
+#include <random>
 
 using namespace std;
 using namespace geant4_app;
@@ -38,7 +38,15 @@ void DetectorConstruction::SetSensitiveVolumes(const set<string>& volumes) {
 G4VPhysicalVolume* DetectorConstruction::Construct() {
     G4GDMLParser parser;
 
-    auto gdmlTmpPath = filesystem::temp_directory_path() / ("GDML_PID" + to_string(getpid()) + ".gdml");
+    const auto gdmlTemporaryDir = Application::GetTemporaryApplicationDirectory() / "gdml";
+    if (!fs::exists(gdmlTemporaryDir)) {
+        fs::create_directories(gdmlTemporaryDir);
+    }
+
+    // get a unique id for the temporary file. This should be unique across all processes (batch jobs)
+    auto uniqueString = std::to_string(std::hash<unsigned int>{}(std::random_device()()));
+    const auto gdmlTmpPath = gdmlTemporaryDir / ("GDML_" + uniqueString + ".gdml");
+    cout << "Writing temporary GDML file to " << gdmlTmpPath << endl;
     // write contents of gdml string into file, raise exception if there is a problem
     ofstream gdmlTmpFile(gdmlTmpPath);
     if (!gdmlTmpFile.is_open()) {
