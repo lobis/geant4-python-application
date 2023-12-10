@@ -206,8 +206,9 @@ jobs:
           matrix.python-version != '3.11' && matrix.platform == 'windows-latest'
         run: |
           $env:GEANT4_DATA_DIR = python -c "import geant4_python_application; print(geant4_python_application.data_dir)"
-          mkdir ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
-          mv ${{ github.workspace }}/geant4-data/* $GEANT4_DATA_DIR
+          New-Item -ItemType Directory -Path "${{ github.workspace }}/geant4-data" -Force
+          New-Item -ItemType Directory -Path "$($GEANT4_DATA_DIR)" -Force
+          Move-Item "${{ github.workspace }}\geant4-data\*" $env:GEANT4_DATA_DIR -Force
 
       - name: Check import
         run: |
