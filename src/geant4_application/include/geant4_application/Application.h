@@ -16,6 +16,8 @@
 #include "geant4_application/PrimaryGeneratorAction.h"
 #include "geant4_application/StackingAction.h"
 
+#include <filesystem>
+
 namespace py = pybind11;
 
 namespace geant4_app {
