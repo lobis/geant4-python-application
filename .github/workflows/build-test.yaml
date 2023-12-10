@@ -39,8 +39,8 @@ env:
 
 jobs:
   build-geant4:
-    name: Build Geant4 on ${{ matrix.platform }}
-    runs-on: ${{ matrix.platform }}
+    name: Build Geant4 on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     strategy:
       fail-fast: false
