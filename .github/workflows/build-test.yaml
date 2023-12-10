@@ -56,7 +56,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/xerces
-          key: xerces-${{ matrix.os }}-cpp${{ env.CPP_STANDARD }}
+          key:
+            xerces-v${{ env.XERCES_VERSION }}-${{ matrix.os }}-cpp${{
+            env.CPP_STANDARD }}
 
       - name: Build and Install Xerces-C
         if: steps.cache-xerces.outputs.cache-hit != 'true'
@@ -72,7 +74,7 @@ jobs:
         with:
           path: ${{ env.Geant4_DIR }}
           key:
-            geant4-${{ env.GEANT4_VERSION }}-${{ matrix.os }}-cpp${{
+            geant4-v${{ env.GEANT4_VERSION }}-${{ matrix.os }}-cpp${{
             env.CPP_STANDARD }}
 
       - name: Build and Install Geant4 (without datasets)
@@ -99,7 +101,7 @@ jobs:
         with:
           path: ${{ github.workspace }}/geant4
           key:
-            geant4-${{ env.GEANT4_VERSION }}-${{ matrix.os }}-cpp${{
+            geant4-v${{ env.GEANT4_VERSION }}-${{ matrix.os }}-cpp${{
             env.CPP_STANDARD }}
           fail-on-cache-miss: true
 
@@ -166,7 +168,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/xerces
-          key: xerces-${{ matrix.os }}-cpp${{ env.CPP_STANDARD }}
+          key:
+            xerces-v${{ env.XERCES_VERSION }}-${{ matrix.os }}-cpp${{
+            env.CPP_STANDARD }}
           fail-on-cache-miss: true
 
       - name: Cache Geant4 Installation
@@ -175,7 +179,7 @@ jobs:
         with:
           path: ${{ github.workspace }}/geant4
           key:
-            geant4-${{ env.GEANT4_VERSION }}-${{ matrix.os }}-cpp${{
+            geant4-v${{ env.GEANT4_VERSION }}-${{ matrix.os }}-cpp${{
             env.CPP_STANDARD }}
           fail-on-cache-miss: true
 
