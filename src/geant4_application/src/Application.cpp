@@ -183,3 +183,11 @@ const DetectorConstruction& Application::GetDetectorConstruction() const {
     }
     return *detectorConstruction;
 }
+
+filesystem::path Application::GetTemporaryApplicationDirectory() {
+    const auto dir = filesystem::temp_directory_path() / "geant4_python_application";
+    if (!filesystem::exists(dir)) {
+        filesystem::create_directories(dir);
+    }
+    return dir;
+}

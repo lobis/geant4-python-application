@@ -57,6 +57,8 @@ public:
     const PrimaryGeneratorAction& GetPrimaryGeneratorAction() const;
     const StackingAction& GetStackingAction() const;
     const DetectorConstruction& GetDetectorConstruction() const;
+
+    static std::filesystem::path GetTemporaryApplicationDirectory();
 };
 
 }// namespace geant4_app
