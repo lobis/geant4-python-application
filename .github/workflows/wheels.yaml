@@ -114,13 +114,13 @@ jobs:
 
       # TODO: How to pass this directly into cibuildwheel (CIBW_BEFORE_ALL_WINDOWS)?
       - name: Setup Windows environment variables
-        if: runner.os == 'windows-latest'
+        if: matrix.os == 'windows-latest'
         shell: bash
         run: |
           echo "CMAKE_ARGS=-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" >> $GITHUB_ENV
 
       - name: Setup MacOS environment variables
-        if: runner.os == 'macos-latest'
+        if: matrix.os == 'macos-latest'
         run: |
           echo "CMAKE_ARGS=${{ matrix.platform_id == 'macosx_x86_64' && 'x86_64' || 'arm64' }}" >> $GITHUB_ENV
 
