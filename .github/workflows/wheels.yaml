@@ -205,9 +205,33 @@ jobs:
           name: dist
           path: wheelhouse/*.whl
 
+  check-wheels-size:
+    name: Check wheels size
+    needs: wheels
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download wheels
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+      - name: Check wheel size
+        run: |
+          for file in dist/*.whl
+          do
+            size=$(du -m "$file" | cut -f1)
+            if [ "$size" -le 2 ]; then
+              echo "Error: $file is smaller than 2MB"
+              exit 1
+            else
+              echo "$file is larger than 2MB"
+            fi
+          done
+
   upload-test-pypi:
     name: Upload wheels to Test PyPI
-    needs: [sdist, wheels]
+    needs: [sdist, wheels, check-wheels-size]
     runs-on: ubuntu-latest
     if:
       (github.event_name == 'release' && github.event.action == 'published') ||
@@ -233,7 +257,7 @@ jobs:
 
   upload-pypi:
     name: Upload wheels to PyPI
-    needs: [sdist, wheels]
+    needs: [sdist, wheels, check-wheels-size]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
 
