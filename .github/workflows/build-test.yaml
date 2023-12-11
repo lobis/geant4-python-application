@@ -21,19 +21,15 @@ on:
       ## Paste this snippet into the workflow file to enable tmate debugging
       #      - name: Setup tmate session
       #        uses: mxschmitt/action-tmate@v3
-    #        if:
-    #          ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled
-    #          }}
-    #        with:
-    #          limit-access-to-actor: false
+      #        if:
+      #          ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled
+      #          }}
+      #        with:
+      #          limit-access-to-actor: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
-
-defaults:
-  run:
-    shell: bash
 
 env:
   GEANT4_VERSION: 11.2.0
@@ -120,6 +116,7 @@ jobs:
 
       - name: Move Geant4 Datasets
         if: steps.cache-geant4-data.outputs.cache-hit != 'true'
+        shell: bash
         run: |
           bash ${{ github.workspace }}/geant4/bin/geant4-config --install-datasets
           bash ${{ github.workspace }}/geant4/bin/geant4-config --check-datasets

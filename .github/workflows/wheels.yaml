@@ -111,7 +111,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup CMake
-        uses: lukka/get-cmake@v3.27.9
+        uses: lukka/get-cmake@v3.28.0
 
       - name: Setup MacOS environment variables
         if: matrix.os == 'macos-latest'
@@ -135,7 +135,7 @@ jobs:
         run: |
           git clone https://github.com/apache/xerces-c.git xerces-source
           git -C xerces-source checkout tags/v${{ env.XERCES_VERSION }}
-          cmake -B xerces-build -S xerces-source -DCMAKE_BUILD_TYPE=Release ${{ env.CMAKE_ARGS }} -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DBUILD_SHARED_LIBS=OFF ${{ matrix.os == 'windows-latest' && '-DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv' }}
+          cmake -B xerces-build -S xerces-source ${{ env.CMAKE_ARGS }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DBUILD_SHARED_LIBS=OFF ${{ matrix.os == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv' }}
           cmake --build xerces-build --parallel $(nproc) --config Release --target install
 
       - name: Cache Geant4 Installation
@@ -154,11 +154,7 @@ jobs:
           'ubuntu-latest'
         run: |
           git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}
-          cmake -B geant4-build -S geant4-source -DCMAKE_BUILD_TYPE=Release ${{ env.CMAKE_ARGS }} \
-          -DCMAKE_INSTALL_PREFIX=${{ env.Geant4_DIR }} -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces \
-          -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF \
-          -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF \
-          ${{ matrix.os == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF' }}
+          cmake -B geant4-build -S geant4-source ${{ env.CMAKE_ARGS }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ env.Geant4_DIR }} -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ${{ matrix.os == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF' }}
           cmake --build geant4-build --parallel $(nproc) --config Release --target install
 
       - name: Setup Python
@@ -212,6 +208,7 @@ jobs:
           path: dist
 
       - name: Check wheel size
+        shell: bash
         run: |
           for file in dist/*.whl
           do
