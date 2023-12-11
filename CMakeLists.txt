@@ -43,6 +43,15 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(AWKWARD_VERSION "v2.5.0")
 set(PYBIND11_VERSION "v2.11.1")
 
+if (MSVC)
+    if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+        string(REGEX REPLACE "/W[0-4]" "/W3" CMAKE_CXX_FLAGS
+                             "${CMAKE_CXX_FLAGS}")
+    else ()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+    endif ()
+endif ()
+
 find_package(
     Python
     COMPONENTS Interpreter Development.Module
