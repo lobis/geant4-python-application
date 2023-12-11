@@ -147,6 +147,7 @@ jobs:
 
       - name: Setup Windows environment variables
         if: matrix.os == 'windows-latest'
+        shell: bash
         run: |
           echo "CMAKE_ARGS=-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" >> $GITHUB_ENV
 
