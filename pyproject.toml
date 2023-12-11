@@ -39,7 +39,7 @@ description = "Geant4 Python Application"
 name = "geant4_python_application"
 readme = "README.md"
 requires-python = ">=3.8"
-version = "0.0.2-dev1"
+version = "0.0.2.dev1"
 
 [project.optional-dependencies]
 dev = [
