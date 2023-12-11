@@ -5,10 +5,16 @@ if (NOT DEFINED SKBUILD_PROJECT_NAME)
     set(SKBUILD_PROJECT_NAME geant4-python-application)
 endif ()
 
-project(
-    ${SKBUILD_PROJECT_NAME}
-    VERSION ${SKBUILD_PROJECT_VERSION}
-    LANGUAGES CXX)
+string(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+$" IS_SEMANTIC_VERSION
+             "${SKBUILD_PROJECT_VERSION}")
+if (IS_SEMANTIC_VERSION)
+    # TODO: set the project version to this only if it is a semantic version
+    # (x.y.z, not x.y.z.dev0)
+endif ()
+
+project(${SKBUILD_PROJECT_NAME}
+        # VERSION ${SKBUILD_PROJECT_VERSION}
+        LANGUAGES CXX)
 
 if (MSVC)
     if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
