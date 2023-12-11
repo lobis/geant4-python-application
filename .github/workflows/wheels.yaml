@@ -216,6 +216,7 @@ jobs:
       - name: Check wheel size
         shell: bash
         run: |
+          ls -lh dist
           for file in dist/*.whl
           do
             size=$(du -m "$file" | cut -f1)
