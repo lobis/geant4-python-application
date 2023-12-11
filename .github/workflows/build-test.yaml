@@ -195,8 +195,7 @@ jobs:
           enableCrossOsArchive: true
 
       - name: Move Geant4 datasets (Ubuntu/MacOS)
-        if:
-          matrix.python-version != '3.11' && matrix.platform != 'windows-latest'
+        if: matrix.python-version != '3.11' && matrix.os != 'windows-latest'
         run: |
           GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.data_dir)")
           mkdir -p ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
@@ -204,8 +203,7 @@ jobs:
 
       # TODO: unify this with the above
       - name: Move Geant4 datasets (Windows)
-        if:
-          matrix.python-version != '3.11' && matrix.platform == 'windows-latest'
+        if: matrix.python-version != '3.11' && matrix.os == 'windows-latest'
         shell: powershell
         run: |
           $env:GEANT4_DATA_DIR = python -c "import geant4_python_application; print(geant4_python_application.data_dir)"
