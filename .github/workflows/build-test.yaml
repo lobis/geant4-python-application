@@ -31,6 +31,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+
 env:
   GEANT4_VERSION: 11.2.0
   XERCES_VERSION: 3.2.4
@@ -114,25 +118,12 @@ jobs:
           enableCrossOsArchive: true
           lookup-only: true
 
-      - name: Move Geant4 Datasets (Ubuntu/MacOS)
-        if:
-          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os !=
-          'windows-latest'
+      - name: Move Geant4 Datasets
+        if: steps.cache-geant4-data.outputs.cache-hit != 'true'
         run: |
-          source ${{ github.workspace }}/geant4/bin/geant4.sh
-          geant4-config --install-datasets
-          geant4-config --check-datasets
+          bash ${{ github.workspace }}/geant4/bin/geant4-config --install-datasets
+          bash ${{ github.workspace }}/geant4/bin/geant4-config --check-datasets
           mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
-
-      - name: Move Geant4 Datasets (Windows)
-        if:
-          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os ==
-          'windows-latest'
-        run: |
-          .\geant4\bin\geant4-config --install-datasets
-          ls .\geant4\share\Geant4\data
-          .\geant4\bin\geant4-config --check-datasets
-          mv .\geant4\share\Geant4\data .\geant4-data
 
   build-test:
     name:
@@ -199,20 +190,12 @@ jobs:
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
-      - name: Move datasets (Ubuntu/MacOS)
-        if: matrix.python-version != '3.11' && matrix.os != 'windows-latest'
+      - name: Move datasets
+        if: matrix.python-version != '3.11'
         run: |
           GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.data_dir)")
           mkdir -p ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
           mv ${{ github.workspace }}/geant4-data/* $GEANT4_DATA_DIR
-
-      - name: Move datasets (Windows)
-        if: matrix.python-version != '3.11' && matrix.os == 'windows-latest'
-        run: |
-          $env:GEANT4_DATA_DIR = python -c "import geant4_python_application; print(geant4_python_application.data_dir)"
-          New-Item -ItemType Directory -Path "${{ github.workspace }}\geant4-data" -Force
-          New-Item -ItemType Directory -Path $env:GEANT4_DATA_DIR -Force
-          Move-Item "${{ github.workspace }}\geant4-data\*" $env:GEANT4_DATA_DIR -Force
 
       - name: Check import
         run: |

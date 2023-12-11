@@ -8,6 +8,10 @@ on:
         description: Publish to Test PyPI
         default: false
 
+defaults:
+  run:
+    shell: bash
+
 env:
   GEANT4_VERSION: 11.2.0
   XERCES_VERSION: 3.2.4
