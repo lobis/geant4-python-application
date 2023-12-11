@@ -211,7 +211,7 @@ jobs:
 
     steps:
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
       - name: Download wheels
         uses: actions/download-artifact@v3
         with:
@@ -232,7 +232,7 @@ jobs:
 
     steps:
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
       - name: Download wheels
         uses: actions/download-artifact@v3
         with:
