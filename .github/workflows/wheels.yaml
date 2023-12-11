@@ -135,9 +135,7 @@ jobs:
         run: |
           git clone https://github.com/apache/xerces-c.git xerces-source
           git -C xerces-source checkout tags/v${{ env.XERCES_VERSION }}
-          cmake -B xerces-build -S xerces-source -DCMAKE_BUILD_TYPE=Release ${{ env.CMAKE_ARGS }} \
-          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DBUILD_SHARED_LIBS=OFF \
-          ${{ matrix.os == 'windows-latest' && '-DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv' }}
+          cmake -B xerces-build -S xerces-source -DCMAKE_BUILD_TYPE=Release ${{ env.CMAKE_ARGS }} -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DBUILD_SHARED_LIBS=OFF ${{ matrix.os == 'windows-latest' && '-DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv' }}
           cmake --build xerces-build --parallel $(nproc) --config Release --target install
 
       - name: Cache Geant4 Installation
