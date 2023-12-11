@@ -32,6 +32,8 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
 
       - name: Build sdist
         run: |
@@ -166,6 +168,8 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
 
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.16.2
@@ -212,6 +216,9 @@ jobs:
     steps:
       - name: Setup Python
         uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
       - name: Download wheels
         uses: actions/download-artifact@v3
         with:
@@ -233,6 +240,9 @@ jobs:
     steps:
       - name: Setup Python
         uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
       - name: Download wheels
         uses: actions/download-artifact@v3
         with:
