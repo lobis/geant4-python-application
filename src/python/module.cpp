@@ -68,11 +68,7 @@ PYBIND11_MODULE(_geant4_application, m) {
                     [](const py::object&) { return StackingAction::GetParticlesToIgnore(); },
                     [](const py::object&, const set<string>& particles) { return StackingAction::SetParticlesToIgnore(particles); });
 
-#ifdef VERSION_INFO
-    m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
-#else
-    m.attr("__version__") = "dev";
-#endif
+    m.attr("__version__") = MACRO_STRINGIFY(SKBUILD_PROJECT_VERSION);
     m.attr("geant4_version") = MACRO_STRINGIFY(GEANT4_VERSION);
     m.attr("awkward_version") = MACRO_STRINGIFY(AWKWARD_VERSION);
     m.attr("pybind11_version") = MACRO_STRINGIFY(PYBIND11_VERSION);

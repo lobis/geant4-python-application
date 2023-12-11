@@ -8,10 +8,15 @@ on:
         description: Publish to Test PyPI
         default: false
 
+defaults:
+  run:
+    shell: bash
+
 env:
   GEANT4_VERSION: 11.2.0
   XERCES_VERSION: 3.2.4
-  CPP_STANDARD: 20
+  CPP_STANDARD: 17
+  Geant4_DIR: ${{ github.workspace }}/geant4
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -41,7 +46,7 @@ jobs:
 
   wheels:
     name:
-      Build wheel for cp${{ matrix.python }}-${{ matrix.platform_id }}-${{
+      Build wheel for cp${{ matrix.python }} ${{ matrix.platform_id }} ${{
       matrix.manylinux_image }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -91,12 +96,73 @@ jobs:
             python: 311
             platform_id: macosx_arm64
 
+          - os: windows-latest
+            python: 38
+            platform_id: win_amd64
+          - os: windows-latest
+            python: 39
+            platform_id: win_amd64
+          - os: windows-latest
+            python: 310
+            platform_id: win_amd64
+          - os: windows-latest
+            python: 311
+            platform_id: win_amd64
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup CMake
         uses: lukka/get-cmake@v3.27.9
+
+      - name: Setup Windows environment variables
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "CMAKE_ARGS=-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" >> $GITHUB_ENV
+
+      - name: Setup MacOS environment variables
+        if: matrix.os == 'macos-latest'
+        run: |
+          echo "CMAKE_ARGS=-DCMAKE_OSX_ARCHITECTURES=${{ matrix.platform_id == 'macosx_x86_64' && 'x86_64' || 'arm64' }}" >> $GITHUB_ENV
+
+      - name: Cache Xerces-C Installation
+        if: matrix.os != 'ubuntu-latest'
+        id: cache-xerces
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/xerces
+          key:
+            xerces-v${{ env.XERCES_VERSION }}-${{ matrix.os }}-cpp${{
+            env.CPP_STANDARD }}-${{ matrix.platform_id }}
+
+      - name: Build and Install Xerces-C
+        if:
+          steps.cache-xerces.outputs.cache-hit != 'true' && matrix.os !=
+          'ubuntu-latest'
+        run: |
+          git clone https://github.com/apache/xerces-c.git xerces-source
+          git -C xerces-source checkout tags/v${{ env.XERCES_VERSION }}
+          cmake -B xerces-build -S xerces-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DBUILD_SHARED_LIBS=OFF ${{ matrix.os == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv' }}
+          cmake --build xerces-build --parallel $(nproc) --config Release --target install
+
+      - name: Cache Geant4 Installation
+        if: matrix.os != 'ubuntu-latest'
+        id: cache-geant4
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.Geant4_DIR }}
+          key:
+            geant4-v${{ env.GEANT4_VERSION }}-${{ matrix.os }}-cpp${{
+            env.CPP_STANDARD }}-${{ matrix.platform_id }}
+
+      - name: Build and Install Geant4 (without datasets)
+        if:
+          steps.cache-geant4.outputs.cache-hit != 'true' && matrix.os !=
+          'ubuntu-latest'
+        run: |
+          git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}
+          cmake -B geant4-build -S geant4-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ env.Geant4_DIR }} -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ${{ matrix.os == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF' }}
+          cmake --build geant4-build --parallel $(nproc) --config Release --target install
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -128,17 +194,7 @@ jobs:
           CIBW_ENVIRONMENT_MACOS: >
             MACOSX_DEPLOYMENT_TARGET=10.15 ${{ matrix.platform_id ==
             'macosx_arm64' && 'SKIP_PYBIND11_STUBGEN=1' || '' }}
-          CIBW_BEFORE_ALL_MACOS: |
-            python3 -m pip install cmake ninja
-            git clone https://github.com/apache/xerces-c.git /tmp/xerces
-            git -C /tmp/xerces checkout tags/v${{ env.XERCES_VERSION }}
-            cmake -G Ninja -B /tmp/xerces/build -S /tmp/xerces -DCMAKE_OSX_ARCHITECTURES=${{ matrix.platform_id == 'macosx_x86_64' && 'x86_64' || 'arm64' }} -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -Dnetwork-accessor=socket -Dtranscoder=iconv -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC
-            cmake --build /tmp/xerces/build --parallel $(nproc) --target install > /dev/null 2>&1
-            rm -rf /tmp/xerces
-            git clone https://github.com/Geant4/geant4.git /tmp/geant4 --branch=v${{ env.GEANT4_VERSION }} --depth=1
-            cmake -G Ninja -B /tmp/geant4/build -S /tmp/geant4 -DCMAKE_OSX_ARCHITECTURES=${{ matrix.platform_id == 'macosx_x86_64' && 'x86_64' || 'arm64' }} -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DCMAKE_BUILD_TYPE=Release -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF
-            cmake --build /tmp/geant4/build --parallel $(nproc) --target install > /dev/null 2>&1
-            rm -rf /tmp/geant4
+
       - name: Upload wheel
         uses: actions/upload-artifact@v3
         with:
@@ -151,7 +207,7 @@ jobs:
     runs-on: ubuntu-latest
     if:
       (github.event_name == 'release' && github.event.action == 'published') ||
-      github.event.inputs.publish_to_test_pypi
+      github.event.inputs.publish_to_test_pypi == 'true'
 
     steps:
       - name: Setup Python
@@ -166,7 +222,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.8.11
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+          repository-url: https://test.pypi.org/legacy/
 
   upload-pypi:
     name: Upload wheels to PyPI
