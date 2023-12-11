@@ -24,8 +24,8 @@ on:
       #        if:
       #          ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled
       #          }}
-      #        with:
-      #          limit-access-to-actor: false
+    #        with:
+    #          limit-access-to-actor: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -154,6 +154,11 @@ jobs:
       - name: Setup CMake
         uses: lukka/get-cmake@v3.27.9
 
+      - name: Setup Windows environment variables
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "CMAKE_ARGS=-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" >> $GITHUB_ENV
+
       - name: Cache Xerces-C Installation
         id: cache-xerces
         uses: actions/cache@v3
@@ -176,7 +181,6 @@ jobs:
 
       - name: pip install the package
         run: |
-          ${{ matrix.os == 'windows-latest' && 'CMAKE_ARGS="-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"' || ''}}
           python -m pip install .[test]
 
       # test ability to download datasets in one job and use the cache in the others
