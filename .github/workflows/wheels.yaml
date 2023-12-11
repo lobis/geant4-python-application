@@ -117,11 +117,6 @@ jobs:
       - name: Setup CMake
         uses: lukka/get-cmake@v3.27.9
 
-      - name: Setup Windows environment variables
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "CMAKE_ARGS=-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" >> $GITHUB_ENV
-
       - name: Setup MacOS environment variables
         if: matrix.os == 'macos-latest'
         run: |
@@ -169,7 +164,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=${{ env.Geant4_DIR }} -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces \
           -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF \
           -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF \
-          ${{ matrix.os == 'windows-latest' && '-DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF' }}
+          ${{ matrix.os == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF' }}
           cmake --build geant4-build --parallel $(nproc) --config Release --target install
 
       - name: Setup Python
