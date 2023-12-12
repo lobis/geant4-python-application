@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import multiprocessing
+import threading
 from collections import namedtuple
 
 import awkward as ak
@@ -17,30 +18,36 @@ Message = namedtuple("Message", ["target", "method", "args", "kwargs"])
 def _start_application(pipe: multiprocessing.Pipe):
     app = Geant4Application()
 
-    while message := pipe.recv():
-        if message is None:
-            break
-        target = app
-        target_list = message.target.split(".")
-        target_list = [element for element in target_list if element]
-        for target_name in target_list:
-            if not hasattr(target, target_name):
-                raise ValueError(f"{target} has no attribute {target_name}")
-            target = getattr(target, target_name)
-
-        method = message.method
-        # verify that the method exists on app
-        if not hasattr(target, method):
-            raise ValueError(f"Unknown method: {method}")
-
+    while True:
+        counter = None
         try:
-            # call the method
+            message_with_counter = pipe.recv()
+            if message_with_counter is None:
+                break
+
+            counter, message = message_with_counter
+            target = app
+            target_list = message.target.split(".")
+            target_list = [element for element in target_list if element]
+            for target_name in target_list:
+                if not hasattr(target, target_name):
+                    raise ValueError(f"{target} has no attribute {target_name}")
+                target = getattr(target, target_name)
+
+            method = message.method
+            # verify that the method exists on app
+            if not hasattr(target, method):
+                raise ValueError(f"Unknown method: {method}")
+
             result = getattr(target, method)(*message.args, **message.kwargs)
-            # send the result back
-            pipe.send(result)
-        except Exception as e:
-            print(f"Exception in {method}: {e}")
+            pipe.send(counter, result)
+        except KeyboardInterrupt:
+            pass
+        except EOFError or BrokenPipeError:
             break
+        except Exception as e:
+            if counter is not None:
+                pipe.send(counter, e)
 
 
 class Application:
@@ -54,27 +61,31 @@ class Application:
             target=_start_application, args=(child_pipe,), daemon=True
         )
         self._process.start()
+        self._message_counter = 0
 
     def __del__(self):
-        try:
-            self._send(None)
-        except Exception:
-            pass
+        if hasattr(self, "_pipe") and self._pipe and self._pipe.poll():
+            self._pipe.send(None)
+            self._pipe.close()
+            self._process.join()
 
-    def _send(self, message: Message | None):
-        self._pipe.send(message)
+    def _send(self, counter: int, message: Message):
+        self._pipe.send((counter, message))
 
     def _recv(self):
         return self._pipe.recv()
 
     def _send_and_recv(self, message: Message):
-        try:
-            self._send(message)
-            return self._recv()
-        except Exception as e:
-            raise RuntimeError(
-                f"Application has been destroyed. Please create a new one: {e}"
-            )
+        with threading.Lock():
+            try:
+                self._send(self._message_counter, message)
+                counter, response = self._recv()
+            except (EOFError, BrokenPipeError):
+                raise RuntimeError("Application process died. Recreate the application")
+            if counter != self._message_counter:
+                raise RuntimeError("Message counter mismatch")
+            self._message_counter += 1
+            return response
 
     def setup_manager(self, n_threads: int = 0) -> Application:
         self._send_and_recv(Message("", "setup_manager", (n_threads,), {}))
