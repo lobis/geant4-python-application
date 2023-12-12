@@ -40,14 +40,14 @@ def _start_application(pipe: multiprocessing.Pipe):
                 raise ValueError(f"Unknown method: {method}")
 
             result = getattr(target, method)(*message.args, **message.kwargs)
-            pipe.send(counter, result)
+            pipe.send((counter, result))
         except KeyboardInterrupt:
             pass
         except EOFError or BrokenPipeError:
             break
         except Exception as e:
             if counter is not None:
-                pipe.send(counter, e)
+                pipe.send((counter, e))
 
 
 class Application:
@@ -84,6 +84,8 @@ class Application:
                 raise RuntimeError("Application process died. Recreate the application")
             if counter != self._message_counter:
                 raise RuntimeError("Message counter mismatch")
+            if isinstance(response, Exception):
+                raise response
             self._message_counter += 1
             return response
 
