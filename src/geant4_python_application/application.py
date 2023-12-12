@@ -52,22 +52,36 @@ def _start_application(pipe: multiprocessing.Pipe):
 
 class Application:
     def __init__(self):
-        geant4_python_application.datasets.install_datasets(show_progress=True)
-
         self._detector = geant4_python_application.Detector(self)
 
         self._pipe, child_pipe = multiprocessing.Pipe()
         self._process = multiprocessing.Process(
             target=_start_application, args=(child_pipe,), daemon=True
         )
-        self._process.start()
         self._message_counter = 0
 
-    def __del__(self):
-        if hasattr(self, "_pipe") and self._pipe and self._pipe.poll():
+    def start(self):
+        if self._process.is_alive():
+            raise RuntimeError("Application is already running")
+        self._process.start()
+
+    def stop(self):
+        if not self._process.is_alive():
+            return
+        try:
             self._pipe.send(None)
             self._pipe.close()
             self._process.join()
+        except (EOFError, BrokenPipeError):
+            pass
+
+    def __enter__(self):
+        self.start()
+        geant4_python_application.datasets.install_datasets(show_progress=True)
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.stop()
 
     def _send(self, counter: int, message: Message):
         self._pipe.send((counter, message))
