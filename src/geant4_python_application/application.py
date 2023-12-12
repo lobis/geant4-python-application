@@ -52,13 +52,15 @@ def _start_application(pipe: multiprocessing.Pipe):
 
 class Application:
     def __init__(self):
-        self._detector = geant4_python_application.Detector(self)
+        geant4_python_application.datasets.install_datasets(show_progress=True)
 
+        self._detector = geant4_python_application.Detector(self)
         self._pipe, child_pipe = multiprocessing.Pipe()
         self._process = multiprocessing.Process(
             target=_start_application, args=(child_pipe,), daemon=True
         )
         self._message_counter = 0
+        self._lock = threading.Lock()
 
     def start(self):
         if self._process.is_alive():
@@ -77,7 +79,6 @@ class Application:
 
     def __enter__(self):
         self.start()
-        geant4_python_application.datasets.install_datasets(show_progress=True)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -90,17 +91,17 @@ class Application:
         return self._pipe.recv()
 
     def _send_and_recv(self, message: Message):
-        with threading.Lock():
+        with self._lock:
             try:
                 self._send(self._message_counter, message)
                 counter, response = self._recv()
+                if counter != self._message_counter:
+                    raise RuntimeError("Message counter mismatch")
+                self._message_counter += 1
             except (EOFError, BrokenPipeError):
                 raise RuntimeError("Application process died. Recreate the application")
-            if counter != self._message_counter:
-                raise RuntimeError("Message counter mismatch")
             if isinstance(response, Exception):
                 raise response
-            self._message_counter += 1
             return response
 
     def setup_manager(self, n_threads: int = 0) -> Application:

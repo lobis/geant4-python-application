@@ -29,26 +29,6 @@ def test_run():
         assert len(events) == 100
 
 
-def test_multiple_apps():
-    apps = [Application() for _ in range(10)]
-
-    for app in apps:
-        app.start()
-        app.setup_manager().setup_detector(
-            gdml=basic_gdml
-        ).setup_physics().setup_action()
-
-    for app in apps:
-        app.initialize()
-
-    for app in apps:
-        events = app.run(10)
-        assert len(events) == 10
-
-    for app in apps:
-        app.stop()
-
-
 def test_seed_single_thread():
     with Application() as app:
         app.setup_manager()
@@ -78,6 +58,26 @@ def test_seed_single_thread():
         ]
         energy = np.array(events["track.step.energy"][0][0][0:5])
         assert np.allclose(energy, reference_value, atol=1e-5)
+
+
+def test_multiple_apps():
+    apps = [Application() for _ in range(10)]
+
+    for app in apps:
+        app.start()
+        app.setup_manager().setup_detector(
+            gdml=basic_gdml
+        ).setup_physics().setup_action()
+
+    for app in apps:
+        app.initialize()
+
+    for app in apps:
+        events = app.run(10)
+        assert len(events) == 10
+
+    for app in apps:
+        app.stop()
 
 
 def test_event_data_is_cleared():
@@ -116,3 +116,18 @@ def test_complex_gdml(n_threads):
         assert len(app.detector.physical_volumes) == 309
 
         events = app.run(1000)
+
+
+def test_python_thread_safety():
+    import concurrent.futures
+
+    with Application() as app:
+        app.setup_manager().setup_physics().setup_detector(
+            gdml=basic_gdml
+        ).setup_action()
+        app.initialize()
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(app.run, 10) for _ in range(10)]
+            for future in futures:
+                future.result()
