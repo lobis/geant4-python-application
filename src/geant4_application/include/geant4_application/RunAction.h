@@ -23,10 +23,10 @@ public:
     static std::vector<py::object> GetEvents();
 
 private:
-    data::Builders builder = {Application::GetEventFields()};
+    std::unique_ptr<data::Builders> builder = nullptr;
     std::mutex mutex;
     static std::unique_ptr<std::vector<py::object>> events;
-    static std::vector<data::Builders*> buildersToSnapshot;
+    static std::vector<std::unique_ptr<data::Builders>> buildersToSnapshot;
 };
 
 }// namespace geant4_app

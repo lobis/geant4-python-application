@@ -10,7 +10,7 @@ using namespace geant4_app;
 RunAction::RunAction() : G4UserRunAction() {}
 
 void RunAction::BeginOfRunAction(const G4Run*) {
-    builder.Clear();
+    builder = make_unique<data::Builders>(Application::GetEventFields());
 
     auto steppingVerbose = ((SteppingVerbose*) G4VSteppingVerbose::GetInstance());
     steppingVerbose->Initialize();
@@ -23,7 +23,7 @@ void RunAction::BeginOfRunAction(const G4Run*) {
 void RunAction::EndOfRunAction(const G4Run*) {
     if (!isMaster || !G4Threading::IsMultithreadedApplication()) {
         lock_guard<std::mutex> lock(mutex);
-        buildersToSnapshot.push_back(&builder);
+        buildersToSnapshot.push_back(std::move(builder));
     }
 
     if (isMaster) {
@@ -39,7 +39,7 @@ void RunAction::EndOfRunAction(const G4Run*) {
 
 data::Builders& RunAction::GetBuilder() {
     auto runAction = dynamic_cast<RunAction*>(const_cast<G4UserRunAction*>(G4RunManager::GetRunManager()->GetUserRunAction()));
-    return runAction->builder;
+    return *runAction->builder;
 }
 
 unique_ptr<std::vector<py::object>> RunAction::events = nullptr;
@@ -50,4 +50,4 @@ vector<py::object> RunAction::GetEvents() {
     return *std::move(RunAction::events);
 }
 
-vector<data::Builders*> RunAction::buildersToSnapshot = {};
+vector<std::unique_ptr<data::Builders>> RunAction::buildersToSnapshot = {};
