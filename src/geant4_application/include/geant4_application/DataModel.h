@@ -54,12 +54,32 @@ struct Builders {
     TrackFieldBuilder<double> track_initial_position_x;
     TrackFieldBuilder<double> track_initial_position_y;
     TrackFieldBuilder<double> track_initial_position_z;
+    TrackFieldBuilder<double> track_initial_momentum_x;
+    TrackFieldBuilder<double> track_initial_momentum_y;
+    TrackFieldBuilder<double> track_initial_momentum_z;
+    StepFieldBuilder<uint> track_children_ids;// this is a track field, but it has the same structure of a step field
     TrackStringBuilder track_particle;
+    TrackStringBuilder track_particle_type;
+    TrackStringBuilder track_creator_process;
+    TrackStringBuilder track_creator_process_type;
+    TrackFieldBuilder<double> track_weight;
+    //
     StepFieldBuilder<double> step_energy;
     StepFieldBuilder<double> step_time;
+    StepFieldBuilder<double> step_track_kinetic_energy;
+    StepStringBuilder step_process;
+    StepStringBuilder step_process_type;
+    StepStringBuilder step_particle_type;
+    StepStringBuilder step_volume;
+    StepStringBuilder step_volume_post;
+    StepStringBuilder step_nucleus;
     StepFieldBuilder<double> step_position_x;
     StepFieldBuilder<double> step_position_y;
     StepFieldBuilder<double> step_position_z;
+    StepFieldBuilder<double> step_momentum_x;
+    StepFieldBuilder<double> step_momentum_y;
+    StepFieldBuilder<double> step_momentum_z;
+
 
     Builders(const std::unordered_set<std::string>& fields) : fields(fields) {
         track_particle.content().set_parameters(R"""("__array__": "string")""");

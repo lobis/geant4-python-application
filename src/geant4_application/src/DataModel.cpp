@@ -45,89 +45,205 @@ void InsertEvent(const G4Event* event, Builders& builders) {
 
 void InsertEventBegin(const G4Event* event, Builders& builder) {
     // track fields
-    if (builder.fields.contains("track_id")) {
-        builder.track_id.begin_list();
-    }
-    if (builder.fields.contains("track_parent_id")) {
-        builder.track_parent_id.begin_list();
-    }
-    if (builder.fields.contains("track_initial_energy")) {
-        builder.track_initial_energy.begin_list();
-    }
-    if (builder.fields.contains("track_initial_time")) {
-        builder.track_initial_time.begin_list();
-    }
-    if (builder.fields.contains("track_initial_position_x")) {
-        builder.track_initial_position_x.begin_list();
-    }
-    if (builder.fields.contains("track_initial_position_y")) {
-        builder.track_initial_position_y.begin_list();
-    }
-    if (builder.fields.contains("track_initial_position_z")) {
-        builder.track_initial_position_z.begin_list();
-    }
-    if (builder.fields.contains("track_particle")) {
-        builder.track_particle.begin_list();
+    {
+        if (builder.fields.contains("track_id")) {
+            builder.track_id.begin_list();
+        }
+        if (builder.fields.contains("track_parent_id")) {
+            builder.track_parent_id.begin_list();
+        }
+        if (builder.fields.contains("track_initial_energy")) {
+            builder.track_initial_energy.begin_list();
+        }
+        if (builder.fields.contains("track_initial_time")) {
+            builder.track_initial_time.begin_list();
+        }
+        if (builder.fields.contains("track_weight")) {
+            builder.track_weight.begin_list();
+        }
+        if (builder.fields.contains("track_initial_position_x")) {
+            builder.track_initial_position_x.begin_list();
+        }
+        if (builder.fields.contains("track_initial_position_y")) {
+            builder.track_initial_position_y.begin_list();
+        }
+        if (builder.fields.contains("track_initial_position_z")) {
+            builder.track_initial_position_z.begin_list();
+        }
+        if (builder.fields.contains("track_initial_momentum_x")) {
+            builder.track_initial_momentum_x.begin_list();
+        }
+        if (builder.fields.contains("track_initial_momentum_y")) {
+            builder.track_initial_momentum_y.begin_list();
+        }
+        if (builder.fields.contains("track_initial_momentum_z")) {
+            builder.track_initial_momentum_z.begin_list();
+        }
+        if (builder.fields.contains("track_particle")) {
+            builder.track_particle.begin_list();
+        }
+        if (builder.fields.contains("track_particle_type")) {
+            builder.track_particle_type.begin_list();
+        }
+        if (builder.fields.contains("track_creator_process")) {
+            builder.track_creator_process.begin_list();
+        }
+        if (builder.fields.contains("track_creator_process_type")) {
+            builder.track_creator_process_type.begin_list();
+        }
+        if (builder.fields.contains("track_children_ids")) {
+            builder.track_children_ids.begin_list();
+        }
     }
     // step fields
-    if (builder.fields.contains("step_energy")) {
-        builder.step_energy.begin_list();
-    }
-    if (builder.fields.contains("step_time")) {
-        builder.step_time.begin_list();
-    }
-    if (builder.fields.contains("step_position_x")) {
-        builder.step_position_x.begin_list();
-    }
-    if (builder.fields.contains("step_position_y")) {
-        builder.step_position_y.begin_list();
-    }
-    if (builder.fields.contains("step_position_z")) {
-        builder.step_position_z.begin_list();
+    {
+        if (builder.fields.contains("step_energy")) {
+            builder.step_energy.begin_list();
+        }
+        if (builder.fields.contains("step_time")) {
+            builder.step_time.begin_list();
+        }
+        if (builder.fields.contains("step_track_kinetic_energy")) {
+            builder.step_track_kinetic_energy.begin_list();
+        }
+        if (builder.fields.contains("step_process")) {
+            builder.step_process.begin_list();
+        }
+        if (builder.fields.contains("step_process_type")) {
+            builder.step_process_type.begin_list();
+        }
+        if (builder.fields.contains("step_particle_type")) {
+            builder.step_particle_type.begin_list();
+        }
+        if (builder.fields.contains("step_volume")) {
+            builder.step_volume.begin_list();
+        }
+        if (builder.fields.contains("step_volume_post")) {
+            builder.step_volume_post.begin_list();
+        }
+        if (builder.fields.contains("step_nucleus")) {
+            builder.step_nucleus.begin_list();
+        }
+        if (builder.fields.contains("step_position_x")) {
+            builder.step_position_x.begin_list();
+        }
+        if (builder.fields.contains("step_position_y")) {
+            builder.step_position_y.begin_list();
+        }
+        if (builder.fields.contains("step_position_z")) {
+            builder.step_position_z.begin_list();
+        }
+        if (builder.fields.contains("step_momentum_x")) {
+            builder.step_momentum_x.begin_list();
+        }
+        if (builder.fields.contains("step_momentum_y")) {
+            builder.step_momentum_y.begin_list();
+        }
+        if (builder.fields.contains("step_momentum_z")) {
+            builder.step_momentum_z.begin_list();
+        }
     }
 }
 
 void InsertEventEnd(const G4Event*, Builders& builder) {
     // track fields
-    if (builder.fields.contains("track_id")) {
-        builder.track_id.end_list();
-    }
-    if (builder.fields.contains("track_parent_id")) {
-        builder.track_parent_id.end_list();
-    }
-    if (builder.fields.contains("track_initial_energy")) {
-        builder.track_initial_energy.end_list();
-    }
-    if (builder.fields.contains("track_initial_time")) {
-        builder.track_initial_time.end_list();
-    }
-    if (builder.fields.contains("track_initial_position_x")) {
-        builder.track_initial_position_x.end_list();
-    }
-    if (builder.fields.contains("track_initial_position_y")) {
-        builder.track_initial_position_y.end_list();
-    }
-    if (builder.fields.contains("track_initial_position_z")) {
-        builder.track_initial_position_z.end_list();
-    }
-    if (builder.fields.contains("track_particle")) {
-        builder.track_particle.end_list();
+    {
+        if (builder.fields.contains("track_id")) {
+            builder.track_id.end_list();
+        }
+        if (builder.fields.contains("track_parent_id")) {
+            builder.track_parent_id.end_list();
+        }
+        if (builder.fields.contains("track_initial_energy")) {
+            builder.track_initial_energy.end_list();
+        }
+        if (builder.fields.contains("track_initial_time")) {
+            builder.track_initial_time.end_list();
+        }
+        if (builder.fields.contains("track_weight")) {
+            builder.track_weight.end_list();
+        }
+        if (builder.fields.contains("track_initial_position_x")) {
+            builder.track_initial_position_x.end_list();
+        }
+        if (builder.fields.contains("track_initial_position_y")) {
+            builder.track_initial_position_y.end_list();
+        }
+        if (builder.fields.contains("track_initial_position_z")) {
+            builder.track_initial_position_z.end_list();
+        }
+        if (builder.fields.contains("track_initial_momentum_x")) {
+            builder.track_initial_momentum_x.end_list();
+        }
+        if (builder.fields.contains("track_initial_momentum_y")) {
+            builder.track_initial_momentum_y.end_list();
+        }
+        if (builder.fields.contains("track_initial_momentum_z")) {
+            builder.track_initial_momentum_z.end_list();
+        }
+        if (builder.fields.contains("track_particle")) {
+            builder.track_particle.end_list();
+        }
+        if (builder.fields.contains("track_particle_type")) {
+            builder.track_particle_type.end_list();
+        }
+        if (builder.fields.contains("track_creator_process")) {
+            builder.track_creator_process.end_list();
+        }
+        if (builder.fields.contains("track_creator_process_type")) {
+            builder.track_creator_process_type.end_list();
+        }
+        if (builder.fields.contains("track_children_ids")) {
+            builder.track_children_ids.end_list();
+        }
     }
     // step fields
-    if (builder.fields.contains("step_energy")) {
-        builder.step_energy.end_list();
-    }
-    if (builder.fields.contains("step_time")) {
-        builder.step_time.end_list();
-    }
-    if (builder.fields.contains("step_position_x")) {
-        builder.step_position_x.end_list();
-    }
-    if (builder.fields.contains("step_position_y")) {
-        builder.step_position_y.end_list();
-    }
-    if (builder.fields.contains("step_position_z")) {
-        builder.step_position_z.end_list();
+    {
+        if (builder.fields.contains("step_energy")) {
+            builder.step_energy.end_list();
+        }
+        if (builder.fields.contains("step_time")) {
+            builder.step_time.end_list();
+        }
+        if (builder.fields.contains("step_track_kinetic_energy")) {
+            builder.step_track_kinetic_energy.end_list();
+        }
+        if (builder.fields.contains("step_process")) {
+            builder.step_process.end_list();
+        }
+        if (builder.fields.contains("step_process_type")) {
+            builder.step_process_type.end_list();
+        }
+        if (builder.fields.contains("step_particle_type")) {
+            builder.step_particle_type.end_list();
+        }
+        if (builder.fields.contains("step_volume")) {
+            builder.step_volume.end_list();
+        }
+        if (builder.fields.contains("step_volume_post")) {
+            builder.step_volume_post.end_list();
+        }
+        if (builder.fields.contains("step_nucleus")) {
+            builder.step_nucleus.end_list();
+        }
+        if (builder.fields.contains("step_position_x")) {
+            builder.step_position_x.end_list();
+        }
+        if (builder.fields.contains("step_position_y")) {
+            builder.step_position_y.end_list();
+        }
+        if (builder.fields.contains("step_position_z")) {
+            builder.step_position_z.end_list();
+        }
+        if (builder.fields.contains("step_momentum_x")) {
+            builder.step_momentum_x.end_list();
+        }
+        if (builder.fields.contains("step_momentum_y")) {
+            builder.step_momentum_y.end_list();
+        }
+        if (builder.fields.contains("step_momentum_z")) {
+            builder.step_momentum_z.end_list();
+        }
     }
 }
 
