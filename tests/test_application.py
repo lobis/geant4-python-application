@@ -19,6 +19,12 @@ def test_missing_manager():
             app.setup_detector(gdml="")
 
 
+def test_no_initialize():
+    app = Application()
+    with pytest.raises(RuntimeError):
+        app.setup_manager()
+
+
 def test_run():
     with Application() as app:
         app.setup_manager().setup_detector(

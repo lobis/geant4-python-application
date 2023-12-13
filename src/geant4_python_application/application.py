@@ -91,6 +91,8 @@ class Application:
         return self._pipe.recv()
 
     def _send_and_recv(self, message: Message):
+        if self._process is None or not self._process.is_alive():
+            raise RuntimeError("Application is not running")
         with self._lock:
             try:
                 self._send(self._message_counter, message)
