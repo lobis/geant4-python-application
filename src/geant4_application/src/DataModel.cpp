@@ -287,6 +287,27 @@ void InsertTrackBegin(const G4Track* track, Builders& builder) {
     if (builder.fields.contains("step_time")) {
         builder.step_time.content().begin_list();
     }
+    if (builder.fields.contains("step_track_kinetic_energy")) {
+        builder.step_track_kinetic_energy.content().begin_list();
+    }
+    if (builder.fields.contains("step_process")) {
+        builder.step_process.content().begin_list();
+    }
+    if (builder.fields.contains("step_process_type")) {
+        builder.step_process_type.content().begin_list();
+    }
+    if (builder.fields.contains("step_particle_type")) {
+        builder.step_particle_type.content().begin_list();
+    }
+    if (builder.fields.contains("step_volume")) {
+        builder.step_volume.content().begin_list();
+    }
+    if (builder.fields.contains("step_volume_post")) {
+        builder.step_volume_post.content().begin_list();
+    }
+    if (builder.fields.contains("step_nucleus")) {
+        builder.step_nucleus.content().begin_list();
+    }
     if (builder.fields.contains("step_position_x")) {
         builder.step_position_x.content().begin_list();
     }
@@ -295,6 +316,15 @@ void InsertTrackBegin(const G4Track* track, Builders& builder) {
     }
     if (builder.fields.contains("step_position_z")) {
         builder.step_position_z.content().begin_list();
+    }
+    if (builder.fields.contains("step_momentum_x")) {
+        builder.step_momentum_x.content().begin_list();
+    }
+    if (builder.fields.contains("step_momentum_y")) {
+        builder.step_momentum_y.content().begin_list();
+    }
+    if (builder.fields.contains("step_momentum_z")) {
+        builder.step_momentum_z.content().begin_list();
     }
 }
 
@@ -305,6 +335,27 @@ void InsertTrackEnd(const G4Track*, Builders& builder) {
     if (builder.fields.contains("step_time")) {
         builder.step_time.content().end_list();
     }
+    if (builder.fields.contains("step_track_kinetic_energy")) {
+        builder.step_track_kinetic_energy.content().end_list();
+    }
+    if (builder.fields.contains("step_process")) {
+        builder.step_process.content().end_list();
+    }
+    if (builder.fields.contains("step_process_type")) {
+        builder.step_process_type.content().end_list();
+    }
+    if (builder.fields.contains("step_particle_type")) {
+        builder.step_particle_type.content().end_list();
+    }
+    if (builder.fields.contains("step_volume")) {
+        builder.step_volume.content().end_list();
+    }
+    if (builder.fields.contains("step_volume_post")) {
+        builder.step_volume_post.content().end_list();
+    }
+    if (builder.fields.contains("step_nucleus")) {
+        builder.step_nucleus.content().end_list();
+    }
     if (builder.fields.contains("step_position_x")) {
         builder.step_position_x.content().end_list();
     }
@@ -313,6 +364,15 @@ void InsertTrackEnd(const G4Track*, Builders& builder) {
     }
     if (builder.fields.contains("step_position_z")) {
         builder.step_position_z.content().end_list();
+    }
+    if (builder.fields.contains("step_momentum_x")) {
+        builder.step_momentum_x.content().end_list();
+    }
+    if (builder.fields.contains("step_momentum_y")) {
+        builder.step_momentum_y.content().end_list();
+    }
+    if (builder.fields.contains("step_momentum_z")) {
+        builder.step_momentum_z.content().end_list();
     }
 }
 
@@ -411,6 +471,9 @@ py::object SnapshotBuilder(Builders& builder) {
     if (builder.fields.contains("track_initial_time")) {
         snapshot["track_initial_time"] = snapshot_builder(builder.track_initial_time);
     }
+    if (builder.fields.contains("track_weight")) {
+        snapshot["track_weight"] = snapshot_builder(builder.track_weight);
+    }
     if (builder.fields.contains("track_initial_position_x")) {
         snapshot["track_initial_position_x"] = snapshot_builder(builder.track_initial_position_x);
     }
@@ -420,14 +483,56 @@ py::object SnapshotBuilder(Builders& builder) {
     if (builder.fields.contains("track_initial_position_z")) {
         snapshot["track_initial_position_z"] = snapshot_builder(builder.track_initial_position_z);
     }
+    if (builder.fields.contains("track_initial_momentum_x")) {
+        snapshot["track_initial_momentum_x"] = snapshot_builder(builder.track_initial_momentum_x);
+    }
+    if (builder.fields.contains("track_initial_momentum_y")) {
+        snapshot["track_initial_momentum_y"] = snapshot_builder(builder.track_initial_momentum_y);
+    }
+    if (builder.fields.contains("track_initial_momentum_z")) {
+        snapshot["track_initial_momentum_z"] = snapshot_builder(builder.track_initial_momentum_z);
+    }
     if (builder.fields.contains("track_particle")) {
         snapshot["track_particle"] = snapshot_builder(builder.track_particle);
+    }
+    if (builder.fields.contains("track_particle_type")) {
+        snapshot["track_particle_type"] = snapshot_builder(builder.track_particle_type);
+    }
+    if (builder.fields.contains("track_creator_process")) {
+        snapshot["track_creator_process"] = snapshot_builder(builder.track_creator_process);
+    }
+    if (builder.fields.contains("track_creator_process_type")) {
+        snapshot["track_creator_process_type"] = snapshot_builder(builder.track_creator_process_type);
+    }
+    if (builder.fields.contains("track_children_ids")) {
+        snapshot["track_children_ids"] = snapshot_builder(builder.track_children_ids);
     }
     if (builder.fields.contains("step_energy")) {
         snapshot["step_energy"] = snapshot_builder(builder.step_energy);
     }
     if (builder.fields.contains("step_time")) {
         snapshot["step_time"] = snapshot_builder(builder.step_time);
+    }
+    if (builder.fields.contains("step_track_kinetic_energy")) {
+        snapshot["step_track_kinetic_energy"] = snapshot_builder(builder.step_track_kinetic_energy);
+    }
+    if (builder.fields.contains("step_process")) {
+        snapshot["step_process"] = snapshot_builder(builder.step_process);
+    }
+    if (builder.fields.contains("step_process_type")) {
+        snapshot["step_process_type"] = snapshot_builder(builder.step_process_type);
+    }
+    if (builder.fields.contains("step_particle_type")) {
+        snapshot["step_particle_type"] = snapshot_builder(builder.step_particle_type);
+    }
+    if (builder.fields.contains("step_volume")) {
+        snapshot["step_volume"] = snapshot_builder(builder.step_volume);
+    }
+    if (builder.fields.contains("step_volume_post")) {
+        snapshot["step_volume_post"] = snapshot_builder(builder.step_volume_post);
+    }
+    if (builder.fields.contains("step_nucleus")) {
+        snapshot["step_nucleus"] = snapshot_builder(builder.step_nucleus);
     }
     if (builder.fields.contains("step_position_x")) {
         snapshot["step_position_x"] = snapshot_builder(builder.step_position_x);
@@ -437,6 +542,15 @@ py::object SnapshotBuilder(Builders& builder) {
     }
     if (builder.fields.contains("step_position_z")) {
         snapshot["step_position_z"] = snapshot_builder(builder.step_position_z);
+    }
+    if (builder.fields.contains("step_momentum_x")) {
+        snapshot["step_momentum_x"] = snapshot_builder(builder.step_momentum_x);
+    }
+    if (builder.fields.contains("step_momentum_y")) {
+        snapshot["step_momentum_y"] = snapshot_builder(builder.step_momentum_y);
+    }
+    if (builder.fields.contains("step_momentum_z")) {
+        snapshot["step_momentum_z"] = snapshot_builder(builder.step_momentum_z);
     }
     return snapshot;
 }
