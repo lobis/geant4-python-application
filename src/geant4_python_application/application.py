@@ -62,10 +62,11 @@ class Application:
         self._message_counter = 0
         self._lock = threading.Lock()
 
-    def start(self):
+    def start(self) -> Application:
         if self._process.is_alive():
             raise RuntimeError("Application is already running")
         self._process.start()
+        return self
 
     def stop(self):
         if not self._process.is_alive():
@@ -77,9 +78,8 @@ class Application:
         except (EOFError, BrokenPipeError):
             pass
 
-    def __enter__(self):
-        self.start()
-        return self
+    def __enter__(self) -> Application:
+        return self.start()
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.stop()
@@ -189,7 +189,7 @@ class Application:
             with_name="events",
         )
 
-        return events[ak.argsort(events.event_id)]
+        return events[ak.argsort(events.id)]
 
     @property
     def seed(self):

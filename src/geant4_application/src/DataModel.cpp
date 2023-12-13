@@ -18,16 +18,28 @@
 using namespace std;
 using namespace geant4_app;
 
-std::unordered_set<std::string> Application::eventFieldsComplete = {"run_id", "event_id", "track_id", "track_parent_id", "track_initial_energy", "track_initial_time", "track_initial_position_x", "track_initial_position_y", "track_initial_position_z", "step_energy", "step_time", "step_position_x", "step_position_y", "step_position_z"};
+std::unordered_set<std::string> Application::eventFieldsComplete = {
+        //
+        "id", "run",                                                                                                         //
+        "track_id", "track_parent_id", "track_initial_energy", "track_initial_time", "track_weight",                         //
+        "track_initial_position_x", "track_initial_position_y", "track_initial_position_z",                                  //
+        "track_initial_momentum_x", "track_initial_momentum_y", "track_initial_momentum_z",                                  //
+        "track_particle", "track_particle_type", "track_creator_process", "track_creator_process_type", "track_children_ids",//
+        "step_energy", "step_time", "step_track_kinetic_energy",                                                             //
+        "step_process", "step_process_type", "step_particle_type",                                                           //
+        "step_volume", "step_volume_post", "step_nucleus",                                                                   //
+        "step_position_x", "step_position_y", "step_position_z",                                                             //
+        "step_momentum_x", "step_momentum_y", "step_momentum_z",                                                             //
+};
 
 namespace geant4_app::data {
 
 void InsertEvent(const G4Event* event, Builders& builders) {
-    if (builders.fields.contains("run_id")) {
-        builders.run_id.append(G4RunManager::GetRunManager()->GetCurrentRun()->GetRunID());
+    if (builders.fields.contains("run")) {
+        builders.run.append(G4RunManager::GetRunManager()->GetCurrentRun()->GetRunID());
     }
-    if (builders.fields.contains("event_id")) {
-        builders.event_id.append(event->GetEventID());
+    if (builders.fields.contains("id")) {
+        builders.id.append(event->GetEventID());
     }
 }
 
@@ -53,6 +65,9 @@ void InsertEventBegin(const G4Event* event, Builders& builder) {
     }
     if (builder.fields.contains("track_initial_position_z")) {
         builder.track_initial_position_z.begin_list();
+    }
+    if (builder.fields.contains("track_particle")) {
+        builder.track_particle.begin_list();
     }
     // step fields
     if (builder.fields.contains("step_energy")) {
@@ -95,6 +110,9 @@ void InsertEventEnd(const G4Event*, Builders& builder) {
     if (builder.fields.contains("track_initial_position_z")) {
         builder.track_initial_position_z.end_list();
     }
+    if (builder.fields.contains("track_particle")) {
+        builder.track_particle.end_list();
+    }
     // step fields
     if (builder.fields.contains("step_energy")) {
         builder.step_energy.end_list();
@@ -134,6 +152,15 @@ void InsertTrack(const G4Track* track, Builders& builder) {
     }
     if (builder.fields.contains("track_initial_position_z")) {
         builder.track_initial_position_z.content().append(track->GetVertexPosition().z() / units::length);
+    }
+    if (builder.fields.contains("track_particle")) {
+        const auto& particleName = track->GetParticleDefinition()->GetParticleName();
+        builder.track_particle.content().begin_list();
+        // iterate over the characters in the string
+        for (char c: particleName) {
+            builder.track_particle.content().content().append(c);
+        }
+        builder.track_particle.content().end_list();
     }
 }
 
@@ -250,11 +277,11 @@ py::object snapshot_builder(const T& builder) {
 
 py::object SnapshotBuilder(Builders& builder) {
     py::dict snapshot;
-    if (builder.fields.contains("run_id")) {
-        snapshot["run_id"] = snapshot_builder(builder.run_id);
+    if (builder.fields.contains("run")) {
+        snapshot["run"] = snapshot_builder(builder.run);
     }
-    if (builder.fields.contains("event_id")) {
-        snapshot["event_id"] = snapshot_builder(builder.event_id);
+    if (builder.fields.contains("id")) {
+        snapshot["id"] = snapshot_builder(builder.id);
     }
     if (builder.fields.contains("track_id")) {
         snapshot["track_id"] = snapshot_builder(builder.track_id);
@@ -276,6 +303,9 @@ py::object SnapshotBuilder(Builders& builder) {
     }
     if (builder.fields.contains("track_initial_position_z")) {
         snapshot["track_initial_position_z"] = snapshot_builder(builder.track_initial_position_z);
+    }
+    if (builder.fields.contains("track_particle")) {
+        snapshot["track_particle"] = snapshot_builder(builder.track_particle);
     }
     if (builder.fields.contains("step_energy")) {
         snapshot["step_energy"] = snapshot_builder(builder.step_energy);

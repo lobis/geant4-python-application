@@ -31,7 +31,7 @@ void RunAction::EndOfRunAction(const G4Run*) {
         py::gil_scoped_acquire acquire;
         for (auto& builderToSnapshot: buildersToSnapshot) {
             events->push_back(SnapshotBuilder(*builderToSnapshot));
-            builderToSnapshot->Clear();
+            builderToSnapshot = nullptr;
         }
         buildersToSnapshot.clear();
     }

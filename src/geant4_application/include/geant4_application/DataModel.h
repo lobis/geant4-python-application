@@ -33,49 +33,38 @@ using IndexedBuilder = awkward::LayoutBuilder::IndexedOption<PRIMITIVE, BUILDER>
 template<class PRIMITIVE>
 using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
 
-typedef unsigned int id;
+template<class T>
+using TrackFieldBuilder = ListOffsetBuilder<uint, NumpyBuilder<T>>;
 
 template<class T>
-using TrackFieldBuilder = ListOffsetBuilder<id, NumpyBuilder<T>>;
+using StepFieldBuilder = ListOffsetBuilder<uint, ListOffsetBuilder<uint, NumpyBuilder<T>>>;
 
-template<class T>
-using StepFieldBuilder = ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<T>>>;
+using TrackStringBuilder = ListOffsetBuilder<uint, ListOffsetBuilder<uint, NumpyBuilder<uint8_t>>>;
+using StepStringBuilder = ListOffsetBuilder<uint, ListOffsetBuilder<uint, ListOffsetBuilder<uint, NumpyBuilder<uint8_t>>>>;
 
 struct Builders {
     std::unordered_set<std::string> fields;
-    NumpyBuilder<id> run_id;
-    NumpyBuilder<id> event_id;
-    TrackFieldBuilder<id> track_id;
-    TrackFieldBuilder<id> track_parent_id;
-    TrackFieldBuilder<float> track_initial_energy;
-    TrackFieldBuilder<float> track_initial_time;
-    TrackFieldBuilder<float> track_initial_position_x;
-    TrackFieldBuilder<float> track_initial_position_y;
-    TrackFieldBuilder<float> track_initial_position_z;
-    StepFieldBuilder<float> step_energy;
-    StepFieldBuilder<float> step_time;
-    StepFieldBuilder<float> step_position_x;
-    StepFieldBuilder<float> step_position_y;
-    StepFieldBuilder<float> step_position_z;
+    NumpyBuilder<uint> run;
+    NumpyBuilder<uint> id;
+    //
+    TrackFieldBuilder<uint> track_id;
+    TrackFieldBuilder<uint> track_parent_id;
+    TrackFieldBuilder<double> track_initial_energy;
+    TrackFieldBuilder<double> track_initial_time;
+    TrackFieldBuilder<double> track_initial_position_x;
+    TrackFieldBuilder<double> track_initial_position_y;
+    TrackFieldBuilder<double> track_initial_position_z;
+    TrackStringBuilder track_particle;
+    StepFieldBuilder<double> step_energy;
+    StepFieldBuilder<double> step_time;
+    StepFieldBuilder<double> step_position_x;
+    StepFieldBuilder<double> step_position_y;
+    StepFieldBuilder<double> step_position_z;
 
-    Builders(const std::unordered_set<std::string>& fields) : fields(fields){};
-
-    void Clear() {
-        run_id.clear();
-        event_id.clear();
-        track_id.clear();
-        track_parent_id.clear();
-        track_initial_energy.clear();
-        track_initial_time.clear();
-        track_initial_position_x.clear();
-        track_initial_position_y.clear();
-        track_initial_position_z.clear();
-        step_energy.clear();
-        step_time.clear();
-        step_position_x.clear();
-        step_position_y.clear();
-        step_position_z.clear();
-    }
+    Builders(const std::unordered_set<std::string>& fields) : fields(fields) {
+        track_particle.content().set_parameters(R"""("__array__": "string")""");
+        track_particle.content().content().set_parameters(R"""("__array__": "char")""");
+    };
 };
 
 

@@ -192,4 +192,4 @@ filesystem::path Application::GetTemporaryApplicationDirectory() {
     return dir;
 }
 
-unordered_set<string> Application::eventFields = {"run_id", "event_id", "track_id", "track_parent_id", "step_energy"};
+unordered_set<string> Application::eventFields = {"run", "id", "track_id", "track_parent_id", "track_particle", "step_energy"};
