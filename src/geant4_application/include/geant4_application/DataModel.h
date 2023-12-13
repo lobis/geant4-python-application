@@ -33,116 +33,63 @@ using IndexedBuilder = awkward::LayoutBuilder::IndexedOption<PRIMITIVE, BUILDER>
 template<class PRIMITIVE>
 using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
 
-enum Field : std::size_t {
-    runId,
-    eventId,
-    //
-    trackId,
-    trackParentId,
-    trackParticle,
-    // trackParticleType,
-    trackInitialEnergy,
-    trackInitialTime,
-    // trackCreatorProcess,
-    // trackCreatorProcessType,
-    trackInitialPositionX,
-    trackInitialPositionY,
-    trackInitialPositionZ,
-    trackInitialMomentumX,
-    trackInitialMomentumY,
-    trackInitialMomentumZ,
-    trackWeight,
-    //
-    stepEnergy,
-    stepTime,
-    // stepProcess,
-    // stepProcessType,
-    // stepVolume,
-    stepPositionX,
-    stepPositionY,
-    stepPositionZ,
-    stepTrackKineticEnergy,
-};
-
-inline static const UserDefinedMap fieldToNameEvent = {
-        {Field::runId, "run_id"},
-        {Field::eventId, "event_id"},
-};
-
-inline static const UserDefinedMap fieldToNameTrack = {
-        {Field::trackId, "track.id"},
-        {Field::trackParentId, "track.parent_id"},
-        {Field::trackParticle, "track.particle"},
-        // {Field::trackParticleType, "track.particle_type"},
-        {Field::trackInitialEnergy, "track.energy"},
-        {Field::trackInitialTime, "track.time"},
-        {Field::trackInitialPositionX, "track.position.x"},
-        {Field::trackInitialPositionY, "track.position.y"},
-        {Field::trackInitialPositionZ, "track.position.z"},
-        {Field::trackInitialMomentumX, "track.momentum.x"},
-        {Field::trackInitialMomentumY, "track.momentum.y"},
-        {Field::trackInitialMomentumZ, "track.momentum.z"},
-        {Field::trackWeight, "track.weight"},
-};
-
-inline static const UserDefinedMap fieldToNameStep = {
-        {Field::stepEnergy, "track.step.energy"},
-        {Field::stepTime, "track.step.time"},
-        {Field::stepPositionX, "track.step.position.x"},
-        {Field::stepPositionY, "track.step.position.y"},
-        {Field::stepPositionZ, "track.step.position.z"},
-        {Field::stepTrackKineticEnergy, "track.step.track_kinetic_energy"},
-
-        // {Field::stepProcess, "track.step.process"}},
-        // {Field::stepProcessType, "track.step.process_type"}},
-        // {Field::stepVolume, "track.step.volume"}},
-};
-
 typedef unsigned int id;
-using Builder = RecordBuilder<
-        RecordField<Field::runId, NumpyBuilder<id>>,
-        RecordField<Field::eventId, NumpyBuilder<id>>,
-        //
-        RecordField<Field::trackId, ListOffsetBuilder<id, NumpyBuilder<id>>>,
-        RecordField<Field::trackParentId, ListOffsetBuilder<id, NumpyBuilder<id>>>,
-        RecordField<Field::trackParticle, ListOffsetBuilder<id, NumpyBuilder<bool>>>,// this should be a string
-        // RecordField<Field::trackParticleType,ListOffsetBuilder<id, NumpyBuilder<std::string>>>,
-        RecordField<Field::trackInitialEnergy, ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<Field::trackInitialTime, ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        // RecordField<Field::trackCreatorProcess,ListOffsetBuilder<id, NumpyBuilder<std::string>>>,
-        RecordField<Field::trackInitialPositionX, ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<Field::trackInitialPositionY, ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<Field::trackInitialPositionZ, ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<Field::trackInitialMomentumX, ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<Field::trackInitialMomentumY, ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<Field::trackInitialMomentumZ, ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        RecordField<Field::trackWeight, ListOffsetBuilder<id, NumpyBuilder<float>>>,
-        //
-        RecordField<Field::stepEnergy, ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        RecordField<Field::stepTime, ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        // RecordField<Field::stepVolume,ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
-        // RecordField<Field::stepProcess,ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
-        // RecordField<Field::stepProcessType,ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<std::string>>>>
-        RecordField<Field::stepPositionX, ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        RecordField<Field::stepPositionY, ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        RecordField<Field::stepPositionZ, ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>,
-        RecordField<Field::stepTrackKineticEnergy, ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<float>>>>
-        //
-        >;
 
-Builder MakeBuilder();
+template<class T>
+using TrackFieldBuilder = ListOffsetBuilder<id, NumpyBuilder<T>>;
 
-void InsertEventBegin(const G4Event* event, Builder& builder);
-void InsertEventEnd(const G4Event* event, Builder& builder);
+template<class T>
+using StepFieldBuilder = ListOffsetBuilder<id, ListOffsetBuilder<id, NumpyBuilder<T>>>;
 
-void InsertTrackBegin(const G4Track* track, Builder& builder);
-void InsertTrackEnd(const G4Track* track, Builder& builder);
+struct Builders {
+    std::unordered_set<std::string> fields;
+    NumpyBuilder<id> run_id;
+    NumpyBuilder<id> event_id;
+    TrackFieldBuilder<id> track_id;
+    TrackFieldBuilder<id> track_parent_id;
+    TrackFieldBuilder<float> track_initial_energy;
+    TrackFieldBuilder<float> track_initial_time;
+    TrackFieldBuilder<float> track_initial_position_x;
+    TrackFieldBuilder<float> track_initial_position_y;
+    TrackFieldBuilder<float> track_initial_position_z;
+    StepFieldBuilder<float> step_energy;
+    StepFieldBuilder<float> step_time;
+    StepFieldBuilder<float> step_position_x;
+    StepFieldBuilder<float> step_position_y;
+    StepFieldBuilder<float> step_position_z;
 
-void InsertEvent(const G4Event* event, Builder& builder);
-void InsertTrack(const G4Track* track, Builder& builder);
-void InsertStep(const G4Step* step, Builder& builder);
+    Builders(const std::unordered_set<std::string>& fields) : fields(fields){};
 
-py::object SnapshotBuilder(Builder& builder);
+    void Clear() {
+        run_id.clear();
+        event_id.clear();
+        track_id.clear();
+        track_parent_id.clear();
+        track_initial_energy.clear();
+        track_initial_time.clear();
+        track_initial_position_x.clear();
+        track_initial_position_y.clear();
+        track_initial_position_z.clear();
+        step_energy.clear();
+        step_time.clear();
+        step_position_x.clear();
+        step_position_y.clear();
+        step_position_z.clear();
+    }
+};
+
+
+void InsertEventBegin(const G4Event* event, Builders& builder);
+void InsertEventEnd(const G4Event* event, Builders& builder);
+
+void InsertTrackBegin(const G4Track* track, Builders& builder);
+void InsertTrackEnd(const G4Track* track, Builders& builder);
+
+void InsertEvent(const G4Event* event, Builders& builder);
+void InsertTrack(const G4Track* track, Builders& builder);
+void InsertStep(const G4Step* step, Builders& builder);
+
+py::object SnapshotBuilder(Builders& builder);
 
 namespace units {
 static constexpr auto energy = CLHEP::keV;

@@ -18,14 +18,16 @@ public:
     void EndOfRunAction(const G4Run*) override;
 
     /// Only one instance of RunAction is created for each thread.
-    static data::Builder& GetBuilder();
+    static data::Builders& GetBuilder();
     static std::vector<py::object> GetEvents();
 
 private:
-    data::Builder builder = data::MakeBuilder();
+    std::unordered_set<std::string> eventFields = {"run_id", "event_id", "track_id", "track_parent_id", "step_energy"};
+
+    data::Builders builder = {eventFields};
     std::mutex mutex;
     static std::unique_ptr<std::vector<py::object>> events;
-    static std::vector<data::Builder*> buildersToSnapshot;
+    static std::vector<data::Builders*> buildersToSnapshot;
 };
 
 }// namespace geant4_app

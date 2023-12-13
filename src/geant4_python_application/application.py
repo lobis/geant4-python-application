@@ -128,10 +128,67 @@ class Application:
 
     def run(self, n_events: int = 1):
         # "run" returns a list of arrays, one for each thread
-        events = ak.concatenate(
-            self._send_and_recv(Message("", "run", (n_events,), {})), axis=0
+        events = self._send_and_recv(Message("", "run", (n_events,), {}))
+        concatenated_dict = {
+            key: ak.concatenate([d[key] for d in events], axis=0)
+            for key in events[0].keys()
+        }
+        # make sure they all have the same length
+        for key in concatenated_dict.keys():
+            if len(concatenated_dict[key]) != len(
+                concatenated_dict[list(concatenated_dict.keys())[0]]
+            ):
+                raise ValueError(f"Length mismatch for key {key}")
+
+        keys_to_remove = set()
+        step_array_dict = {}
+        for key in concatenated_dict.keys():
+            prefix = "step_"
+            if key.startswith(prefix):
+                new_key = key[len(prefix) :]
+                step_array_dict[new_key] = concatenated_dict[key]
+                keys_to_remove.add(key)
+
+        track_array_dict = {}
+        for key in concatenated_dict.keys():
+            prefix = "track_"
+            if key.startswith(prefix):
+                new_key = key[len(prefix) :]
+                track_array_dict[new_key] = concatenated_dict[key]
+                keys_to_remove.add(key)
+
+        events = ak.Array(
+            {
+                **{
+                    key: concatenated_dict[key]
+                    for key in [
+                        key
+                        for key in concatenated_dict.keys()
+                        if key not in keys_to_remove
+                    ]
+                },
+                "track": ak.Array(
+                    {
+                        **{
+                            key: track_array_dict[key]
+                            for key in track_array_dict.keys()
+                        },
+                        "step": ak.Array(
+                            {
+                                **{
+                                    key: step_array_dict[key]
+                                    for key in step_array_dict.keys()
+                                }
+                            },
+                            with_name="step",
+                        ),
+                    },
+                    with_name="track",
+                ),
+            },
+            with_name="events",
         )
-        # sort by event_id (events from different threads are mixed)
+
         return events[ak.argsort(events.event_id)]
 
     @property

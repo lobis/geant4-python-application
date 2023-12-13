@@ -19,75 +19,158 @@ using namespace geant4_app;
 
 namespace geant4_app::data {
 
-void InsertEvent(const G4Event* event, Builder& builder) {
-    builder.content<Field::runId>().append(G4RunManager::GetRunManager()->GetCurrentRun()->GetRunID());
-    builder.content<Field::eventId>().append(event->GetEventID());
+void InsertEvent(const G4Event* event, Builders& builders) {
+    if (builders.fields.contains("run_id")) {
+        builders.run_id.append(G4RunManager::GetRunManager()->GetCurrentRun()->GetRunID());
+    }
+    if (builders.fields.contains("event_id")) {
+        builders.event_id.append(event->GetEventID());
+    }
 }
 
-template<std::size_t... I>
-void InsertEventBeginHelper(Builder& builder) {
-    (builder.content<I>().begin_list(), ...);
+void InsertEventBegin(const G4Event* event, Builders& builder) {
+    // track fields
+    if (builder.fields.contains("track_id")) {
+        builder.track_id.begin_list();
+    }
+    if (builder.fields.contains("track_parent_id")) {
+        builder.track_parent_id.begin_list();
+    }
+    if (builder.fields.contains("track_initial_energy")) {
+        builder.track_initial_energy.begin_list();
+    }
+    if (builder.fields.contains("track_initial_time")) {
+        builder.track_initial_time.begin_list();
+    }
+    if (builder.fields.contains("track_initial_position_x")) {
+        builder.track_initial_position_x.begin_list();
+    }
+    if (builder.fields.contains("track_initial_position_y")) {
+        builder.track_initial_position_y.begin_list();
+    }
+    if (builder.fields.contains("track_initial_position_z")) {
+        builder.track_initial_position_z.begin_list();
+    }
+    // step fields
+    if (builder.fields.contains("step_energy")) {
+        builder.step_energy.begin_list();
+    }
+    if (builder.fields.contains("step_time")) {
+        builder.step_time.begin_list();
+    }
+    if (builder.fields.contains("step_position_x")) {
+        builder.step_position_x.begin_list();
+    }
+    if (builder.fields.contains("step_position_y")) {
+        builder.step_position_y.begin_list();
+    }
+    if (builder.fields.contains("step_position_z")) {
+        builder.step_position_z.begin_list();
+    }
 }
 
-void InsertEventBegin(const G4Event* event, Builder& builder) {
-    InsertEventBeginHelper<Field::trackId, Field::trackParentId, Field::trackInitialEnergy, Field::trackInitialTime,
-                           Field::trackParticle, Field::trackInitialPositionX, Field::trackInitialPositionY, Field::trackInitialPositionZ,
-                           Field::trackInitialMomentumX, Field::trackInitialMomentumY, Field::trackInitialMomentumZ, Field::trackWeight,
-                           Field::stepEnergy, Field::stepTime, Field::stepPositionX, Field::stepPositionY, Field::stepPositionZ,
-                           Field::stepTrackKineticEnergy>(builder);
+void InsertEventEnd(const G4Event*, Builders& builder) {
+    // track fields
+    if (builder.fields.contains("track_id")) {
+        builder.track_id.end_list();
+    }
+    if (builder.fields.contains("track_parent_id")) {
+        builder.track_parent_id.end_list();
+    }
+    if (builder.fields.contains("track_initial_energy")) {
+        builder.track_initial_energy.end_list();
+    }
+    if (builder.fields.contains("track_initial_time")) {
+        builder.track_initial_time.end_list();
+    }
+    if (builder.fields.contains("track_initial_position_x")) {
+        builder.track_initial_position_x.end_list();
+    }
+    if (builder.fields.contains("track_initial_position_y")) {
+        builder.track_initial_position_y.end_list();
+    }
+    if (builder.fields.contains("track_initial_position_z")) {
+        builder.track_initial_position_z.end_list();
+    }
+    // step fields
+    if (builder.fields.contains("step_energy")) {
+        builder.step_energy.end_list();
+    }
+    if (builder.fields.contains("step_time")) {
+        builder.step_time.end_list();
+    }
+    if (builder.fields.contains("step_position_x")) {
+        builder.step_position_x.end_list();
+    }
+    if (builder.fields.contains("step_position_y")) {
+        builder.step_position_y.end_list();
+    }
+    if (builder.fields.contains("step_position_z")) {
+        builder.step_position_z.end_list();
+    }
 }
 
-template<std::size_t... I>
-void InsertEventEndHelper(Builder& builder) {
-    (builder.content<I>().end_list(), ...);
+void InsertTrack(const G4Track* track, Builders& builder) {
+    if (builder.fields.contains("track_id")) {
+        builder.track_id.content().append(track->GetTrackID());
+    }
+    if (builder.fields.contains("track_parent_id")) {
+        builder.track_parent_id.content().append(track->GetParentID());
+    }
+    if (builder.fields.contains("track_initial_energy")) {
+        builder.track_initial_energy.content().append(track->GetVertexKineticEnergy() / units::energy);
+    }
+    if (builder.fields.contains("track_initial_time")) {
+        builder.track_initial_time.content().append(track->GetGlobalTime() / units::time);
+    }
+    if (builder.fields.contains("track_initial_position_x")) {
+        builder.track_initial_position_x.content().append(track->GetVertexPosition().x() / units::length);
+    }
+    if (builder.fields.contains("track_initial_position_y")) {
+        builder.track_initial_position_y.content().append(track->GetVertexPosition().y() / units::length);
+    }
+    if (builder.fields.contains("track_initial_position_z")) {
+        builder.track_initial_position_z.content().append(track->GetVertexPosition().z() / units::length);
+    }
 }
 
-void InsertEventEnd(const G4Event*, Builder& builder) {
-    InsertEventEndHelper<Field::trackId, Field::trackParentId, Field::trackInitialEnergy, Field::trackInitialTime,
-                         Field::trackParticle, Field::trackInitialPositionX, Field::trackInitialPositionY, Field::trackInitialPositionZ,
-                         Field::trackInitialMomentumX, Field::trackInitialMomentumY, Field::trackInitialMomentumZ, Field::trackWeight,
-                         Field::stepEnergy, Field::stepTime, Field::stepPositionX, Field::stepPositionY, Field::stepPositionZ,
-                         Field::stepTrackKineticEnergy>(builder);
+void InsertTrackBegin(const G4Track* track, Builders& builder) {
+    if (builder.fields.contains("step_energy")) {
+        builder.step_energy.content().begin_list();
+    }
+    if (builder.fields.contains("step_time")) {
+        builder.step_time.content().begin_list();
+    }
+    if (builder.fields.contains("step_position_x")) {
+        builder.step_position_x.content().begin_list();
+    }
+    if (builder.fields.contains("step_position_y")) {
+        builder.step_position_y.content().begin_list();
+    }
+    if (builder.fields.contains("step_position_z")) {
+        builder.step_position_z.content().begin_list();
+    }
 }
 
-void InsertTrack(const G4Track* track, Builder& builder) {
-    builder.content<Field::trackId>().content().append(track->GetTrackID());
-    builder.content<Field::trackParentId>().content().append(track->GetParentID());
-    builder.content<Field::trackParticle>().content().append({});
-    builder.content<Field::trackInitialEnergy>().content().append(track->GetKineticEnergy() / units::energy);
-    builder.content<Field::trackInitialTime>().content().append(track->GetGlobalTime() / units::time);
-    // builder.content<Field::trackCreatorProcess>().content().append(track->GetCreatorProcess()->GetProcessName());
-    // builder.content<Field::trackCreatorProcessType>().content().append(G4VProcess::GetProcessTypeName(track->GetCreatorProcess()->GetProcessType()));
-    builder.content<Field::trackInitialPositionX>().content().append(track->GetPosition().x() / units::length);
-    builder.content<Field::trackInitialPositionY>().content().append(track->GetPosition().y() / units::length);
-    builder.content<Field::trackInitialPositionZ>().content().append(track->GetPosition().z() / units::length);
-    builder.content<Field::trackInitialMomentumX>().content().append(track->GetMomentum().x() / units::momentum);
-    builder.content<Field::trackInitialMomentumY>().content().append(track->GetMomentum().y() / units::momentum);
-    builder.content<Field::trackInitialMomentumZ>().content().append(track->GetMomentum().z() / units::momentum);
-    builder.content<Field::trackWeight>().content().append(track->GetWeight());
+void InsertTrackEnd(const G4Track*, Builders& builder) {
+    if (builder.fields.contains("step_energy")) {
+        builder.step_energy.content().end_list();
+    }
+    if (builder.fields.contains("step_time")) {
+        builder.step_time.content().end_list();
+    }
+    if (builder.fields.contains("step_position_x")) {
+        builder.step_position_x.content().end_list();
+    }
+    if (builder.fields.contains("step_position_y")) {
+        builder.step_position_y.content().end_list();
+    }
+    if (builder.fields.contains("step_position_z")) {
+        builder.step_position_z.content().end_list();
+    }
 }
 
-template<std::size_t... I>
-void InsertTrackBeginHelper(Builder& builder) {
-    (builder.content<I>().content().begin_list(), ...);
-}
-
-void InsertTrackBegin(const G4Track* track, Builder& builder) {
-    InsertTrackBeginHelper<Field::stepEnergy, Field::stepTime, Field::stepPositionX, Field::stepPositionY, Field::stepPositionZ,
-                           Field::stepTrackKineticEnergy>(builder);
-}
-
-template<std::size_t... I>
-void InsertTrackEndHelper(Builder& builder) {
-    (builder.content<I>().content().end_list(), ...);
-}
-
-void InsertTrackEnd(const G4Track*, Builder& builder) {
-    InsertTrackEndHelper<Field::stepEnergy, Field::stepTime, Field::stepPositionX, Field::stepPositionY, Field::stepPositionZ,
-                         Field::stepTrackKineticEnergy>(builder);
-}
-
-void InsertStep(const G4Step* step, Builder& builder) {
+void InsertStep(const G4Step* step, Builders& builder) {
     const G4Track* track = step->GetTrack();
 
     const auto& stepPost = step->GetPostStepPoint();
@@ -102,37 +185,45 @@ void InsertStep(const G4Step* step, Builder& builder) {
         processTypeName = G4VProcess::GetProcessTypeName(process->GetProcessType());
     }
 
-    builder.content<Field::stepEnergy>().content().content().append(step->GetTotalEnergyDeposit() / units::energy);
-    builder.content<Field::stepTime>().content().content().append(stepPost->GetGlobalTime() / units::time);
-    // builder.content<Field::stepProcess>().content().content().append(processName);
-    // builder.content<Field::stepProcessType>().content().content().append(processTypeName);
-    // builder.content<Field::stepVolume>().content().content().append(stepPost->GetPhysicalVolume()->GetName());
-    builder.content<Field::stepPositionX>().content().content().append(stepPost->GetPosition().x() / units::length);
-    builder.content<Field::stepPositionY>().content().content().append(stepPost->GetPosition().y() / units::length);
-    builder.content<Field::stepPositionZ>().content().content().append(stepPost->GetPosition().z() / units::length);
-    builder.content<Field::stepTrackKineticEnergy>().content().content().append(stepPost->GetKineticEnergy() / units::energy);
+    if (builder.fields.contains("step_energy")) {
+        builder.step_energy.content().content().append(step->GetTotalEnergyDeposit() / units::energy);
+    }
+    if (builder.fields.contains("step_time")) {
+        builder.step_time.content().content().append(stepPost->GetGlobalTime() / units::time);
+    }
+    if (builder.fields.contains("step_position_x")) {
+        builder.step_position_x.content().content().append(stepPost->GetPosition().x() / units::length);
+    }
+    if (builder.fields.contains("step_position_y")) {
+        builder.step_position_y.content().content().append(stepPost->GetPosition().y() / units::length);
+    }
+    if (builder.fields.contains("step_position_z")) {
+        builder.step_position_z.content().content().append(stepPost->GetPosition().z() / units::length);
+    }
 }
 
-py::object SnapshotBuilder(Builder& builder) {
+template<typename T>
+py::object snapshot_builder(const T& builder) {
     // How much memory to allocate?
     std::map<std::string, size_t> names_nbytes = {};
     builder.buffer_nbytes(names_nbytes);
 
     // Allocate memory
     std::map<std::string, void*> buffers = {};
-    for (const auto& it: names_nbytes) {
+    for (auto it: names_nbytes) {
         uint8_t* ptr = new uint8_t[it.second];
-        buffers[it.first] = static_cast<void*>(ptr);
+        buffers[it.first] = (void*) ptr;
     }
 
     // Write non-contiguous contents to memory
     builder.to_buffers(buffers);
-    // this line (below) throws an exception when run from a thread
     auto from_buffers = py::module::import("awkward").attr("from_buffers");
 
     // Build Python dictionary containing arrays
+    // dtypes not important here as long as they match the underlying buffer
+    // as Awkward Array calls `frombuffer` to convert to the correct type
     py::dict container;
-    for (const auto& it: buffers) {
+    for (auto it: buffers) {
 
         // Create capsule that frees the allocated data when out of scope
         py::capsule free_when_done(it.second, [](void* data) {
@@ -141,21 +232,64 @@ py::object SnapshotBuilder(Builder& builder) {
         });
 
         // Adopt the memory filled by `to_buffers` as a NumPy array
+        // We only need to return a "buffer" here, but py::array_t let's
+        // us associate a capsule for destruction, which means that
+        // Python can own this memory. Therefore, we use py::array_t
+        uint8_t* data = reinterpret_cast<uint8_t*>(it.second);
         container[py::str(it.first)] = py::array_t<uint8_t>(
                 {names_nbytes[it.first]},
                 {sizeof(uint8_t)},
-                reinterpret_cast<uint8_t*>(it.second),
+                data,
                 free_when_done);
     }
-
     return from_buffers(builder.form(), builder.length(), container);
 }
 
-Builder MakeBuilder() {
-    UserDefinedMap fieldToName;
-    for (const auto& m: {fieldToNameEvent, fieldToNameTrack, fieldToNameStep}) {
-        fieldToName.insert(m.begin(), m.end());
+py::object SnapshotBuilder(Builders& builder) {
+    py::dict snapshot;
+    if (builder.fields.contains("run_id")) {
+        snapshot["run_id"] = snapshot_builder(builder.run_id);
     }
-    return {fieldToName};
+    if (builder.fields.contains("event_id")) {
+        snapshot["event_id"] = snapshot_builder(builder.event_id);
+    }
+    if (builder.fields.contains("track_id")) {
+        snapshot["track_id"] = snapshot_builder(builder.track_id);
+    }
+    if (builder.fields.contains("track_parent_id")) {
+        snapshot["track_parent_id"] = snapshot_builder(builder.track_parent_id);
+    }
+    if (builder.fields.contains("track_initial_energy")) {
+        snapshot["track_initial_energy"] = snapshot_builder(builder.track_initial_energy);
+    }
+    if (builder.fields.contains("track_initial_time")) {
+        snapshot["track_initial_time"] = snapshot_builder(builder.track_initial_time);
+    }
+    if (builder.fields.contains("track_initial_position_x")) {
+        snapshot["track_initial_position_x"] = snapshot_builder(builder.track_initial_position_x);
+    }
+    if (builder.fields.contains("track_initial_position_y")) {
+        snapshot["track_initial_position_y"] = snapshot_builder(builder.track_initial_position_y);
+    }
+    if (builder.fields.contains("track_initial_position_z")) {
+        snapshot["track_initial_position_z"] = snapshot_builder(builder.track_initial_position_z);
+    }
+    if (builder.fields.contains("step_energy")) {
+        snapshot["step_energy"] = snapshot_builder(builder.step_energy);
+    }
+    if (builder.fields.contains("step_time")) {
+        snapshot["step_time"] = snapshot_builder(builder.step_time);
+    }
+    if (builder.fields.contains("step_position_x")) {
+        snapshot["step_position_x"] = snapshot_builder(builder.step_position_x);
+    }
+    if (builder.fields.contains("step_position_y")) {
+        snapshot["step_position_y"] = snapshot_builder(builder.step_position_y);
+    }
+    if (builder.fields.contains("step_position_z")) {
+        snapshot["step_position_z"] = snapshot_builder(builder.step_position_z);
+    }
+    return snapshot;
 }
+
 }// namespace geant4_app::data
