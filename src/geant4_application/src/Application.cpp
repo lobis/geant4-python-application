@@ -9,7 +9,9 @@
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
 
+#include <algorithm>
 #include <random>
+#include <unordered_set>
 
 using namespace std;
 using namespace geant4_app;
@@ -23,6 +25,8 @@ Application::Application() {
         throw runtime_error("Application can only be created once");
     }
     pInstance = this;
+
+    SetEventFields({"id", "track_id", "step_energy"});
 }
 
 /// We cannot clean up everything, creating a new application will fail after initializing the kernel, so we don't allow it.
@@ -112,6 +116,9 @@ vector<py::object> Application::Run(int nEvents) {
     if (!IsInitialized()) {
         Initialize();
     }
+    if (eventFields.empty()) {
+        throw runtime_error("Event fields cannot be empty");
+    }
     runManager->BeamOn(nEvents);
     py::gil_scoped_acquire acquire;
     return RunAction::GetEvents();
@@ -192,4 +199,13 @@ filesystem::path Application::GetTemporaryApplicationDirectory() {
     return dir;
 }
 
-unordered_set<string> Application::eventFields = {"run", "id", "track_id", "track_parent_id", "track_particle", "step_energy"};
+void Application::SetEventFields(const unordered_set<string>& fields) {
+    for (const auto& field: fields) {
+        if (!eventFieldsComplete.contains(field)) {
+            throw runtime_error("Invalid event field: " + field);
+        }
+    }
+    eventFields = fields;
+}
+
+unordered_set<string> Application::eventFields = {};

@@ -55,7 +55,7 @@ public:
 
     inline static std::unordered_set<std::string> GetEventFieldsComplete() { return eventFieldsComplete; }
     inline static std::unordered_set<std::string> GetEventFields() { return eventFields; }
-
+    static void SetEventFields(const std::unordered_set<std::string>& fields);
     inline long GetRandomSeed() const { return randomSeed; }
 
     static void Command(const std::string& command);
