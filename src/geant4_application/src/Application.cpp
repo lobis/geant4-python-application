@@ -110,7 +110,7 @@ void Application::Initialize() {
 
 vector<py::object> Application::Run(int nEvents) {
     if (!IsInitialized()) {
-        throw runtime_error("Application needs to be initialized first");
+        Initialize();
     }
     runManager->BeamOn(nEvents);
     py::gil_scoped_acquire acquire;
