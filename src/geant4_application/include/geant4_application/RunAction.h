@@ -4,6 +4,7 @@
 #include <G4RunManager.hh>
 #include <G4UserRunAction.hh>
 
+#include "geant4_application/Application.h"
 #include "geant4_application/DataModel.h"
 
 namespace py = pybind11;
@@ -22,9 +23,7 @@ public:
     static std::vector<py::object> GetEvents();
 
 private:
-    std::unordered_set<std::string> eventFields = {"run_id", "event_id", "track_id", "track_parent_id", "step_energy"};
-
-    data::Builders builder = {eventFields};
+    data::Builders builder = {Application::GetEventFields()};
     std::mutex mutex;
     static std::unique_ptr<std::vector<py::object>> events;
     static std::vector<data::Builders*> buildersToSnapshot;

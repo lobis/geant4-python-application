@@ -1,5 +1,6 @@
 
 #include "geant4_application/DataModel.h"
+#include "geant4_application/Application.h"
 
 #include <G4HadronicProcess.hh>
 #include <G4Nucleus.hh>
@@ -16,6 +17,8 @@
 
 using namespace std;
 using namespace geant4_app;
+
+std::unordered_set<std::string> Application::eventFieldsComplete = {"run_id", "event_id", "track_id", "track_parent_id", "track_initial_energy", "track_initial_time", "track_initial_position_x", "track_initial_position_y", "track_initial_position_z", "step_energy", "step_time", "step_position_x", "step_position_y", "step_position_z"};
 
 namespace geant4_app::data {
 
