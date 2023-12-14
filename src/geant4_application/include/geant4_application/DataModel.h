@@ -34,21 +34,21 @@ template<class PRIMITIVE>
 using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
 
 template<class T>
-using TrackFieldBuilder = ListOffsetBuilder<uint, NumpyBuilder<T>>;
+using TrackFieldBuilder = ListOffsetBuilder<unsigned int, NumpyBuilder<T>>;
 
 template<class T>
-using StepFieldBuilder = ListOffsetBuilder<uint, ListOffsetBuilder<uint, NumpyBuilder<T>>>;
+using StepFieldBuilder = ListOffsetBuilder<unsigned int, ListOffsetBuilder<unsigned int, NumpyBuilder<T>>>;
 
-using TrackStringBuilder = ListOffsetBuilder<uint, ListOffsetBuilder<uint, NumpyBuilder<uint8_t>>>;
-using StepStringBuilder = ListOffsetBuilder<uint, ListOffsetBuilder<uint, ListOffsetBuilder<uint, NumpyBuilder<uint8_t>>>>;
+using TrackStringBuilder = ListOffsetBuilder<unsigned int, ListOffsetBuilder<unsigned int, NumpyBuilder<uint8_t>>>;
+using StepStringBuilder = ListOffsetBuilder<unsigned int, ListOffsetBuilder<unsigned int, ListOffsetBuilder<unsigned int, NumpyBuilder<uint8_t>>>>;
 
 struct Builders {
     std::unordered_set<std::string> fields;
-    NumpyBuilder<uint> run;
-    NumpyBuilder<uint> id;
+    NumpyBuilder<unsigned int> run;
+    NumpyBuilder<unsigned int> id;
     //
-    TrackFieldBuilder<uint> track_id;
-    TrackFieldBuilder<uint> track_parent_id;
+    TrackFieldBuilder<unsigned int> track_id;
+    TrackFieldBuilder<unsigned int> track_parent_id;
     TrackFieldBuilder<double> track_initial_energy;
     TrackFieldBuilder<double> track_initial_time;
     TrackFieldBuilder<double> track_initial_position_x;
@@ -57,7 +57,7 @@ struct Builders {
     TrackFieldBuilder<double> track_initial_momentum_x;
     TrackFieldBuilder<double> track_initial_momentum_y;
     TrackFieldBuilder<double> track_initial_momentum_z;
-    StepFieldBuilder<uint> track_children_ids;// this is a track field, but it has the same structure of a step field
+    StepFieldBuilder<unsigned int> track_children_ids;// this is a track field, but it has the same structure of a step field
     TrackStringBuilder track_particle;
     TrackStringBuilder track_particle_type;
     TrackStringBuilder track_creator_process;
