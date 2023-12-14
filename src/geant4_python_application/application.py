@@ -8,6 +8,7 @@ import awkward as ak
 
 import geant4_python_application
 import geant4_python_application.datasets
+import geant4_python_application.events
 from geant4_python_application._geant4_application import (
     Application as Geant4Application,
 )
@@ -228,7 +229,7 @@ class Application:
                     else {}
                 ),
             },
-            with_name="events",
+            with_name="event",
         )
 
         events = ak.str.to_categorical(events)
