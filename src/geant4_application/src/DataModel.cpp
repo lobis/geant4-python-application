@@ -26,7 +26,7 @@ std::unordered_set<std::string> Application::eventFieldsComplete = {
         "track_initial_momentum_x", "track_initial_momentum_y", "track_initial_momentum_z",                                  //
         "track_particle", "track_particle_type", "track_creator_process", "track_creator_process_type", "track_children_ids",//
         "step_energy", "step_time", "step_track_kinetic_energy",                                                             //
-        "step_process", "step_process_type", "step_particle_type",                                                           //
+        "step_process", "step_process_type",                                                                                 //
         "step_volume", "step_volume_post", "step_nucleus",                                                                   //
         "step_position_x", "step_position_y", "step_position_z",                                                             //
         "step_momentum_x", "step_momentum_y", "step_momentum_z",                                                             //
@@ -111,9 +111,6 @@ void InsertEventBegin(const G4Event* event, Builders& builder) {
         }
         if (builder.fields.contains("step_process_type")) {
             builder.step_process_type.begin_list();
-        }
-        if (builder.fields.contains("step_particle_type")) {
-            builder.step_particle_type.begin_list();
         }
         if (builder.fields.contains("step_volume")) {
             builder.step_volume.begin_list();
@@ -214,9 +211,6 @@ void InsertEventEnd(const G4Event*, Builders& builder) {
         if (builder.fields.contains("step_process_type")) {
             builder.step_process_type.end_list();
         }
-        if (builder.fields.contains("step_particle_type")) {
-            builder.step_particle_type.end_list();
-        }
         if (builder.fields.contains("step_volume")) {
             builder.step_volume.end_list();
         }
@@ -247,38 +241,6 @@ void InsertEventEnd(const G4Event*, Builders& builder) {
     }
 }
 
-void InsertTrack(const G4Track* track, Builders& builder) {
-    if (builder.fields.contains("track_id")) {
-        builder.track_id.content().append(track->GetTrackID());
-    }
-    if (builder.fields.contains("track_parent_id")) {
-        builder.track_parent_id.content().append(track->GetParentID());
-    }
-    if (builder.fields.contains("track_initial_energy")) {
-        builder.track_initial_energy.content().append(track->GetVertexKineticEnergy() / units::energy);
-    }
-    if (builder.fields.contains("track_initial_time")) {
-        builder.track_initial_time.content().append(track->GetGlobalTime() / units::time);
-    }
-    if (builder.fields.contains("track_initial_position_x")) {
-        builder.track_initial_position_x.content().append(track->GetVertexPosition().x() / units::length);
-    }
-    if (builder.fields.contains("track_initial_position_y")) {
-        builder.track_initial_position_y.content().append(track->GetVertexPosition().y() / units::length);
-    }
-    if (builder.fields.contains("track_initial_position_z")) {
-        builder.track_initial_position_z.content().append(track->GetVertexPosition().z() / units::length);
-    }
-    if (builder.fields.contains("track_particle")) {
-        const auto& particleName = track->GetParticleDefinition()->GetParticleName();
-        builder.track_particle.content().begin_list();
-        // iterate over the characters in the string
-        for (char c: particleName) {
-            builder.track_particle.content().content().append(c);
-        }
-        builder.track_particle.content().end_list();
-    }
-}
 
 void InsertTrackBegin(const G4Track* track, Builders& builder) {
     if (builder.fields.contains("step_energy")) {
@@ -295,9 +257,6 @@ void InsertTrackBegin(const G4Track* track, Builders& builder) {
     }
     if (builder.fields.contains("step_process_type")) {
         builder.step_process_type.content().begin_list();
-    }
-    if (builder.fields.contains("step_particle_type")) {
-        builder.step_particle_type.content().begin_list();
     }
     if (builder.fields.contains("step_volume")) {
         builder.step_volume.content().begin_list();
@@ -328,7 +287,14 @@ void InsertTrackBegin(const G4Track* track, Builders& builder) {
     }
 }
 
-void InsertTrackEnd(const G4Track*, Builders& builder) {
+void InsertTrackEnd(const G4Track* track, Builders& builder) {
+    // insert secondary ids
+    if (builder.fields.contains("track_children_ids")) {
+        builder.track_children_ids.content().begin_list();
+        // TODO
+        builder.track_children_ids.content().end_list();
+    }
+    //
     if (builder.fields.contains("step_energy")) {
         builder.step_energy.content().end_list();
     }
@@ -343,9 +309,6 @@ void InsertTrackEnd(const G4Track*, Builders& builder) {
     }
     if (builder.fields.contains("step_process_type")) {
         builder.step_process_type.content().end_list();
-    }
-    if (builder.fields.contains("step_particle_type")) {
-        builder.step_particle_type.content().end_list();
     }
     if (builder.fields.contains("step_volume")) {
         builder.step_volume.content().end_list();
@@ -376,13 +339,93 @@ void InsertTrackEnd(const G4Track*, Builders& builder) {
     }
 }
 
+void InsertTrack(const G4Track* track, Builders& builder) {
+    if (builder.fields.contains("track_id")) {
+        builder.track_id.content().append(track->GetTrackID());
+    }
+    if (builder.fields.contains("track_parent_id")) {
+        builder.track_parent_id.content().append(track->GetParentID());
+    }
+    if (builder.fields.contains("track_initial_energy")) {
+        builder.track_initial_energy.content().append(track->GetVertexKineticEnergy() / units::energy);
+    }
+    if (builder.fields.contains("track_initial_time")) {
+        builder.track_initial_time.content().append(track->GetGlobalTime() / units::time);
+    }
+    if (builder.fields.contains("track_initial_position_x")) {
+        builder.track_initial_position_x.content().append(track->GetVertexPosition().x() / units::length);
+    }
+    if (builder.fields.contains("track_initial_position_y")) {
+        builder.track_initial_position_y.content().append(track->GetVertexPosition().y() / units::length);
+    }
+    if (builder.fields.contains("track_initial_position_z")) {
+        builder.track_initial_position_z.content().append(track->GetVertexPosition().z() / units::length);
+    }
+    if (builder.fields.contains("track_initial_momentum_x")) {
+        builder.track_initial_momentum_x.content().append(track->GetVertexMomentumDirection().x());
+    }
+    if (builder.fields.contains("track_initial_momentum_y")) {
+        builder.track_initial_momentum_y.content().append(track->GetVertexMomentumDirection().y());
+    }
+    if (builder.fields.contains("track_initial_momentum_z")) {
+        builder.track_initial_momentum_z.content().append(track->GetVertexMomentumDirection().z());
+    }
+    if (builder.fields.contains("track_weight")) {
+        builder.track_weight.content().append(track->GetWeight());
+    }
+    if (builder.fields.contains("track_particle_type")) {
+        const auto& particleName = track->GetParticleDefinition()->GetParticleName();
+        builder.track_particle_type.content().begin_list();
+        // iterate over the characters in the string
+        for (const char c: particleName) {
+            builder.track_particle_type.content().content().append(c);
+        }
+        builder.track_particle_type.content().end_list();
+    }
+    if (builder.fields.contains("track_particle")) {
+        const auto& particleName = track->GetParticleDefinition()->GetParticleName();
+        builder.track_particle.content().begin_list();
+        // iterate over the characters in the string
+        for (const char c: particleName) {
+            builder.track_particle.content().content().append(c);
+        }
+        builder.track_particle.content().end_list();
+    }
+    if (builder.fields.contains("track_creator_process")) {
+        string creatorProcessName = "InitProcess";
+        const auto creatorProcess = track->GetCreatorProcess();
+        if (creatorProcess != nullptr) {
+            creatorProcessName = creatorProcess->GetProcessName();
+        }
+        builder.track_creator_process.content().begin_list();
+        // iterate over the characters in the string
+        for (const char c: creatorProcessName) {
+            builder.track_creator_process.content().content().append(c);
+        }
+        builder.track_creator_process.content().end_list();
+    }
+    if (builder.fields.contains("track_creator_process_type")) {
+        string creatorProcessTypeName = "InitProcess";
+        const auto& creatorProcess = track->GetCreatorProcess();
+        if (creatorProcess != nullptr) {
+            creatorProcessTypeName = G4VProcess::GetProcessTypeName(creatorProcess->GetProcessType());
+        }
+        builder.track_creator_process_type.content().begin_list();
+        // iterate over the characters in the string
+        for (const char c: creatorProcessTypeName) {
+            builder.track_creator_process_type.content().content().append(c);
+        }
+        builder.track_creator_process_type.content().end_list();
+    }
+}
+
 void InsertStep(const G4Step* step, Builders& builder) {
     const G4Track* track = step->GetTrack();
 
     const auto& stepPost = step->GetPostStepPoint();
     const auto& stepPre = step->GetPreStepPoint();
 
-    const auto process = step->GetPostStepPoint()->GetProcessDefinedStep();
+    const auto process = stepPost->GetProcessDefinedStep();
     G4String processName = "InitStep";
     G4String processTypeName = "InitStep";
     if (track->GetCurrentStepNumber() != 0) {
@@ -405,6 +448,65 @@ void InsertStep(const G4Step* step, Builders& builder) {
     }
     if (builder.fields.contains("step_position_z")) {
         builder.step_position_z.content().content().append(stepPost->GetPosition().z() / units::length);
+    }
+    if (builder.fields.contains("step_momentum_x")) {
+        builder.step_momentum_x.content().content().append(stepPost->GetMomentumDirection().x());
+    }
+    if (builder.fields.contains("step_momentum_y")) {
+        builder.step_momentum_y.content().content().append(stepPost->GetMomentumDirection().y());
+    }
+    if (builder.fields.contains("step_momentum_z")) {
+        builder.step_momentum_z.content().content().append(stepPost->GetMomentumDirection().z());
+    }
+    if (builder.fields.contains("step_track_kinetic_energy")) {
+        builder.step_track_kinetic_energy.content().content().append(stepPost->GetKineticEnergy() / units::energy);
+    }
+    if (builder.fields.contains("step_process")) {
+        builder.step_process.content().content().begin_list();
+        // iterate over the characters in the string
+        for (const char c: processName) {
+            builder.step_process.content().content().content().append(c);
+        }
+        builder.step_process.content().content().end_list();
+    }
+    if (builder.fields.contains("step_process_type")) {
+        builder.step_process_type.content().content().begin_list();
+        // iterate over the characters in the string
+        for (const char c: processTypeName) {
+            builder.step_process_type.content().content().content().append(c);
+        }
+        builder.step_process_type.content().content().end_list();
+    }
+    if (builder.fields.contains("step_volume")) {
+        const auto& volumeName = stepPre->GetPhysicalVolume()->GetName();
+        builder.step_volume.content().content().begin_list();
+        // iterate over the characters in the string
+        for (const char c: volumeName) {
+            builder.step_volume.content().content().content().append(c);
+        }
+        builder.step_volume.content().content().end_list();
+    }
+    if (builder.fields.contains("step_volume_post")) {
+        string volumeName = "OutOfWorld";
+        const auto volume = stepPost->GetPhysicalVolume();
+        if (volume != nullptr) {
+            volumeName = volume->GetName();
+        }
+        builder.step_volume_post.content().content().begin_list();
+        // iterate over the characters in the string
+        for (const char c: volumeName) {
+            builder.step_volume_post.content().content().content().append(c);
+        }
+        builder.step_volume_post.content().content().end_list();
+    }
+    if (builder.fields.contains("step_nucleus")) {
+        const auto& nucleus = "";
+        builder.step_volume_post.content().content().begin_list();
+        // iterate over the characters in the string
+        for (const char c: nucleus) {
+            builder.step_volume_post.content().content().content().append(c);
+        }
+        builder.step_volume_post.content().content().end_list();
     }
 }
 
@@ -429,11 +531,11 @@ py::object snapshot_builder(const T& builder) {
     // dtypes not important here as long as they match the underlying buffer
     // as Awkward Array calls `frombuffer` to convert to the correct type
     py::dict container;
-    for (auto it: buffers) {
+    for (const auto& it: buffers) {
 
         // Create capsule that frees the allocated data when out of scope
         py::capsule free_when_done(it.second, [](void* data) {
-            uint8_t* dataPtr = reinterpret_cast<uint8_t*>(data);
+            auto* dataPtr = reinterpret_cast<uint8_t*>(data);
             delete[] dataPtr;
         });
 
@@ -441,7 +543,7 @@ py::object snapshot_builder(const T& builder) {
         // We only need to return a "buffer" here, but py::array_t let's
         // us associate a capsule for destruction, which means that
         // Python can own this memory. Therefore, we use py::array_t
-        uint8_t* data = reinterpret_cast<uint8_t*>(it.second);
+        auto* data = reinterpret_cast<uint8_t*>(it.second);
         container[py::str(it.first)] = py::array_t<uint8_t>(
                 {names_nbytes[it.first]},
                 {sizeof(uint8_t)},
@@ -521,9 +623,6 @@ py::object SnapshotBuilder(Builders& builder) {
     }
     if (builder.fields.contains("step_process_type")) {
         snapshot["step_process_type"] = snapshot_builder(builder.step_process_type);
-    }
-    if (builder.fields.contains("step_particle_type")) {
-        snapshot["step_particle_type"] = snapshot_builder(builder.step_particle_type);
     }
     if (builder.fields.contains("step_volume")) {
         snapshot["step_volume"] = snapshot_builder(builder.step_volume);

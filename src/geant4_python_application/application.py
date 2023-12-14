@@ -122,6 +122,16 @@ class Application:
         self._send_and_recv(Message("", "setup_action", (), {}))
         return self
 
+    def set_event_fields(self, fields: set[str]) -> Application:
+        self._send_and_recv(Message("", "set_event_fields", (fields,), {}))
+        return self
+
+    def get_event_fields(self) -> set[str]:
+        return self._send_and_recv(Message("", "get_event_fields", (), {}))
+
+    def get_event_fields_complete(self) -> set[str]:
+        return self._send_and_recv(Message("", "get_event_fields_complete", (), {}))
+
     def initialize(self) -> Application:
         self._send_and_recv(Message("", "initialize", (), {}))
         return self

@@ -69,7 +69,6 @@ struct Builders {
     StepFieldBuilder<double> step_track_kinetic_energy;
     StepStringBuilder step_process;
     StepStringBuilder step_process_type;
-    StepStringBuilder step_particle_type;
     StepStringBuilder step_volume;
     StepStringBuilder step_volume_post;
     StepStringBuilder step_nucleus;
@@ -84,6 +83,15 @@ struct Builders {
     Builders(const std::unordered_set<std::string>& fields) : fields(fields) {
         track_particle.content().set_parameters(R"""("__array__": "string")""");
         track_particle.content().content().set_parameters(R"""("__array__": "char")""");
+
+        track_particle_type.content().set_parameters(R"""("__array__": "string")""");
+        track_particle_type.content().content().set_parameters(R"""("__array__": "char")""");
+
+        track_creator_process.content().set_parameters(R"""("__array__": "string")""");
+        track_creator_process.content().content().set_parameters(R"""("__array__": "char")""");
+
+        track_creator_process_type.content().set_parameters(R"""("__array__": "string")""");
+        track_creator_process_type.content().content().set_parameters(R"""("__array__": "char")""");
     };
 };
 
