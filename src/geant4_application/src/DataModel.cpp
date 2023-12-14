@@ -373,23 +373,13 @@ void InsertTrack(const G4Track* track, Builders& builder) {
     if (builder.fields.contains("track_weight")) {
         builder.track_weight.content().append(track->GetWeight());
     }
-    if (builder.fields.contains("track_particle_type")) {
-        const auto& particleName = track->GetParticleDefinition()->GetParticleName();
-        builder.track_particle_type.content().begin_list();
-        // iterate over the characters in the string
-        for (const char c: particleName) {
-            builder.track_particle_type.content().content().append(c);
-        }
-        builder.track_particle_type.content().end_list();
-    }
     if (builder.fields.contains("track_particle")) {
         const auto& particleName = track->GetParticleDefinition()->GetParticleName();
-        builder.track_particle.content().begin_list();
-        // iterate over the characters in the string
-        for (const char c: particleName) {
-            builder.track_particle.content().content().append(c);
-        }
-        builder.track_particle.content().end_list();
+        builder.track_particle.content().append_string(particleName);
+    }
+    if (builder.fields.contains("track_particle_type")) {
+        const auto& particleTypeName = track->GetParticleDefinition()->GetParticleType();
+        builder.track_particle_type.content().append_string(particleTypeName);
     }
     if (builder.fields.contains("track_creator_process")) {
         string creatorProcessName = "InitProcess";
@@ -397,12 +387,7 @@ void InsertTrack(const G4Track* track, Builders& builder) {
         if (creatorProcess != nullptr) {
             creatorProcessName = creatorProcess->GetProcessName();
         }
-        builder.track_creator_process.content().begin_list();
-        // iterate over the characters in the string
-        for (const char c: creatorProcessName) {
-            builder.track_creator_process.content().content().append(c);
-        }
-        builder.track_creator_process.content().end_list();
+        builder.track_creator_process.content().append_string(creatorProcessName);
     }
     if (builder.fields.contains("track_creator_process_type")) {
         string creatorProcessTypeName = "InitProcess";
@@ -410,12 +395,7 @@ void InsertTrack(const G4Track* track, Builders& builder) {
         if (creatorProcess != nullptr) {
             creatorProcessTypeName = G4VProcess::GetProcessTypeName(creatorProcess->GetProcessType());
         }
-        builder.track_creator_process_type.content().begin_list();
-        // iterate over the characters in the string
-        for (const char c: creatorProcessTypeName) {
-            builder.track_creator_process_type.content().content().append(c);
-        }
-        builder.track_creator_process_type.content().end_list();
+        builder.track_creator_process_type.content().append_string(creatorProcessTypeName);
     }
 }
 
@@ -462,29 +442,14 @@ void InsertStep(const G4Step* step, Builders& builder) {
         builder.step_track_kinetic_energy.content().content().append(stepPost->GetKineticEnergy() / units::energy);
     }
     if (builder.fields.contains("step_process")) {
-        builder.step_process.content().content().begin_list();
-        // iterate over the characters in the string
-        for (const char c: processName) {
-            builder.step_process.content().content().content().append(c);
-        }
-        builder.step_process.content().content().end_list();
+        builder.step_process.content().content().append_string(processName);
     }
     if (builder.fields.contains("step_process_type")) {
-        builder.step_process_type.content().content().begin_list();
-        // iterate over the characters in the string
-        for (const char c: processTypeName) {
-            builder.step_process_type.content().content().content().append(c);
-        }
-        builder.step_process_type.content().content().end_list();
+        builder.step_process_type.content().content().append_string(processName);
     }
     if (builder.fields.contains("step_volume")) {
         const auto& volumeName = stepPre->GetPhysicalVolume()->GetName();
-        builder.step_volume.content().content().begin_list();
-        // iterate over the characters in the string
-        for (const char c: volumeName) {
-            builder.step_volume.content().content().content().append(c);
-        }
-        builder.step_volume.content().content().end_list();
+        builder.step_volume.content().content().append_string(volumeName);
     }
     if (builder.fields.contains("step_volume_post")) {
         string volumeName = "OutOfWorld";
@@ -492,21 +457,12 @@ void InsertStep(const G4Step* step, Builders& builder) {
         if (volume != nullptr) {
             volumeName = volume->GetName();
         }
-        builder.step_volume_post.content().content().begin_list();
-        // iterate over the characters in the string
-        for (const char c: volumeName) {
-            builder.step_volume_post.content().content().content().append(c);
-        }
-        builder.step_volume_post.content().content().end_list();
+        builder.step_volume_post.content().content().append_string(volumeName);
     }
     if (builder.fields.contains("step_nucleus")) {
         const auto& nucleus = "";
-        builder.step_volume_post.content().content().begin_list();
-        // iterate over the characters in the string
-        for (const char c: nucleus) {
-            builder.step_volume_post.content().content().content().append(c);
-        }
-        builder.step_volume_post.content().content().end_list();
+        // TODO
+        builder.step_nucleus.content().content().append_string(nucleus);
     }
 }
 
@@ -518,8 +474,8 @@ py::object snapshot_builder(const T& builder) {
 
     // Allocate memory
     std::map<std::string, void*> buffers = {};
-    for (auto it: names_nbytes) {
-        uint8_t* ptr = new uint8_t[it.second];
+    for (const auto& it: names_nbytes) {
+        auto* ptr = new uint8_t[it.second];
         buffers[it.first] = (void*) ptr;
     }
 

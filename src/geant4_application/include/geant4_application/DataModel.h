@@ -36,11 +36,28 @@ using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
 template<class T>
 using TrackFieldBuilder = ListOffsetBuilder<unsigned int, NumpyBuilder<T>>;
 
+template<class PRIMITIVE>
+class StringBuilder : public ListOffsetBuilder<PRIMITIVE, NumpyBuilder<uint8_t>> {
+public:
+    StringBuilder() : ListOffsetBuilder<PRIMITIVE, NumpyBuilder<uint8_t>>() {
+        this->set_parameters(R"""("__array__": "string")""");
+        this->content().set_parameters(R"""("__array__": "char")""");
+    }
+
+    void append_string(const std::string& value) {
+        this->begin_list();
+        for (const auto c: value) {
+            this->content().append(c);
+        }
+        this->end_list();
+    }
+};
+
 template<class T>
 using StepFieldBuilder = ListOffsetBuilder<unsigned int, ListOffsetBuilder<unsigned int, NumpyBuilder<T>>>;
 
-using TrackStringBuilder = ListOffsetBuilder<unsigned int, ListOffsetBuilder<unsigned int, NumpyBuilder<uint8_t>>>;
-using StepStringBuilder = ListOffsetBuilder<unsigned int, ListOffsetBuilder<unsigned int, ListOffsetBuilder<unsigned int, NumpyBuilder<uint8_t>>>>;
+using TrackStringBuilder = ListOffsetBuilder<unsigned int, StringBuilder<unsigned int>>;
+using StepStringBuilder = ListOffsetBuilder<unsigned int, ListOffsetBuilder<unsigned int, StringBuilder<unsigned int>>>;
 
 struct Builders {
     std::unordered_set<std::string> fields;
@@ -79,34 +96,7 @@ struct Builders {
     StepFieldBuilder<double> step_momentum_y;
     StepFieldBuilder<double> step_momentum_z;
 
-    Builders(const std::unordered_set<std::string>& fields) : fields(fields) {
-        track_particle.content().set_parameters(R"""("__array__": "string")""");
-        track_particle.content().content().set_parameters(R"""("__array__": "char")""");
-
-        track_particle_type.content().set_parameters(R"""("__array__": "string")""");
-        track_particle_type.content().content().set_parameters(R"""("__array__": "char")""");
-
-        track_creator_process.content().set_parameters(R"""("__array__": "string")""");
-        track_creator_process.content().content().set_parameters(R"""("__array__": "char")""");
-
-        track_creator_process_type.content().set_parameters(R"""("__array__": "string")""");
-        track_creator_process_type.content().content().set_parameters(R"""("__array__": "char")""");
-
-        step_process.content().content().set_parameters(R"""("__array__": "string")""");
-        step_process.content().content().content().set_parameters(R"""("__array__": "char")""");
-
-        step_process_type.content().content().set_parameters(R"""("__array__": "string")""");
-        step_process_type.content().content().content().set_parameters(R"""("__array__": "char")""");
-
-        step_volume.content().content().set_parameters(R"""("__array__": "string")""");
-        step_volume.content().content().content().set_parameters(R"""("__array__": "char")""");
-
-        step_volume_post.content().content().set_parameters(R"""("__array__": "string")""");
-        step_volume_post.content().content().content().set_parameters(R"""("__array__": "char")""");
-
-        step_nucleus.content().content().set_parameters(R"""("__array__": "string")""");
-        step_nucleus.content().content().content().set_parameters(R"""("__array__": "char")""");
-    };
+    Builders(const std::unordered_set<std::string>& fields) : fields(fields){};
 };
 
 
