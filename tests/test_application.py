@@ -162,3 +162,45 @@ def test_fields():
         app.command("/gun/position 0 0 10 m")
 
         events = app.run(100)
+
+
+def test_no_step_fields():
+    with Application() as app:
+        app.setup_manager().setup_physics().setup_detector(
+            gdml=basic_gdml
+        ).setup_action()
+
+        app.set_event_fields({"id", "track_id"})
+
+        events = app.run(100)
+        assert len(events) == 100
+        assert set(events.fields) == {"id", "track"}
+        assert set(events.track.fields) == {"id"}
+
+
+def test_no_track_step_fields():
+    with Application() as app:
+        app.setup_manager().setup_physics().setup_detector(
+            gdml=basic_gdml
+        ).setup_action()
+
+        app.set_event_fields({"id"})
+
+        events = app.run(100)
+        assert len(events) == 100
+        assert set(events.fields) == {"id"}
+
+
+def test_no_track_fields():
+    with Application() as app:
+        app.setup_manager().setup_physics().setup_detector(
+            gdml=basic_gdml
+        ).setup_action()
+
+        app.set_event_fields({"id", "step_energy"})
+
+        events = app.run(100)
+        assert len(events) == 100
+        assert set(events.fields) == {"id", "track"}
+        assert set(events.track.fields) == {"step"}
+        assert set(events.track.step.fields) == {"energy"}

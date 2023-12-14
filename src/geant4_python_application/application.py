@@ -177,29 +177,43 @@ class Application:
                         if key not in keys_to_remove
                     ]
                 },
-                "track": ak.Array(
+                **(
                     {
-                        **{
-                            key: track_array_dict[key]
-                            for key in track_array_dict.keys()
-                        },
-                        "step": ak.Array(
+                        "track": ak.Array(
                             {
                                 **{
-                                    key: step_array_dict[key]
-                                    for key in step_array_dict.keys()
-                                }
+                                    key: track_array_dict[key]
+                                    for key in track_array_dict.keys()
+                                },
+                                **(
+                                    {
+                                        "step": ak.Array(
+                                            {
+                                                **{
+                                                    key: step_array_dict[key]
+                                                    for key in step_array_dict.keys()
+                                                }
+                                            },
+                                            with_name="step",
+                                        )
+                                    }
+                                    if len(step_array_dict) > 0
+                                    else {}
+                                ),
                             },
-                            with_name="step",
-                        ),
-                    },
-                    with_name="track",
+                            with_name="track",
+                        )
+                    }
+                    if len(track_array_dict) > 0 or len(step_array_dict) > 0
+                    else {}
                 ),
             },
             with_name="events",
         )
 
-        return events[ak.argsort(events.id)]
+        if "id" in events.fields:
+            events = events[ak.argsort(events.id)]
+        return events
 
     @property
     def seed(self):
