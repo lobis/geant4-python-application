@@ -33,7 +33,6 @@ dependencies = [
     "awkward",
     "pyarrow",
     "awkward-pandas",
-    "pandas",
     "numpy",
     "requests",
     "tqdm",
