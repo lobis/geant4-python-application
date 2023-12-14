@@ -31,6 +31,7 @@ classifiers = [
 ]
 dependencies = [
     "awkward",
+    "pyarrow",
     "numpy",
     "requests",
     "tqdm",
@@ -47,7 +48,6 @@ dev = [
     "hist",
     "pandas",
     "awkward-pandas",
-    "pyarrow",
     "uproot",
     "fsspec",
 ]
