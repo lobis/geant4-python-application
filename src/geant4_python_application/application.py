@@ -232,7 +232,7 @@ class Application:
             with_name="event",
         )
 
-        events = ak.str.to_categorical(events)
+        # events = ak.str.to_categorical(events)
         if "id" in events.fields:
             events = events[ak.argsort(events.id)]
         return events

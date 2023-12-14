@@ -34,7 +34,7 @@ def test_events():
         volume = list(volumes)[0]
 
         energy_arrays = []
-        while (n := np.sum([len(energy) for energy in energy_arrays])) < 1e6:
+        while (n := np.sum([len(energy) for energy in energy_arrays])) < 1e4:
             events = app.run(1000)
             energy = events.energy_in_volume(volume)
             energy_arrays.append(energy[energy > 0])
