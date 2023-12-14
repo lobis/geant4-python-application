@@ -79,7 +79,6 @@ struct Builders {
     StepFieldBuilder<double> step_momentum_y;
     StepFieldBuilder<double> step_momentum_z;
 
-
     Builders(const std::unordered_set<std::string>& fields) : fields(fields) {
         track_particle.content().set_parameters(R"""("__array__": "string")""");
         track_particle.content().content().set_parameters(R"""("__array__": "char")""");
@@ -92,6 +91,21 @@ struct Builders {
 
         track_creator_process_type.content().set_parameters(R"""("__array__": "string")""");
         track_creator_process_type.content().content().set_parameters(R"""("__array__": "char")""");
+
+        step_process.content().content().set_parameters(R"""("__array__": "string")""");
+        step_process.content().content().content().set_parameters(R"""("__array__": "char")""");
+
+        step_process_type.content().content().set_parameters(R"""("__array__": "string")""");
+        step_process_type.content().content().content().set_parameters(R"""("__array__": "char")""");
+
+        step_volume.content().content().set_parameters(R"""("__array__": "string")""");
+        step_volume.content().content().content().set_parameters(R"""("__array__": "char")""");
+
+        step_volume_post.content().content().set_parameters(R"""("__array__": "string")""");
+        step_volume_post.content().content().content().set_parameters(R"""("__array__": "char")""");
+
+        step_nucleus.content().content().set_parameters(R"""("__array__": "string")""");
+        step_nucleus.content().content().content().set_parameters(R"""("__array__": "char")""");
     };
 };
 
