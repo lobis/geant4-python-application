@@ -46,3 +46,22 @@ class Detector:
         self._application._send_and_recv(
             Message("detector", "set_sensitive_volumes", (volumes,), {})
         )
+
+    def material_from_volume(self, volume: str) -> str:
+        return self._application._send_and_recv(
+            Message("detector", "get_material_from_volume", (volume,), {})
+        )
+
+    def logical_volume_from_physical(self, physical: str) -> str:
+        return self._application._send_and_recv(
+            Message(
+                "detector", "get_logical_volume_from_physical_volume", (physical,), {}
+            )
+        )
+
+    def physical_volumes_from_logical(self, logical: str) -> set[str]:
+        return self._application._send_and_recv(
+            Message(
+                "detector", "get_physical_volumes_from_logical_volume", (logical,), {}
+            )
+        )

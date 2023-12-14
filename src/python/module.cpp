@@ -62,6 +62,9 @@ PYBIND11_MODULE(_geant4_application, m) {
             .def_static("get_physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames)
             .def("get_sensitive_volumes", &DetectorConstruction::GetSensitiveVolumes)
             .def("set_sensitive_volumes", &DetectorConstruction::SetSensitiveVolumes, py::arg("volumes"))
+            .def_static("get_physical_volumes_from_logical_volume", &DetectorConstruction::GetPhysicalVolumesFromLogicalVolume, py::arg("logical_volume"))
+            .def_static("get_logical_volume_from_physical_volume", &DetectorConstruction::GetLogicalVolumeFromPhysicalVolume, py::arg("physical_volume"))
+            .def_static("get_material_from_volume", &DetectorConstruction::GetMaterialFromVolume, py::arg("volume"))
             .def("get_gdml", &DetectorConstruction::GetGDML);
 
 
