@@ -17,7 +17,27 @@ Message = namedtuple("Message", ["target", "method", "args", "kwargs"])
 
 def _start_application(pipe: multiprocessing.Pipe):
     app = Geant4Application()
-
+    app.set_event_fields(
+        {
+            "id",
+            "track_id",
+            "track_parent_id",
+            "track_initial_energy",
+            "track_initial_time",
+            "track_initial_position_x",
+            "track_initial_position_y",
+            "track_initial_position_z",
+            "track_particle",
+            "track_creator_process",
+            "step_energy",
+            "step_time",
+            "step_process",
+            "step_volume",
+            "step_position_x",
+            "step_position_y",
+            "step_position_z",
+        }
+    )
     while True:
         counter = None
         try:
@@ -211,6 +231,7 @@ class Application:
             with_name="events",
         )
 
+        events = ak.str.to_categorical(events)
         if "id" in events.fields:
             events = events[ak.argsort(events.id)]
         return events

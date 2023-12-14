@@ -25,8 +25,6 @@ Application::Application() {
         throw runtime_error("Application can only be created once");
     }
     pInstance = this;
-
-    SetEventFields({"id", "track_id", "step_energy"});
 }
 
 /// We cannot clean up everything, creating a new application will fail after initializing the kernel, so we don't allow it.
