@@ -37,7 +37,7 @@ jobs:
           python -m build --sdist .
 
       - name: Upload sdist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/*.tar.gz
@@ -197,7 +197,7 @@ jobs:
             'macosx_arm64' && 'SKIP_PYBIND11_STUBGEN=1' || '' }}
 
       - name: Upload wheel
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: wheelhouse/*.whl
