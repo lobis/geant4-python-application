@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import awkward as ak
 import numpy as np
 import requests
+from tqdm import tqdm
 
 from geant4_python_application import Application
 
@@ -40,3 +42,35 @@ def test_events():
             energy_arrays.append(energy[energy > 0])
             # discard 0 energy events
         energies = np.concatenate(energy_arrays)
+
+
+def test_sensitive():
+    with Application() as app:
+        app.seed = 1000
+        app.setup_manager(4).setup_physics().setup_detector(
+            gdml=complexGdml
+        ).setup_action()
+
+        sensitive_volume = "gasVolume"
+        app.detector.sensitive_volumes = {sensitive_volume}
+
+        app.initialize()
+
+        app.command("/gun/particle neutron")
+        app.command("/gun/energy 100 MeV")
+        app.command("/gun/direction 0 -1 0")
+        app.command("/gun/position 0 10 0 m")
+
+        volumes = app.detector.physical_volumes_from_logical(sensitive_volume)
+        assert len(volumes) == 1
+        volume = list(volumes)[0]
+        print("volume: ", volume)
+        events = []
+        total = 5
+        with tqdm(total=total) as pbar:
+            while (n := np.sum([len(_events) for _events in events])) < total:
+                run_events = app.run(50)
+                run_events = run_events[run_events.energy_in_volume(volume) > 0]
+                events.append(run_events)
+                pbar.update(len(run_events))
+        events = ak.concatenate(events)
