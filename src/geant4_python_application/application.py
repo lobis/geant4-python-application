@@ -25,18 +25,14 @@ def _start_application(pipe: multiprocessing.Pipe):
             "track_parent_id",
             "track_initial_energy",
             "track_initial_time",
-            "track_initial_position_x",
-            "track_initial_position_y",
-            "track_initial_position_z",
+            "track_initial_position",
             "track_particle",
             "track_creator_process",
             "step_energy",
             "step_time",
             "step_process",
             "step_volume",
-            "step_position_x",
-            "step_position_y",
-            "step_position_z",
+            "step_position",
         }
     )
     while True:

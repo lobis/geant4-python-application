@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import awkward as ak
 import numpy as np
+import vector
 
 
 class EventRecord(ak.Record):
@@ -23,7 +24,7 @@ class EventArray(ak.Array):
         if volume is not None:
             hits = hits[hits.volume == volume]
         # only keep x,y,z, time, and energy
-        hits = hits[["position_x", "position_y", "position_z", "time", "energy"]]
+        hits = hits[["position", "time", "energy"]]
         return ak.Array(hits, with_name="hits")
 
 
@@ -36,9 +37,7 @@ class HitsRecord(ak.Record):
                 [
                     [
                         {
-                            "position_x": self.position_x[i],
-                            "position_y": self.position_y[i],
-                            "position_z": self.position_z[i],
+                            "position": self.position[i],
                             "time": self.time[i],
                         }
                         for _ in range(int(n_electrons[i]))
@@ -50,7 +49,35 @@ class HitsRecord(ak.Record):
         )
 
 
+class ElectronsRecord(ak.Array):
+    def drift(
+        self,
+        *,
+        drift_velocity: float,
+        longitudinal_diffusion: float,
+        transversal_diffusion: float,
+        plane_point: tuple[float, float, float],
+        plane_normal: tuple[float, float, float],
+    ) -> ElectronsRecord:
+        # TODO: not working yet
+        plane_normal = vector.obj(
+            x=plane_normal[0], y=plane_normal[1], z=plane_normal[2]
+        ).unit()
+        assert np.isclose(plane_normal.mag, 1.0)
+        plane_point = vector.obj(x=plane_point[0], y=plane_point[1], z=plane_point[2])
+        distance_to_plane = (self.position - plane_point) * plane_normal
+        self.time += distance_to_plane / drift_velocity + np.random.normal(
+            0, longitudinal_diffusion * distance_to_plane, len(self.time)
+        )
+        self.position += -distance_to_plane * plane_normal
+        self.position += np.random.normal(
+            0, transversal_diffusion * distance_to_plane, len(self.position)
+        )
+        return self
+
+
 ak.behavior["event"] = EventRecord
 ak.behavior["*", "event"] = EventArray
 
 ak.behavior["hits"] = HitsRecord
+ak.behavior["electrons"] = ElectronsRecord

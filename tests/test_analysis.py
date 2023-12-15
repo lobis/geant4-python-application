@@ -71,3 +71,6 @@ def test_sensitive():
             run_events = run_events[run_events.energy_in_volume(volume) > 0]
             events.append(run_events)
         events = ak.concatenate(events)
+        # ak.to_parquet(events.hits(volume), "hits.parquet")
+        hits = events.hits(volume)
+        electrons = ak.concatenate([hit.electrons() for hit in hits])
