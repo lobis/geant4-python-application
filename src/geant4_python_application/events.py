@@ -50,6 +50,19 @@ class HitsRecord(ak.Record):
         )
 
 
+class ElectronsRecord(ak.Record):
+    def drift(
+        self,
+        *,
+        velocity: float,
+        longitudinal_diffusion: float,
+        transversal_diffusion: float,
+        plane_point: tuple[float, float, float],
+        plane_normal: tuple[float, float, float],
+    ) -> ak.Array:
+        pass
+
+
 ak.behavior["event"] = EventRecord
 ak.behavior["*", "event"] = EventArray
 
