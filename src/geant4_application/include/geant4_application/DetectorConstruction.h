@@ -32,6 +32,10 @@ public:
     static std::set<std::string> GetLogicalVolumeNames();
     static std::set<std::string> GetPhysicalVolumeNames();
 
+    static std::set<std::string> GetPhysicalVolumesFromLogicalVolume(const std::string& logicalVolumeName);
+    static std::string GetLogicalVolumeFromPhysicalVolume(const std::string& physicalVolumeName);
+    static std::string GetMaterialFromVolume(const std::string& volumeName);
+
     bool IsConstructed() const { return world != nullptr; }
 
 private:

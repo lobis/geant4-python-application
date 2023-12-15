@@ -6,6 +6,10 @@ import requests
 
 from geant4_python_application import Application, basic_gdml
 
+complexGdml = requests.get(
+    "https://raw.githubusercontent.com/rest-for-physics/restG4/dc3a8f42cea4978206a13325261fa85ec1b26261/examples/13.IAXO/geometry/setup.gdml"
+).text
+
 
 def test_missing_setup():
     with Application() as app:
@@ -62,7 +66,7 @@ def test_seed_single_thread():
             8.09506886e-03,
             1.22345221e00,
         ]
-        energy = np.array(events["track.step.energy"][0][0][0:5])
+        energy = np.array(events.track.step.energy[0][0][0:5])
         assert np.allclose(energy, reference_value, atol=1e-5)
 
 
@@ -102,11 +106,9 @@ def test_event_data_is_cleared():
 # raising the number of threads to a high value (e.g. 1000) has a very low chance to cause a segfault. TODO: investigate
 @pytest.mark.parametrize("n_threads", [0, 1, 2, 20])
 def test_complex_gdml(n_threads):
-    url = "https://raw.githubusercontent.com/rest-for-physics/restG4/dc3a8f42cea4978206a13325261fa85ec1b26261/examples/13.IAXO/geometry/setup.gdml"
-
     with Application() as app:
         app.setup_manager(n_threads=n_threads).setup_physics().setup_detector(
-            gdml=requests.get(url).text
+            gdml=complexGdml
         ).setup_action()
 
         app.detector.sensitive_volumes = {"gasVolume"}
@@ -137,3 +139,68 @@ def test_python_thread_safety():
             futures = [executor.submit(app.run, 10) for _ in range(10)]
             for future in futures:
                 future.result()
+
+
+def test_fields():
+    with Application() as app:
+        app.seed = 1000
+        app.setup_manager().setup_physics().setup_detector(
+            gdml=complexGdml
+        ).setup_action()
+
+        app.detector.sensitive_volumes = {"gasVolume"}
+
+        app.initialize()
+
+        fields = app.get_event_fields_complete()
+        assert len(fields) == 32
+        app.set_event_fields(fields)
+
+        app.command("/gun/particle neutron")
+        app.command("/gun/energy 100 MeV")
+        app.command("/gun/direction 0 0 -1")
+        app.command("/gun/position 0 0 10 m")
+
+        events = app.run(100)
+
+
+def test_no_step_fields():
+    with Application() as app:
+        app.setup_manager().setup_physics().setup_detector(
+            gdml=basic_gdml
+        ).setup_action()
+
+        app.set_event_fields({"id", "track_id"})
+
+        events = app.run(100)
+        assert len(events) == 100
+        assert set(events.fields) == {"id", "track"}
+        assert set(events.track.fields) == {"id"}
+
+
+def test_no_track_step_fields():
+    with Application() as app:
+        app.setup_manager().setup_physics().setup_detector(
+            gdml=basic_gdml
+        ).setup_action()
+
+        app.set_event_fields({"id"})
+
+        events = app.run(100)
+        assert len(events) == 100
+        assert set(events.fields) == {"id"}
+
+
+def test_no_track_fields():
+    with Application() as app:
+        app.setup_manager().setup_physics().setup_detector(
+            gdml=basic_gdml
+        ).setup_action()
+
+        app.set_event_fields({"id", "step_energy"})
+
+        events = app.run(100)
+        assert len(events) == 100
+        assert set(events.fields) == {"id", "track"}
+        assert set(events.track.fields) == {"step"}
+        assert set(events.track.step.fields) == {"energy"}

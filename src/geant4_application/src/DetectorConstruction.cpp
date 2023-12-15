@@ -117,3 +117,58 @@ set<string> DetectorConstruction::GetPhysicalVolumeNames() {
     }
     return names;
 }
+
+set<string> DetectorConstruction::GetPhysicalVolumesFromLogicalVolume(const string& logicalVolumeName) {
+    set<string> names;
+    const auto logicalVolume = G4LogicalVolumeStore::GetInstance()->GetVolume(logicalVolumeName, false);
+    if (logicalVolume == nullptr) {
+        throw runtime_error("Could not find logical volume '" + logicalVolumeName + "'");
+    }
+    const auto physicalVolumeTable = G4PhysicalVolumeStore::GetInstance();
+    for (const auto& physicalVolume: *physicalVolumeTable) {
+        if (physicalVolume->GetLogicalVolume() == logicalVolume) {
+            names.insert(physicalVolume->GetName());
+        }
+    }
+    if (names.empty()) {
+        throw runtime_error("Could not find physical volumes for logical volume '" + logicalVolumeName + "'");
+    }
+    return names;
+}
+
+string DetectorConstruction::GetLogicalVolumeFromPhysicalVolume(const string& physicalVolumeName) {
+    const auto physicalVolume = G4PhysicalVolumeStore::GetInstance()->GetVolume(physicalVolumeName, false);
+    if (physicalVolume == nullptr) {
+        throw runtime_error("Could not find physical volume '" + physicalVolumeName + "'");
+    }
+    const auto logicalVolume = physicalVolume->GetLogicalVolume();
+    if (logicalVolume == nullptr) {
+        throw runtime_error("Could not find logical volume for physical volume '" + physicalVolumeName + "'");
+    }
+    return logicalVolume->GetName();
+}
+
+string DetectorConstruction::GetMaterialFromVolume(const string& volumeName) {
+    const auto physicalVolume = G4PhysicalVolumeStore::GetInstance()->GetVolume(volumeName, false);
+    const auto logicalVolume = G4LogicalVolumeStore::GetInstance()->GetVolume(volumeName, false);
+    if (logicalVolume == nullptr && physicalVolume == nullptr) {
+        throw runtime_error("Could not find volume '" + volumeName + "'");
+    }
+    if (logicalVolume != nullptr && physicalVolume != nullptr) {
+        // not sure if this is possible, maybe instead of a runtime_error we should just return the material of the logical volume
+        throw runtime_error("Volume '" + volumeName + "' is both a logical and physical volume");
+    }
+
+    const G4Material* material;
+    if (logicalVolume != nullptr) {
+        material = logicalVolume->GetMaterial();
+    } else {
+        material = physicalVolume->GetLogicalVolume()->GetMaterial();
+    }
+
+    if (material == nullptr) {
+        throw runtime_error("Could not find material for logical volume '" + logicalVolume->GetName() + "'");
+    }
+
+    return material->GetName();
+}

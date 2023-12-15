@@ -9,7 +9,9 @@
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
 
+#include <algorithm>
 #include <random>
+#include <unordered_set>
 
 using namespace std;
 using namespace geant4_app;
@@ -112,6 +114,9 @@ vector<py::object> Application::Run(int nEvents) {
     if (!IsInitialized()) {
         Initialize();
     }
+    if (eventFields.empty()) {
+        throw runtime_error("Event fields cannot be empty");
+    }
     runManager->BeamOn(nEvents);
     py::gil_scoped_acquire acquire;
     return RunAction::GetEvents();
@@ -191,3 +196,14 @@ filesystem::path Application::GetTemporaryApplicationDirectory() {
     }
     return dir;
 }
+
+void Application::SetEventFields(const unordered_set<string>& fields) {
+    for (const auto& field: fields) {
+        if (!eventFieldsComplete.contains(field)) {
+            throw runtime_error("Invalid event field: " + field);
+        }
+    }
+    eventFields = fields;
+}
+
+unordered_set<string> Application::eventFields = {};

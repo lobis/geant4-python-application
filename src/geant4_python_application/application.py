@@ -8,6 +8,7 @@ import awkward as ak
 
 import geant4_python_application
 import geant4_python_application.datasets
+import geant4_python_application.events
 from geant4_python_application._geant4_application import (
     Application as Geant4Application,
 )
@@ -17,7 +18,27 @@ Message = namedtuple("Message", ["target", "method", "args", "kwargs"])
 
 def _start_application(pipe: multiprocessing.Pipe):
     app = Geant4Application()
-
+    app.set_event_fields(
+        {
+            "id",
+            "track_id",
+            "track_parent_id",
+            "track_initial_energy",
+            "track_initial_time",
+            "track_initial_position_x",
+            "track_initial_position_y",
+            "track_initial_position_z",
+            "track_particle",
+            "track_creator_process",
+            "step_energy",
+            "step_time",
+            "step_process",
+            "step_volume",
+            "step_position_x",
+            "step_position_y",
+            "step_position_z",
+        }
+    )
     while True:
         counter = None
         try:
@@ -62,10 +83,11 @@ class Application:
         self._message_counter = 0
         self._lock = threading.Lock()
 
-    def start(self):
+    def start(self) -> Application:
         if self._process.is_alive():
             raise RuntimeError("Application is already running")
         self._process.start()
+        return self
 
     def stop(self):
         if not self._process.is_alive():
@@ -77,9 +99,8 @@ class Application:
         except (EOFError, BrokenPipeError):
             pass
 
-    def __enter__(self):
-        self.start()
-        return self
+    def __enter__(self) -> Application:
+        return self.start()
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.stop()
@@ -122,17 +143,99 @@ class Application:
         self._send_and_recv(Message("", "setup_action", (), {}))
         return self
 
+    def set_event_fields(self, fields: set[str]) -> Application:
+        self._send_and_recv(Message("", "set_event_fields", (fields,), {}))
+        return self
+
+    def get_event_fields(self) -> set[str]:
+        return self._send_and_recv(Message("", "get_event_fields", (), {}))
+
+    def get_event_fields_complete(self) -> set[str]:
+        return self._send_and_recv(Message("", "get_event_fields_complete", (), {}))
+
     def initialize(self) -> Application:
         self._send_and_recv(Message("", "initialize", (), {}))
         return self
 
     def run(self, n_events: int = 1):
         # "run" returns a list of arrays, one for each thread
-        events = ak.concatenate(
-            self._send_and_recv(Message("", "run", (n_events,), {})), axis=0
+        events = self._send_and_recv(Message("", "run", (n_events,), {}))
+        concatenated_dict = {
+            key: ak.concatenate([d[key] for d in events], axis=0)
+            for key in events[0].keys()
+        }
+        # make sure they all have the same length
+        for key in concatenated_dict.keys():
+            if len(concatenated_dict[key]) != len(
+                concatenated_dict[list(concatenated_dict.keys())[0]]
+            ):
+                raise ValueError(f"Length mismatch for key {key}")
+
+        keys_to_remove = set()
+        step_array_dict = {}
+        for key in concatenated_dict.keys():
+            prefix = "step_"
+            if key.startswith(prefix):
+                new_key = key[len(prefix) :]
+                step_array_dict[new_key] = concatenated_dict[key]
+                keys_to_remove.add(key)
+
+        track_array_dict = {}
+        for key in concatenated_dict.keys():
+            prefix = "track_"
+            if key.startswith(prefix):
+                new_key = key[len(prefix) :]
+                track_array_dict[new_key] = concatenated_dict[key]
+                keys_to_remove.add(key)
+
+        events = ak.Array(
+            {
+                **{
+                    key: concatenated_dict[key]
+                    for key in [
+                        key
+                        for key in concatenated_dict.keys()
+                        if key not in keys_to_remove
+                    ]
+                },
+                **(
+                    {
+                        "track": ak.Array(
+                            {
+                                **{
+                                    key: track_array_dict[key]
+                                    for key in track_array_dict.keys()
+                                },
+                                **(
+                                    {
+                                        "step": ak.Array(
+                                            {
+                                                **{
+                                                    key: step_array_dict[key]
+                                                    for key in step_array_dict.keys()
+                                                }
+                                            },
+                                            with_name="step",
+                                        )
+                                    }
+                                    if len(step_array_dict) > 0
+                                    else {}
+                                ),
+                            },
+                            with_name="track",
+                        )
+                    }
+                    if len(track_array_dict) > 0 or len(step_array_dict) > 0
+                    else {}
+                ),
+            },
+            with_name="event",
         )
-        # sort by event_id (events from different threads are mixed)
-        return events[ak.argsort(events.event_id)]
+
+        # events = ak.str.to_categorical(events)
+        if "id" in events.fields:
+            events = events[ak.argsort(events.id)]
+        return events
 
     @property
     def seed(self):

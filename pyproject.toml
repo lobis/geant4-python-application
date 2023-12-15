@@ -31,6 +31,8 @@ classifiers = [
 ]
 dependencies = [
     "awkward",
+    "pyarrow",
+    "awkward-pandas",
     "numpy",
     "requests",
     "tqdm",
@@ -45,9 +47,6 @@ version = "0.0.2.dev1"
 dev = [
     "boost_histogram",
     "hist",
-    "pandas",
-    "awkward-pandas",
-    "pyarrow",
     "uproot",
     "fsspec",
 ]

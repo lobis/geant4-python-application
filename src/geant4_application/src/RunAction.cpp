@@ -10,7 +10,7 @@ using namespace geant4_app;
 RunAction::RunAction() : G4UserRunAction() {}
 
 void RunAction::BeginOfRunAction(const G4Run*) {
-    builder.clear();
+    builder = make_unique<data::Builders>(Application::GetEventFields());
 
     auto steppingVerbose = ((SteppingVerbose*) G4VSteppingVerbose::GetInstance());
     steppingVerbose->Initialize();
@@ -21,30 +21,25 @@ void RunAction::BeginOfRunAction(const G4Run*) {
 }
 
 void RunAction::EndOfRunAction(const G4Run*) {
-    string error;
-    if (!builder.is_valid(error)) {
-        throw runtime_error("Builder is not valid: " + error);
-    }
-
     if (!isMaster || !G4Threading::IsMultithreadedApplication()) {
         lock_guard<std::mutex> lock(mutex);
-        buildersToSnapshot.push_back(&builder);
+        buildersToSnapshot.push_back(std::move(builder));
     }
 
     if (isMaster) {
         // snapshot not working on worker threads, why?
         py::gil_scoped_acquire acquire;
         for (auto& builderToSnapshot: buildersToSnapshot) {
-            events->push_back(data::SnapshotBuilder(*builderToSnapshot));
-            builderToSnapshot->clear();
+            events->push_back(SnapshotBuilder(*builderToSnapshot));
+            builderToSnapshot = nullptr;
         }
         buildersToSnapshot.clear();
     }
 }
 
-data::Builder& RunAction::GetBuilder() {
+data::Builders& RunAction::GetBuilder() {
     auto runAction = dynamic_cast<RunAction*>(const_cast<G4UserRunAction*>(G4RunManager::GetRunManager()->GetUserRunAction()));
-    return runAction->builder;
+    return *runAction->builder;
 }
 
 unique_ptr<std::vector<py::object>> RunAction::events = nullptr;
@@ -55,4 +50,4 @@ vector<py::object> RunAction::GetEvents() {
     return *std::move(RunAction::events);
 }
 
-vector<data::Builder*> RunAction::buildersToSnapshot = {};
+vector<std::unique_ptr<data::Builders>> RunAction::buildersToSnapshot = {};
