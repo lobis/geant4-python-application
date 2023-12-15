@@ -24,7 +24,7 @@ def test_events():
 
         app.initialize()
 
-        app.set_event_fields({"id", "step_energy", "step_volume"})
+        app.set_event_fields({"step_energy", "step_volume"})
 
         app.command("/gun/particle gamma")
         app.command("/gun/energy 8 keV")
