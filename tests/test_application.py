@@ -153,7 +153,7 @@ def test_fields():
         app.initialize()
 
         fields = app.get_event_fields_complete()
-        assert len(fields) == 32
+        assert len(fields) == 24
         app.set_event_fields(fields)
 
         app.command("/gun/particle neutron")

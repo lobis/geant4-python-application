@@ -19,17 +19,15 @@ using namespace std;
 using namespace geant4_app;
 
 std::unordered_set<std::string> Application::eventFieldsComplete = {
-        //
-        "id", "run",                                                                                                         //
-        "track_id", "track_parent_id", "track_initial_energy", "track_initial_time", "track_weight",                         //
-        "track_initial_position_x", "track_initial_position_y", "track_initial_position_z",                                  //
-        "track_initial_momentum_x", "track_initial_momentum_y", "track_initial_momentum_z",                                  //
-        "track_particle", "track_particle_type", "track_creator_process", "track_creator_process_type", "track_children_ids",//
-        "step_energy", "step_time", "step_track_kinetic_energy",                                                             //
-        "step_process", "step_process_type",                                                                                 //
-        "step_volume", "step_volume_post", "step_nucleus",                                                                   //
-        "step_position_x", "step_position_y", "step_position_z",                                                             //
-        "step_momentum_x", "step_momentum_y", "step_momentum_z",                                                             //
+        "id", "run",                                                                                   //
+        "track_id", "track_parent_id", "track_initial_energy", "track_initial_time",                   //
+        "track_initial_position", "track_initial_momentum",                                            //
+        "track_particle", "track_particle_type", "track_creator_process", "track_creator_process_type",//
+        "track_children_ids", "track_weight",                                                          //
+        "step_energy", "step_time", "step_track_kinetic_energy",                                       //
+        "step_process", "step_process_type",                                                           //
+        "step_volume", "step_volume_post", "step_nucleus",                                             //
+        "step_position", "step_momentum"                                                               //
 };
 
 namespace geant4_app::data {
@@ -61,23 +59,11 @@ void InsertEventBegin(const G4Event* event, Builders& builder) {
         if (builder.fields.contains("track_weight")) {
             builder.track_weight.begin_list();
         }
-        if (builder.fields.contains("track_initial_position_x")) {
-            builder.track_initial_position_x.begin_list();
+        if (builder.fields.contains("track_initial_position")) {
+            builder.track_initial_position.begin_list();
         }
-        if (builder.fields.contains("track_initial_position_y")) {
-            builder.track_initial_position_y.begin_list();
-        }
-        if (builder.fields.contains("track_initial_position_z")) {
-            builder.track_initial_position_z.begin_list();
-        }
-        if (builder.fields.contains("track_initial_momentum_x")) {
-            builder.track_initial_momentum_x.begin_list();
-        }
-        if (builder.fields.contains("track_initial_momentum_y")) {
-            builder.track_initial_momentum_y.begin_list();
-        }
-        if (builder.fields.contains("track_initial_momentum_z")) {
-            builder.track_initial_momentum_z.begin_list();
+        if (builder.fields.contains("track_initial_momentum")) {
+            builder.track_initial_momentum.begin_list();
         }
         if (builder.fields.contains("track_particle")) {
             builder.track_particle.begin_list();
@@ -121,23 +107,11 @@ void InsertEventBegin(const G4Event* event, Builders& builder) {
         if (builder.fields.contains("step_nucleus")) {
             builder.step_nucleus.begin_list();
         }
-        if (builder.fields.contains("step_position_x")) {
-            builder.step_position_x.begin_list();
+        if (builder.fields.contains("step_position")) {
+            builder.step_position.begin_list();
         }
-        if (builder.fields.contains("step_position_y")) {
-            builder.step_position_y.begin_list();
-        }
-        if (builder.fields.contains("step_position_z")) {
-            builder.step_position_z.begin_list();
-        }
-        if (builder.fields.contains("step_momentum_x")) {
-            builder.step_momentum_x.begin_list();
-        }
-        if (builder.fields.contains("step_momentum_y")) {
-            builder.step_momentum_y.begin_list();
-        }
-        if (builder.fields.contains("step_momentum_z")) {
-            builder.step_momentum_z.begin_list();
+        if (builder.fields.contains("step_momentum")) {
+            builder.step_momentum.begin_list();
         }
     }
 }
@@ -160,23 +134,11 @@ void InsertEventEnd(const G4Event*, Builders& builder) {
         if (builder.fields.contains("track_weight")) {
             builder.track_weight.end_list();
         }
-        if (builder.fields.contains("track_initial_position_x")) {
-            builder.track_initial_position_x.end_list();
+        if (builder.fields.contains("track_initial_position")) {
+            builder.track_initial_position.end_list();
         }
-        if (builder.fields.contains("track_initial_position_y")) {
-            builder.track_initial_position_y.end_list();
-        }
-        if (builder.fields.contains("track_initial_position_z")) {
-            builder.track_initial_position_z.end_list();
-        }
-        if (builder.fields.contains("track_initial_momentum_x")) {
-            builder.track_initial_momentum_x.end_list();
-        }
-        if (builder.fields.contains("track_initial_momentum_y")) {
-            builder.track_initial_momentum_y.end_list();
-        }
-        if (builder.fields.contains("track_initial_momentum_z")) {
-            builder.track_initial_momentum_z.end_list();
+        if (builder.fields.contains("track_initial_momentum")) {
+            builder.track_initial_momentum.end_list();
         }
         if (builder.fields.contains("track_particle")) {
             builder.track_particle.end_list();
@@ -220,23 +182,11 @@ void InsertEventEnd(const G4Event*, Builders& builder) {
         if (builder.fields.contains("step_nucleus")) {
             builder.step_nucleus.end_list();
         }
-        if (builder.fields.contains("step_position_x")) {
-            builder.step_position_x.end_list();
+        if (builder.fields.contains("step_position")) {
+            builder.step_position.end_list();
         }
-        if (builder.fields.contains("step_position_y")) {
-            builder.step_position_y.end_list();
-        }
-        if (builder.fields.contains("step_position_z")) {
-            builder.step_position_z.end_list();
-        }
-        if (builder.fields.contains("step_momentum_x")) {
-            builder.step_momentum_x.end_list();
-        }
-        if (builder.fields.contains("step_momentum_y")) {
-            builder.step_momentum_y.end_list();
-        }
-        if (builder.fields.contains("step_momentum_z")) {
-            builder.step_momentum_z.end_list();
+        if (builder.fields.contains("step_momentum")) {
+            builder.step_momentum.end_list();
         }
     }
 }
@@ -267,23 +217,11 @@ void InsertTrackBegin(const G4Track* track, Builders& builder) {
     if (builder.fields.contains("step_nucleus")) {
         builder.step_nucleus.content().begin_list();
     }
-    if (builder.fields.contains("step_position_x")) {
-        builder.step_position_x.content().begin_list();
+    if (builder.fields.contains("step_position")) {
+        builder.step_position.content().begin_list();
     }
-    if (builder.fields.contains("step_position_y")) {
-        builder.step_position_y.content().begin_list();
-    }
-    if (builder.fields.contains("step_position_z")) {
-        builder.step_position_z.content().begin_list();
-    }
-    if (builder.fields.contains("step_momentum_x")) {
-        builder.step_momentum_x.content().begin_list();
-    }
-    if (builder.fields.contains("step_momentum_y")) {
-        builder.step_momentum_y.content().begin_list();
-    }
-    if (builder.fields.contains("step_momentum_z")) {
-        builder.step_momentum_z.content().begin_list();
+    if (builder.fields.contains("step_momentum")) {
+        builder.step_momentum.content().begin_list();
     }
 }
 
@@ -319,23 +257,11 @@ void InsertTrackEnd(const G4Track* track, Builders& builder) {
     if (builder.fields.contains("step_nucleus")) {
         builder.step_nucleus.content().end_list();
     }
-    if (builder.fields.contains("step_position_x")) {
-        builder.step_position_x.content().end_list();
+    if (builder.fields.contains("step_position")) {
+        builder.step_position.content().end_list();
     }
-    if (builder.fields.contains("step_position_y")) {
-        builder.step_position_y.content().end_list();
-    }
-    if (builder.fields.contains("step_position_z")) {
-        builder.step_position_z.content().end_list();
-    }
-    if (builder.fields.contains("step_momentum_x")) {
-        builder.step_momentum_x.content().end_list();
-    }
-    if (builder.fields.contains("step_momentum_y")) {
-        builder.step_momentum_y.content().end_list();
-    }
-    if (builder.fields.contains("step_momentum_z")) {
-        builder.step_momentum_z.content().end_list();
+    if (builder.fields.contains("step_momentum")) {
+        builder.step_momentum.content().end_list();
     }
 }
 
@@ -352,34 +278,22 @@ void InsertTrack(const G4Track* track, Builders& builder) {
     if (builder.fields.contains("track_initial_time")) {
         builder.track_initial_time.content().append(track->GetGlobalTime() / units::time);
     }
-    if (builder.fields.contains("track_initial_position_x")) {
-        builder.track_initial_position_x.content().append(track->GetVertexPosition().x() / units::length);
+    if (builder.fields.contains("track_initial_position")) {
+        builder.track_initial_position.content().append(track->GetVertexPosition() / units::length);
     }
-    if (builder.fields.contains("track_initial_position_y")) {
-        builder.track_initial_position_y.content().append(track->GetVertexPosition().y() / units::length);
-    }
-    if (builder.fields.contains("track_initial_position_z")) {
-        builder.track_initial_position_z.content().append(track->GetVertexPosition().z() / units::length);
-    }
-    if (builder.fields.contains("track_initial_momentum_x")) {
-        builder.track_initial_momentum_x.content().append(track->GetVertexMomentumDirection().x());
-    }
-    if (builder.fields.contains("track_initial_momentum_y")) {
-        builder.track_initial_momentum_y.content().append(track->GetVertexMomentumDirection().y());
-    }
-    if (builder.fields.contains("track_initial_momentum_z")) {
-        builder.track_initial_momentum_z.content().append(track->GetVertexMomentumDirection().z());
+    if (builder.fields.contains("track_initial_momentum")) {
+        builder.track_initial_momentum.content().append(track->GetVertexMomentumDirection());
     }
     if (builder.fields.contains("track_weight")) {
         builder.track_weight.content().append(track->GetWeight());
     }
     if (builder.fields.contains("track_particle")) {
         const auto& particleName = track->GetParticleDefinition()->GetParticleName();
-        builder.track_particle.content().append_string(particleName);
+        builder.track_particle.content().append(particleName);
     }
     if (builder.fields.contains("track_particle_type")) {
         const auto& particleTypeName = track->GetParticleDefinition()->GetParticleType();
-        builder.track_particle_type.content().append_string(particleTypeName);
+        builder.track_particle_type.content().append(particleTypeName);
     }
     if (builder.fields.contains("track_creator_process")) {
         string creatorProcessName = "InitProcess";
@@ -387,7 +301,7 @@ void InsertTrack(const G4Track* track, Builders& builder) {
         if (creatorProcess != nullptr) {
             creatorProcessName = creatorProcess->GetProcessName();
         }
-        builder.track_creator_process.content().append_string(creatorProcessName);
+        builder.track_creator_process.content().append(creatorProcessName);
     }
     if (builder.fields.contains("track_creator_process_type")) {
         string creatorProcessTypeName = "InitProcess";
@@ -395,7 +309,7 @@ void InsertTrack(const G4Track* track, Builders& builder) {
         if (creatorProcess != nullptr) {
             creatorProcessTypeName = G4VProcess::GetProcessTypeName(creatorProcess->GetProcessType());
         }
-        builder.track_creator_process_type.content().append_string(creatorProcessTypeName);
+        builder.track_creator_process_type.content().append(creatorProcessTypeName);
     }
 }
 
@@ -420,36 +334,24 @@ void InsertStep(const G4Step* step, Builders& builder) {
     if (builder.fields.contains("step_time")) {
         builder.step_time.content().content().append(stepPost->GetGlobalTime() / units::time);
     }
-    if (builder.fields.contains("step_position_x")) {
-        builder.step_position_x.content().content().append(stepPost->GetPosition().x() / units::length);
+    if (builder.fields.contains("step_position")) {
+        builder.step_position.content().content().append(stepPost->GetPosition() / units::length);
     }
-    if (builder.fields.contains("step_position_y")) {
-        builder.step_position_y.content().content().append(stepPost->GetPosition().y() / units::length);
-    }
-    if (builder.fields.contains("step_position_z")) {
-        builder.step_position_z.content().content().append(stepPost->GetPosition().z() / units::length);
-    }
-    if (builder.fields.contains("step_momentum_x")) {
-        builder.step_momentum_x.content().content().append(stepPost->GetMomentumDirection().x());
-    }
-    if (builder.fields.contains("step_momentum_y")) {
-        builder.step_momentum_y.content().content().append(stepPost->GetMomentumDirection().y());
-    }
-    if (builder.fields.contains("step_momentum_z")) {
-        builder.step_momentum_z.content().content().append(stepPost->GetMomentumDirection().z());
+    if (builder.fields.contains("step_momentum")) {
+        builder.step_momentum.content().content().append(stepPost->GetMomentumDirection());
     }
     if (builder.fields.contains("step_track_kinetic_energy")) {
         builder.step_track_kinetic_energy.content().content().append(stepPost->GetKineticEnergy() / units::energy);
     }
     if (builder.fields.contains("step_process")) {
-        builder.step_process.content().content().append_string(processName);
+        builder.step_process.content().content().append(processName);
     }
     if (builder.fields.contains("step_process_type")) {
-        builder.step_process_type.content().content().append_string(processName);
+        builder.step_process_type.content().content().append(processName);
     }
     if (builder.fields.contains("step_volume")) {
         const auto& volumeName = stepPre->GetPhysicalVolume()->GetName();
-        builder.step_volume.content().content().append_string(volumeName);
+        builder.step_volume.content().content().append(volumeName);
     }
     if (builder.fields.contains("step_volume_post")) {
         string volumeName = "OutOfWorld";
@@ -457,12 +359,12 @@ void InsertStep(const G4Step* step, Builders& builder) {
         if (volume != nullptr) {
             volumeName = volume->GetName();
         }
-        builder.step_volume_post.content().content().append_string(volumeName);
+        builder.step_volume_post.content().content().append(volumeName);
     }
     if (builder.fields.contains("step_nucleus")) {
         const auto& nucleus = "";
         // TODO
-        builder.step_nucleus.content().content().append_string(nucleus);
+        builder.step_nucleus.content().content().append(nucleus);
     }
 }
 
@@ -532,23 +434,11 @@ py::object SnapshotBuilder(Builders& builder) {
     if (builder.fields.contains("track_weight")) {
         snapshot["track_weight"] = snapshot_builder(builder.track_weight);
     }
-    if (builder.fields.contains("track_initial_position_x")) {
-        snapshot["track_initial_position_x"] = snapshot_builder(builder.track_initial_position_x);
+    if (builder.fields.contains("track_initial_position")) {
+        snapshot["track_initial_position"] = snapshot_builder(builder.track_initial_position);
     }
-    if (builder.fields.contains("track_initial_position_y")) {
-        snapshot["track_initial_position_y"] = snapshot_builder(builder.track_initial_position_y);
-    }
-    if (builder.fields.contains("track_initial_position_z")) {
-        snapshot["track_initial_position_z"] = snapshot_builder(builder.track_initial_position_z);
-    }
-    if (builder.fields.contains("track_initial_momentum_x")) {
-        snapshot["track_initial_momentum_x"] = snapshot_builder(builder.track_initial_momentum_x);
-    }
-    if (builder.fields.contains("track_initial_momentum_y")) {
-        snapshot["track_initial_momentum_y"] = snapshot_builder(builder.track_initial_momentum_y);
-    }
-    if (builder.fields.contains("track_initial_momentum_z")) {
-        snapshot["track_initial_momentum_z"] = snapshot_builder(builder.track_initial_momentum_z);
+    if (builder.fields.contains("track_initial_momentum")) {
+        snapshot["track_initial_momentum"] = snapshot_builder(builder.track_initial_momentum);
     }
     if (builder.fields.contains("track_particle")) {
         snapshot["track_particle"] = snapshot_builder(builder.track_particle);
@@ -589,23 +479,11 @@ py::object SnapshotBuilder(Builders& builder) {
     if (builder.fields.contains("step_nucleus")) {
         snapshot["step_nucleus"] = snapshot_builder(builder.step_nucleus);
     }
-    if (builder.fields.contains("step_position_x")) {
-        snapshot["step_position_x"] = snapshot_builder(builder.step_position_x);
+    if (builder.fields.contains("step_position")) {
+        snapshot["step_position"] = snapshot_builder(builder.step_position);
     }
-    if (builder.fields.contains("step_position_y")) {
-        snapshot["step_position_y"] = snapshot_builder(builder.step_position_y);
-    }
-    if (builder.fields.contains("step_position_z")) {
-        snapshot["step_position_z"] = snapshot_builder(builder.step_position_z);
-    }
-    if (builder.fields.contains("step_momentum_x")) {
-        snapshot["step_momentum_x"] = snapshot_builder(builder.step_momentum_x);
-    }
-    if (builder.fields.contains("step_momentum_y")) {
-        snapshot["step_momentum_y"] = snapshot_builder(builder.step_momentum_y);
-    }
-    if (builder.fields.contains("step_momentum_z")) {
-        snapshot["step_momentum_z"] = snapshot_builder(builder.step_momentum_z);
+    if (builder.fields.contains("step_momentum")) {
+        snapshot["step_momentum"] = snapshot_builder(builder.step_momentum);
     }
     return snapshot;
 }

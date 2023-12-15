@@ -44,12 +44,48 @@ public:
         this->content().set_parameters(R"""("__array__": "char")""");
     }
 
-    void append_string(const std::string& value) {
+    void append(const std::string& value) {
         this->begin_list();
         for (const auto c: value) {
             this->content().append(c);
         }
         this->end_list();
+    }
+};
+
+template<class PRIMITIVE>
+class VectorBuilder : public RecordBuilder<
+                              RecordField<0, NumpyBuilder<double>>,
+                              RecordField<1, NumpyBuilder<double>>,
+                              RecordField<2, NumpyBuilder<double>>> {
+public:
+    VectorBuilder() : RecordBuilder<
+                              RecordField<0, NumpyBuilder<double>>,
+                              RecordField<1, NumpyBuilder<double>>,
+                              RecordField<2, NumpyBuilder<double>>>() {}
+
+    void append(const G4ThreeVector& vector) {
+        this->content<0>().append(vector.x());
+        this->content<1>().append(vector.y());
+        this->content<2>().append(vector.z());
+    }
+};
+
+template<class T>
+class PositionVectorBuilder : public VectorBuilder<T> {
+public:
+    PositionVectorBuilder() : VectorBuilder<T>() {
+        this->set_fields({{0, "x"}, {1, "y"}, {2, "z"}});
+        this->set_parameters(R"""("__record__": "Vector3D")""");
+    }
+};
+
+template<class T>
+class MomentumVectorBuilder : public VectorBuilder<T> {
+public:
+    MomentumVectorBuilder() : VectorBuilder<T>() {
+        this->set_fields({{0, "px"}, {1, "py"}, {2, "pz"}});
+        this->set_parameters(R"""("__record__": "Momentum3D")""");
     }
 };
 
@@ -59,6 +95,23 @@ using StepFieldBuilder = ListOffsetBuilder<unsigned int, ListOffsetBuilder<unsig
 using TrackStringBuilder = ListOffsetBuilder<unsigned int, StringBuilder<unsigned int>>;
 using StepStringBuilder = ListOffsetBuilder<unsigned int, ListOffsetBuilder<unsigned int, StringBuilder<unsigned int>>>;
 
+template<class T>
+using TrackPositionBuilder = ListOffsetBuilder<unsigned int,
+                                               PositionVectorBuilder<T>>;
+
+template<class T>
+using TrackMomentumBuilder = ListOffsetBuilder<unsigned int,
+                                               MomentumVectorBuilder<T>>;
+
+template<class T>
+using StepPositionBuilder = ListOffsetBuilder<unsigned int,
+                                              ListOffsetBuilder<unsigned int,
+                                                                PositionVectorBuilder<T>>>;
+
+template<class T>
+using StepMomentumBuilder = ListOffsetBuilder<unsigned int,
+                                              ListOffsetBuilder<unsigned int,
+                                                                MomentumVectorBuilder<T>>>;
 struct Builders {
     std::unordered_set<std::string> fields;
     NumpyBuilder<unsigned int> run;
@@ -68,12 +121,8 @@ struct Builders {
     TrackFieldBuilder<unsigned int> track_parent_id;
     TrackFieldBuilder<double> track_initial_energy;
     TrackFieldBuilder<double> track_initial_time;
-    TrackFieldBuilder<double> track_initial_position_x;
-    TrackFieldBuilder<double> track_initial_position_y;
-    TrackFieldBuilder<double> track_initial_position_z;
-    TrackFieldBuilder<double> track_initial_momentum_x;
-    TrackFieldBuilder<double> track_initial_momentum_y;
-    TrackFieldBuilder<double> track_initial_momentum_z;
+    TrackPositionBuilder<double> track_initial_position;
+    TrackMomentumBuilder<double> track_initial_momentum;
     StepFieldBuilder<unsigned int> track_children_ids;// this is a track field, but it has the same structure of a step field
     TrackStringBuilder track_particle;
     TrackStringBuilder track_particle_type;
@@ -89,12 +138,8 @@ struct Builders {
     StepStringBuilder step_volume;
     StepStringBuilder step_volume_post;
     StepStringBuilder step_nucleus;
-    StepFieldBuilder<double> step_position_x;
-    StepFieldBuilder<double> step_position_y;
-    StepFieldBuilder<double> step_position_z;
-    StepFieldBuilder<double> step_momentum_x;
-    StepFieldBuilder<double> step_momentum_y;
-    StepFieldBuilder<double> step_momentum_z;
+    StepPositionBuilder<double> step_position;
+    StepMomentumBuilder<double> step_momentum;
 
     Builders(const std::unordered_set<std::string>& fields) : fields(fields){};
 };

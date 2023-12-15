@@ -23,7 +23,7 @@ class EventArray(ak.Array):
         if volume is not None:
             hits = hits[hits.volume == volume]
         # only keep x,y,z, time, and energy
-        hits = hits[["position_x", "position_y", "position_z", "time", "energy"]]
+        hits = hits[["position", "time", "energy"]]
         return ak.Array(hits, with_name="hits")
 
 
@@ -36,9 +36,7 @@ class HitsRecord(ak.Record):
                 [
                     [
                         {
-                            "position_x": self.position_x[i],
-                            "position_y": self.position_y[i],
-                            "position_z": self.position_z[i],
+                            "position": self.position[i],
                             "time": self.time[i],
                         }
                         for _ in range(int(n_electrons[i]))
