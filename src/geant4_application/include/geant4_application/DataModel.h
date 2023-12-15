@@ -89,14 +89,16 @@ struct Builders {
     StepStringBuilder step_volume;
     StepStringBuilder step_volume_post;
     StepStringBuilder step_nucleus;
-    StepFieldBuilder<double> step_position_x;
-    StepFieldBuilder<double> step_position_y;
-    StepFieldBuilder<double> step_position_z;
-    StepFieldBuilder<double> step_momentum_x;
-    StepFieldBuilder<double> step_momentum_y;
-    StepFieldBuilder<double> step_momentum_z;
+    RecordBuilder<RecordField<0, StepFieldBuilder<double>>, RecordField<1, StepFieldBuilder<double>>, RecordField<2, StepFieldBuilder<double>>> step_position;
+    RecordBuilder<RecordField<0, StepFieldBuilder<double>>, RecordField<1, StepFieldBuilder<double>>, RecordField<2, StepFieldBuilder<double>>> step_momentum;
 
-    Builders(const std::unordered_set<std::string>& fields) : fields(fields){};
+    Builders(const std::unordered_set<std::string>& fields) : fields(fields) {
+        step_position.set_fields({{0, "x"}, {1, "y"}, {2, "z"}});
+        step_position.set_parameters(R"""("__record__": "Vector3D")""");
+
+        step_momentum.set_fields({{0, "px"}, {1, "py"}, {2, "pz"}});
+        step_momentum.set_parameters(R"""("__record__": "Momentum3D")""");
+    };
 };
 
 

@@ -34,9 +34,7 @@ def _start_application(pipe: multiprocessing.Pipe):
             "step_time",
             "step_process",
             "step_volume",
-            "step_position_x",
-            "step_position_y",
-            "step_position_z",
+            "step_position",
         }
     )
     while True:

@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import awkward as ak
 import numpy as np
+import vector
+
+vector.register_awkward()
 
 
 class EventRecord(ak.Record):
