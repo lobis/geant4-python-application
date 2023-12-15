@@ -3,7 +3,6 @@ from __future__ import annotations
 import awkward as ak
 import numpy as np
 import requests
-from tqdm import tqdm
 
 from geant4_python_application import Application
 
@@ -67,10 +66,8 @@ def test_sensitive():
         print("volume: ", volume)
         events = []
         total = 5
-        with tqdm(total=total) as pbar:
-            while (n := np.sum([len(_events) for _events in events])) < total:
-                run_events = app.run(50)
-                run_events = run_events[run_events.energy_in_volume(volume) > 0]
-                events.append(run_events)
-                pbar.update(len(run_events))
+        while (n := np.sum([len(_events) for _events in events])) < total:
+            run_events = app.run(50)
+            run_events = run_events[run_events.energy_in_volume(volume) > 0]
+            events.append(run_events)
         events = ak.concatenate(events)
