@@ -32,6 +32,7 @@ classifiers = [
 dependencies = [
     "awkward",
     "vector",
+    "fsspec",
     "pyarrow",
     "awkward-pandas",
     "numpy",
@@ -49,7 +50,6 @@ dev = [
     "boost_histogram",
     "hist",
     "uproot",
-    "fsspec",
 ]
 test = [
     "pytest",
