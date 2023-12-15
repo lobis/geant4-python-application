@@ -114,9 +114,6 @@ vector<py::object> Application::Run(int nEvents) {
     if (!IsInitialized()) {
         Initialize();
     }
-    if (eventFields.empty()) {
-        throw runtime_error("Event fields cannot be empty");
-    }
     runManager->BeamOn(nEvents);
     py::gil_scoped_acquire acquire;
     return RunAction::GetEvents();

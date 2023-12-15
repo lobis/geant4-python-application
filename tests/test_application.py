@@ -153,7 +153,7 @@ def test_fields():
         app.initialize()
 
         fields = app.get_event_fields_complete()
-        assert len(fields) == 32
+        assert len(fields) == 26
         app.set_event_fields(fields)
 
         app.command("/gun/particle neutron")
@@ -170,11 +170,11 @@ def test_no_step_fields():
             gdml=basic_gdml
         ).setup_action()
 
-        app.set_event_fields({"id", "track_id"})
+        app.set_event_fields({"track_id"})
 
         events = app.run(100)
         assert len(events) == 100
-        assert set(events.fields) == {"id", "track"}
+        assert set(events.fields) == {"run", "id", "track"}
         assert set(events.track.fields) == {"id"}
 
 
@@ -184,11 +184,11 @@ def test_no_track_step_fields():
             gdml=basic_gdml
         ).setup_action()
 
-        app.set_event_fields({"id"})
+        app.set_event_fields(set())
 
         events = app.run(100)
         assert len(events) == 100
-        assert set(events.fields) == {"id"}
+        assert set(events.fields) == {"run", "id"}
 
 
 def test_no_track_fields():
@@ -197,10 +197,10 @@ def test_no_track_fields():
             gdml=basic_gdml
         ).setup_action()
 
-        app.set_event_fields({"id", "step_energy"})
+        app.set_event_fields({"step_energy"})
 
         events = app.run(100)
         assert len(events) == 100
-        assert set(events.fields) == {"id", "track"}
+        assert set(events.fields) == {"run", "id", "track"}
         assert set(events.track.fields) == {"step"}
         assert set(events.track.step.fields) == {"energy"}
