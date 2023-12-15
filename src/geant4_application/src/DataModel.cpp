@@ -19,8 +19,6 @@ using namespace std;
 using namespace geant4_app;
 
 std::unordered_set<std::string> Application::eventFieldsComplete = {
-        //
-        "id", "run",                                                                                                         //
         "track_id", "track_parent_id", "track_initial_energy", "track_initial_time", "track_weight",                         //
         "track_initial_position_x", "track_initial_position_y", "track_initial_position_z",                                  //
         "track_initial_momentum_x", "track_initial_momentum_y", "track_initial_momentum_z",                                  //
@@ -34,12 +32,8 @@ std::unordered_set<std::string> Application::eventFieldsComplete = {
 namespace geant4_app::data {
 
 void InsertEvent(const G4Event* event, Builders& builders) {
-    if (builders.fields.contains("run")) {
-        builders.run.append(G4RunManager::GetRunManager()->GetCurrentRun()->GetRunID());
-    }
-    if (builders.fields.contains("id")) {
-        builders.id.append(event->GetEventID());
-    }
+    builders.run.append(G4RunManager::GetRunManager()->GetCurrentRun()->GetRunID());
+    builders.id.append(event->GetEventID());
 }
 
 void InsertEventBegin(const G4Event* event, Builders& builder) {
@@ -470,12 +464,9 @@ py::object snapshot_builder(const T& builder) {
 
 py::object SnapshotBuilder(Builders& builder) {
     py::dict snapshot;
-    if (builder.fields.contains("run")) {
-        snapshot["run"] = snapshot_builder(builder.run);
-    }
-    if (builder.fields.contains("id")) {
-        snapshot["id"] = snapshot_builder(builder.id);
-    }
+    snapshot["run"] = snapshot_builder(builder.run);
+    snapshot["id"] = snapshot_builder(builder.id);
+
     if (builder.fields.contains("track_id")) {
         snapshot["track_id"] = snapshot_builder(builder.track_id);
     }
@@ -548,8 +539,12 @@ py::object SnapshotBuilder(Builders& builder) {
     if (builder.fields.contains("step_nucleus")) {
         snapshot["step_nucleus"] = snapshot_builder(builder.step_nucleus);
     }
-    snapshot["step_position"] = snapshot_builder(builder.step_position);
-    snapshot["step_momentum"] = snapshot_builder(builder.step_momentum);
+    if (builder.fields.contains("step_position")) {
+        snapshot["step_position"] = snapshot_builder(builder.step_position);
+    }
+    if (builder.fields.contains("step_momentum")) {
+        snapshot["step_momentum"] = snapshot_builder(builder.step_momentum);
+    }
     return snapshot;
 }
 

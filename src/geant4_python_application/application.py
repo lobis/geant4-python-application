@@ -20,7 +20,6 @@ def _start_application(pipe: multiprocessing.Pipe):
     app = Geant4Application()
     app.set_event_fields(
         {
-            "id",
             "track_id",
             "track_parent_id",
             "track_initial_energy",
@@ -35,6 +34,7 @@ def _start_application(pipe: multiprocessing.Pipe):
             "step_process",
             "step_volume",
             "step_position",
+            "step_momentum",
         }
     )
     while True:
@@ -231,8 +231,7 @@ class Application:
         )
 
         # events = ak.str.to_categorical(events)
-        if "id" in events.fields:
-            events = events[ak.argsort(events.id)]
+        events = events[ak.argsort(events.id)]
         return events
 
     @property
