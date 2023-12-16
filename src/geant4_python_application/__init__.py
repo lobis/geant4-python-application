@@ -8,8 +8,9 @@ from geant4_python_application._geant4_application import (
     pybind11_version,
 )
 from geant4_python_application.application import Application
-from geant4_python_application.datasets import data_dir, install_datasets
 from geant4_python_application.detector import Detector
+from geant4_python_application.files.datasets import data_directory, install_datasets
+from geant4_python_application.files.directories import application_directory
 from geant4_python_application.gdml import basic_gdml
 
 version = __version__
@@ -24,6 +25,7 @@ __all__ = [
     "Application",
     "Detector",
     "basic_gdml",
-    "data_dir",
     "install_datasets",
+    "data_directory",
+    "application_directory",
 ]
