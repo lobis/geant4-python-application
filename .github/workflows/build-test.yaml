@@ -19,13 +19,13 @@ on:
       [main]
 
       ## Paste this snippet into the workflow file to enable tmate debugging
-      #      - name: Setup tmate session
-      #        uses: mxschmitt/action-tmate@v3
-      #        if:
-      #          ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled
-      #          }}
-      #        with:
-      #          limit-access-to-actor: false
+    #      - name: Setup tmate session
+    #        uses: mxschmitt/action-tmate@v3
+    #        if:
+    #          ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled
+    #          }}
+    #        with:
+    #          limit-access-to-actor: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -199,9 +199,14 @@ jobs:
           New-Item -ItemType Directory -Path $env:GEANT4_DATA_DIR -Force
           Move-Item "${{ github.workspace }}\geant4-data\*" $env:GEANT4_DATA_DIR -Force
 
-      - name: Check import
-        run: |
-          python -c "import geant4_python_application; geant4_python_application.Application()"
+      - name: Install datasets
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 30
+          retry_wait_seconds: 60
+          max_attempts: 5
+          command: |
+            python -c "import geant4_python_application as g4; g4.install_datasets()"
 
       - name: Run tests
         run: |
