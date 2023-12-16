@@ -117,16 +117,15 @@ template<class PRIMITIVE>
 using PrimariesBuilderBase = RecordBuilder<
         RecordField<0, StringBuilder<PRIMITIVE>>,     // particle. TODO: use PDG / particle
         RecordField<1, NumpyBuilder<double>>,         // energy
-        RecordField<2, NumpyBuilder<double>>,         // time
-        RecordField<3, PositionVectorBuilder<double>>,// position
-        RecordField<4, MomentumVectorBuilder<double>> // direction
+        RecordField<2, PositionVectorBuilder<double>>,// position
+        RecordField<3, MomentumVectorBuilder<double>> // direction
         >;
 
 template<class PRIMITIVE>
 class PrimariesBuilder : public PrimariesBuilderBase<PRIMITIVE> {
 public:
     PrimariesBuilder() : PrimariesBuilderBase<PRIMITIVE>() {
-        this->set_fields({{0, "particle"}, {1, "energy"}, {2, "time"}, {3, "position"}, {4, "direction"}});
+        this->set_fields({{0, "particle"}, {1, "energy"}, {2, "position"}, {3, "direction"}});
         this->set_parameters(R"""("__record__": "primaries")""");// not used for anything at the moment
     }
 };

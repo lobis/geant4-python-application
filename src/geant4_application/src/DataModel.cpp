@@ -43,17 +43,17 @@ void InsertEvent(const G4Event* event, Builders& builders) {
     if (builders.fields.contains("primaries")) {
         builders.primaries.begin_list();
         const auto primaryVertex = event->GetPrimaryVertex();
-        // InsertPrimaries(event->GetPrimaryVertex(), builders);
         for (int i = 0; i < primaryVertex->GetNumberOfParticle(); i++) {
             const auto primary = primaryVertex->GetPrimary(i);
             const auto particle = primary->GetParticleDefinition();
             const auto energy = primary->GetKineticEnergy();
             const auto position = primaryVertex->GetPosition();
             const auto direction = primary->GetMomentumDirection();
-            cout << "PrimaryGeneratorAction::GeneratePrimaries - primary " << i << " is " << particle->GetParticleName()
-                 << " with energy " << energy / keV << " keV at position (" << position.x() / cm << ", " << position.y() / cm
-                 << ", " << position.z() / cm << ") cm and direction (" << direction.x() << ", " << direction.y() << ", "
-                 << direction.z() << ")" << endl;
+
+            builders.primaries.content().content<0>().append(particle->GetParticleName());
+            builders.primaries.content().content<1>().append(energy / units::energy);
+            builders.primaries.content().content<2>().append(position / units::length);
+            builders.primaries.content().content<3>().append(direction);
         }
         builders.primaries.end_list();
     }
