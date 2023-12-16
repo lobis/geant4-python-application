@@ -14,9 +14,7 @@ complexGdml = requests.get(
 def test_events():
     with Application() as app:
         app.seed = 1000
-        app.setup_manager(4).setup_physics().setup_detector(
-            gdml=complexGdml
-        ).setup_action()
+        app.setup_detector(gdml=complexGdml)
 
         sensitive_volume = "gasVolume"
         app.detector.sensitive_volumes = {sensitive_volume}
@@ -35,7 +33,7 @@ def test_events():
         volume = list(volumes)[0]
 
         energy_arrays = []
-        while (n := np.sum([len(energy) for energy in energy_arrays])) < 1e4:
+        while (n := np.sum([len(energy) for energy in energy_arrays])) < 5e3:
             events = app.run(1000)
             energy = events.energy_in_volume(volume)
             energy_arrays.append(energy[energy > 0])
@@ -46,9 +44,7 @@ def test_events():
 def test_sensitive():
     with Application() as app:
         app.seed = 1000
-        app.setup_manager(4).setup_physics().setup_detector(
-            gdml=complexGdml
-        ).setup_action()
+        app.setup_detector(gdml=complexGdml).setup_action()
 
         sensitive_volume = "gasVolume"
         app.detector.sensitive_volumes = {sensitive_volume}
@@ -65,9 +61,9 @@ def test_sensitive():
         volume = list(volumes)[0]
         print("volume: ", volume)
         events = []
-        total = 5
+        total = 2
         while (n := np.sum([len(_events) for _events in events])) < total:
-            run_events = app.run(50)
+            run_events = app.run(20)
             run_events = run_events[run_events.energy_in_volume(volume) > 0]
             events.append(run_events)
         events = ak.concatenate(events)

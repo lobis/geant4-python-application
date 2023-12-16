@@ -96,6 +96,12 @@ void Application::SetupManager(unsigned short nThreads) {
 }
 
 void Application::Initialize() {
+    if (runManager != nullptr && runManager->GetUserDetectorConstruction() != nullptr &&
+        runManager->GetUserPhysicsList() != nullptr && runManager->GetUserActionInitialization() == nullptr) {
+        // automatically set up the action initialization if it hasn't been set up yet
+        SetupAction();
+    }
+
     if (!IsSetup()) {
         throw runtime_error("Application needs to be set up first");
     }

@@ -15,26 +15,26 @@ from geant4_python_application._geant4_application import (
 
 Message = namedtuple("Message", ["target", "method", "args", "kwargs"])
 
+_default_event_fields = {
+    "id",
+    "track_id",
+    "track_parent_id",
+    "track_initial_energy",
+    "track_initial_time",
+    "track_initial_position",
+    "track_particle",
+    "track_creator_process",
+    "step_energy",
+    "step_time",
+    "step_process",
+    "step_volume",
+    "step_position",
+}
+
 
 def _start_application(pipe: multiprocessing.Pipe):
     app = Geant4Application()
-    app.set_event_fields(
-        {
-            "id",
-            "track_id",
-            "track_parent_id",
-            "track_initial_energy",
-            "track_initial_time",
-            "track_initial_position",
-            "track_particle",
-            "track_creator_process",
-            "step_energy",
-            "step_time",
-            "step_process",
-            "step_volume",
-            "step_position",
-        }
-    )
+    app.set_event_fields(_default_event_fields)
     while True:
         counter = None
         try:
@@ -68,10 +68,11 @@ def _start_application(pipe: multiprocessing.Pipe):
 
 
 class Application:
-    def __init__(self):
+    def __init__(
+        self, n_threads: int = 0, gdml: str = None, physics=None, seed: int = 0
+    ):
         geant4_python_application.datasets.install_datasets(show_progress=True)
 
-        self._detector = geant4_python_application.Detector(self)
         self._pipe, child_pipe = multiprocessing.Pipe()
         self._process = multiprocessing.Process(
             target=_start_application, args=(child_pipe,), daemon=True
@@ -79,10 +80,30 @@ class Application:
         self._message_counter = 0
         self._lock = threading.Lock()
 
-    def start(self) -> Application:
+        self._seed = seed
+        self._detector = geant4_python_application.Detector(self)
+        self._n_threads = n_threads
+        self._gdml = gdml
+
+    def start(self, setup: bool = True, initialize: bool = False) -> Application:
         if self._process.is_alive():
             raise RuntimeError("Application is already running")
         self._process.start()
+
+        if setup:
+            self.seed = self._seed
+            self.setup_manager(self._n_threads)
+            self.setup_physics()
+
+            if self._gdml is not None:
+                self.setup_detector(self._gdml)
+                self.setup_action()
+
+        if initialize:
+            if not setup:
+                raise ValueError("Cannot initialize without setup")
+            self.initialize()
+
         return self
 
     def stop(self):
