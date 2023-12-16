@@ -195,6 +195,17 @@ const DetectorConstruction& Application::GetDetectorConstruction() const {
     return *detectorConstruction;
 }
 
+const PhysicsList& Application::GetPhysicsList() const {
+    if (runManager == nullptr) {
+        throw runtime_error("RunManager needs to be set up first");
+    }
+    const auto physicsList = dynamic_cast<const PhysicsList*>(runManager->GetUserPhysicsList());
+    if (physicsList == nullptr) {
+        throw runtime_error("Physics list is not available");
+    }
+    return *physicsList;
+}
+
 filesystem::path Application::GetTemporaryApplicationDirectory() {
     const auto dir = filesystem::temp_directory_path() / "geant4_python_application";
     if (!filesystem::exists(dir)) {

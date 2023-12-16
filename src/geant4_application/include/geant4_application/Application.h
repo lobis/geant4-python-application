@@ -63,11 +63,12 @@ public:
     static void ListCommands(const std::string& directory);
     static G4UImanager* GetUIManager();
 
+    static std::filesystem::path GetTemporaryApplicationDirectory();
+
     const PrimaryGeneratorAction& GetPrimaryGeneratorAction() const;
     const StackingAction& GetStackingAction() const;
     const DetectorConstruction& GetDetectorConstruction() const;
-
-    static std::filesystem::path GetTemporaryApplicationDirectory();
+    const PhysicsList& GetPhysicsList() const;
 };
 
 }// namespace geant4_app
