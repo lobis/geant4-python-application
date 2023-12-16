@@ -116,16 +116,32 @@ void Application::Initialize() {
     isInitialized = true;
 }
 
-vector<py::object> Application::Run(int nEvents) {
+vector<py::object> Application::Run(const py::object& primaries) {
     if (!IsInitialized()) {
         Initialize();
     }
     if (eventFields.empty()) {
         throw runtime_error("Event fields cannot be empty");
     }
-    runManager->BeamOn(nEvents);
-    py::gil_scoped_acquire acquire;
-    return RunAction::GetEvents();
+    // check if it's a python integer
+    if (primaries.ptr()->ob_type == &PyLong_Type) {
+        auto nEvents = py::cast<long>(primaries);
+        if (nEvents < 0) {
+            throw runtime_error("Number of events cannot be negative");
+        }
+        runManager->BeamOn(nEvents);
+        return RunAction::GetEvents();
+    }
+    // check if its an awkward array
+    else if (py::hasattr(primaries, "layout")) {
+        py::object len_func = py::module::import("builtins").attr("len");
+        const auto fields = py::cast<py::list>(primaries.attr("fields"));
+        const auto nEvents = py::cast<G4int>(len_func(primaries));
+        runManager->BeamOn(nEvents);
+        return RunAction::GetEvents();
+    } else {
+        throw runtime_error("Number of events must be an integer or an awkward array");
+    }
 }
 
 bool Application::IsSetup() const {
