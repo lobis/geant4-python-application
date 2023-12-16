@@ -173,9 +173,9 @@ class Application:
         self._send_and_recv(Message("", "initialize", (), {}))
         return self
 
-    def run(self, n_events: int = 1):
+    def run(self, primaries: int | ak.Array):
         # "run" returns a list of arrays, one for each thread
-        events = self._send_and_recv(Message("", "run", (n_events,), {}))
+        events = self._send_and_recv(Message("", "run", (primaries,), {}))
         concatenated_dict = {
             key: ak.concatenate([d[key] for d in events], axis=0)
             for key in events[0].keys()

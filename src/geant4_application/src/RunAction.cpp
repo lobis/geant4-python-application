@@ -17,6 +17,8 @@ void RunAction::BeginOfRunAction(const G4Run*) {
 
     if (IsMaster()) {
         events = make_unique<std::vector<py::object>>();
+    } else {
+        //
     }
 }
 

@@ -116,16 +116,68 @@ void Application::Initialize() {
     isInitialized = true;
 }
 
-vector<py::object> Application::Run(int nEvents) {
+vector<py::object> Application::Run(const py::object& primaries) {
     if (!IsInitialized()) {
         Initialize();
     }
     if (eventFields.empty()) {
         throw runtime_error("Event fields cannot be empty");
     }
-    runManager->BeamOn(nEvents);
-    py::gil_scoped_acquire acquire;
-    return RunAction::GetEvents();
+    PrimaryGeneratorAction::ClearAwkwardPrimaries();
+
+    // check if it's a python integer
+    if (primaries.ptr()->ob_type == &PyLong_Type) {
+        auto nEvents = py::cast<G4int>(primaries);
+        if (nEvents < 0) {
+            throw runtime_error("Number of events cannot be negative");
+        }
+        runManager->BeamOn(nEvents);
+        return RunAction::GetEvents();
+    }
+    // check if it is an awkward array
+    else {
+        py::gil_scoped_acquire acquire;
+        py::object ak = py::module::import("awkward");
+        py::object ak_array = ak.attr("Array");
+        if (!py::isinstance(primaries, ak_array)) {
+            throw runtime_error("primaries must be an integer or an awkward array");
+        }
+        py::object len_func = py::module::import("builtins").attr("len");
+        const auto fields = py::cast<py::set>(primaries.attr("fields"));
+        const auto nEvents = py::cast<G4int>(len_func(primaries));
+
+        if (fields.contains("energy")) {
+            std::vector<double> energies = py::cast<std::vector<double>>(primaries.attr("energy"));
+            PrimaryGeneratorAction::SetAwkwardPrimaryEnergies(energies);
+        }
+        if (fields.contains("particle")) {
+            std::vector<std::string> particles = py::cast<std::vector<std::string>>(primaries.attr("particle"));
+            PrimaryGeneratorAction::SetAwkwardPrimaryParticles(particles);
+        }
+        if (fields.contains("position")) {
+            std::vector<double> positionX = py::cast<std::vector<double>>(primaries.attr("position")["x"]);
+            std::vector<double> positionY = py::cast<std::vector<double>>(primaries.attr("position")["y"]);
+            std::vector<double> positionZ = py::cast<std::vector<double>>(primaries.attr("position")["z"]);
+            std::vector<std::array<double, 3>> positions;
+            for (size_t i = 0; i < nEvents; i++) {
+                positions.push_back({positionX[i], positionY[i], positionZ[i]});
+            }
+            PrimaryGeneratorAction::SetAwkwardPrimaryPositions(positions);
+        }
+        if (fields.contains("direction")) {
+            std::vector<double> directionX = py::cast<std::vector<double>>(primaries.attr("direction")["x"]);
+            std::vector<double> directionY = py::cast<std::vector<double>>(primaries.attr("direction")["y"]);
+            std::vector<double> directionZ = py::cast<std::vector<double>>(primaries.attr("direction")["z"]);
+            std::vector<std::array<double, 3>> directions;
+            for (size_t i = 0; i < nEvents; i++) {
+                directions.push_back({directionX[i], directionY[i], directionZ[i]});
+            }
+            PrimaryGeneratorAction::SetAwkwardPrimaryDirections(directions);
+        }
+
+        runManager->BeamOn(nEvents);
+        return RunAction::GetEvents();
+    }
 }
 
 bool Application::IsSetup() const {

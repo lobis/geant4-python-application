@@ -16,17 +16,33 @@ using namespace geant4_app;
 PrimaryGeneratorAction::PrimaryGeneratorAction() : G4VUserPrimaryGeneratorAction() {}
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
-    if (generatorType == "python") {
-        lock_guard<mutex> lock(pythonMutex);
-        auto result = pythonGenerator();
-        cout << "PrimaryGeneratorAction::GeneratePrimaries - result: " << result << endl;
-        throw runtime_error("PrimaryGeneratorAction::GeneratePrimaries - pythonGenerator not implemented");
-    } else if (generatorType == "gun") {
+    if (!awkwardPrimaryEnergies.empty()) {
+        const double energy = awkwardPrimaryEnergies[event->GetEventID()];
+        gun.SetParticleEnergy(energy * keV);
+    }
+    if (!awkwardPrimaryPositions.empty()) {
+        const auto& position = awkwardPrimaryPositions[event->GetEventID()];
+        gun.SetParticlePosition(G4ThreeVector(position[0] * cm, position[1] * cm, position[2] * cm));
+    }
+    if (!awkwardPrimaryDirections.empty()) {
+        const auto& direction = awkwardPrimaryDirections[event->GetEventID()];
+        gun.SetParticleMomentumDirection(G4ThreeVector(direction[0], direction[1], direction[2]));
+    }
+    if (!awkwardPrimaryParticles.empty()) {
+        const auto& particleAwkward = awkwardPrimaryParticles[event->GetEventID()];
+        auto* particle = G4ParticleTable::GetParticleTable()->FindParticle(particleAwkward);
+        if (particle == nullptr) {
+            throw runtime_error("PrimaryGeneratorAction::GeneratePrimaries - particle '" + particleAwkward + "' not found");
+        }
+        gun.SetParticleDefinition(particle);
+    }
+
+    if (generatorType == "gun") {
         gun.GeneratePrimaryVertex(event);
     } else if (generatorType == "gps") {
         gps.GeneratePrimaryVertex(event);
     } else {
-        throw runtime_error("PrimaryGeneratorAction::GeneratePrimaries - generatorType must be 'gun', 'gps', or 'python'");
+        throw runtime_error("PrimaryGeneratorAction::GeneratePrimaries - generatorType must be 'gun', 'gps'");
     }
 }
 
@@ -35,12 +51,6 @@ void PrimaryGeneratorAction::SetGeneratorType(const string& type) {
         throw runtime_error("PrimaryGeneratorAction::SetGeneratorType - type must be 'gun', 'gps', or 'python'");
     }
     generatorType = type;
-}
-
-void PrimaryGeneratorAction::SetPythonGenerator(const py::function& generator) {
-    lock_guard<mutex> lock(pythonMutex);
-    pythonGenerator = generator;
-    SetGeneratorType("python");
 }
 
 void PrimaryGeneratorAction::SetEnergy(double energy) {
@@ -66,4 +76,15 @@ void PrimaryGeneratorAction::SetParticle(const string& particle) {
 }
 
 string PrimaryGeneratorAction::generatorType = "gun";
-py::function PrimaryGeneratorAction::pythonGenerator = py::function();
+
+void PrimaryGeneratorAction::ClearAwkwardPrimaries() {
+    awkwardPrimaryEnergies.clear();
+    awkwardPrimaryPositions.clear();
+    awkwardPrimaryDirections.clear();
+    awkwardPrimaryParticles.clear();
+}
+
+vector<double> PrimaryGeneratorAction::awkwardPrimaryEnergies = {};
+vector<array<double, 3>> PrimaryGeneratorAction::awkwardPrimaryPositions = {};
+vector<array<double, 3>> PrimaryGeneratorAction::awkwardPrimaryDirections = {};
+vector<string> PrimaryGeneratorAction::awkwardPrimaryParticles = {};

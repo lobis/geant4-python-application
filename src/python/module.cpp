@@ -44,12 +44,6 @@ PYBIND11_MODULE(_geant4_application, m) {
                     [](const py::object&, const string& type) {
                         return PrimaryGeneratorAction::SetGeneratorType(type);
                     })
-            // TODO
-            .def_property_static(
-                    "function",
-                    [](const py::object&) { return PrimaryGeneratorAction::GetPythonGenerator(); },
-                    nullptr)
-            .def("set_function", &PrimaryGeneratorAction::SetPythonGenerator, py::arg("function"))
             .def_static("set_energy", &PrimaryGeneratorAction::SetEnergy, py::arg("energy"))
             .def_static("set_position", &PrimaryGeneratorAction::SetPosition, py::arg("position"))
             .def_static("set_direction", &PrimaryGeneratorAction::SetDirection, py::arg("direction"))
