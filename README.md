@@ -37,22 +37,63 @@ directory automatically during simulation startup.
 pip install -i https://test.pypi.org/simple/ geant4-python-application==0.0.2.dev1
 ```
 
+### Geant4 data files
+
+The Python wheels for this package do not contain any Geant4 data files due to
+their size. These files will be downloaded on demand without the need of any
+user interaction.
+
+The default location for these files can be obtained by calling:
+
+```bash
+python -c "import geant4_python_application; print(geant4_python_application.get_data_path())"
+```
+
+**Uninstalling the package will not remove the data files. The user is
+responsible for removing them manually.**
+
+#### Overriding the default data path
+
+The default data path can be overridden by calling `application_directory`. This
+should be done before the application is initialized.
+
+```python
+from geant4_python_application import application_directory
+
+application_directory("/some/other/path")
+```
+
+Overriding the default data directory is encouraged when submitting batch jobs
+to a cluster in order to avoid downloading the data files multiple times. In
+this case the application directory should point to some shared location.
+
+#### Using a temporary directory
+
+A temporary directory can be used by calling:
+
+```python
+from geant4_python_application import application_directory
+
+application_directory(temp=True)
+```
+
+The operating system will take care of cleaning up the temporary directory.
+
+It is possible that the operating system will delete only some of the files in
+the temporary directory which can lead to a Geant4 runtime error. In this case
+it's recommended to delete the temporary directory manually and let the
+application recreate it again.
+
 ## Usage
 
 ```python
-from geant4_python_application import Application, basic_gdml
+import geant4_python_application as g4
 
-# The data files will be downloaded to a temporary directory the first time this is called
-app = Application()
+# Use a temporary directory for the Geant4 data files (remove this line to use the default location)
+g4.application_directory(temp=True)
 
-app.setup_manager(n_threads=4)
-app.setup_physics()
-app.setup_detector(gdml=basic_gdml)
-app.setup_action()
-
-app.initialize()
-
-events = app.run(n_events=100)
+with g4.Application(gdml=g4.basic_gdml, seed=137) as app:
+    events = app.run(n_events=100)
 
 print(events)
 ```
