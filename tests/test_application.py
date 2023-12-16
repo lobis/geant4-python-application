@@ -114,7 +114,7 @@ def test_fields():
         app.detector.sensitive_volumes = {"gasVolume"}
 
         fields = app.get_event_fields_complete()
-        assert len(fields) == 24
+        assert len(fields) == 25
         app.set_event_fields(fields)
 
         app.command("/gun/particle neutron")

@@ -46,7 +46,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
     // get a unique id for the temporary file. This should be unique across all processes (batch jobs)
     auto uniqueString = std::to_string(std::hash<unsigned int>{}(std::random_device()()));
     const auto gdmlTmpPath = gdmlTemporaryDir / ("GDML_" + uniqueString + ".gdml");
-    cout << "Writing temporary GDML file to " << gdmlTmpPath << endl;
     // write contents of gdml string into file, raise exception if there is a problem
     ofstream gdmlTmpFile(gdmlTmpPath);
     if (!gdmlTmpFile.is_open()) {

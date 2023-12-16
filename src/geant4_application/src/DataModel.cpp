@@ -20,6 +20,7 @@ using namespace geant4_app;
 
 std::unordered_set<std::string> Application::eventFieldsComplete = {
         "id", "run",                                                                                   //
+        "primaries",                                                                                   //
         "track_id", "track_parent_id", "track_initial_energy", "track_initial_time",                   //
         "track_initial_position", "track_initial_momentum",                                            //
         "track_particle", "track_particle_type", "track_creator_process", "track_creator_process_type",//
@@ -38,6 +39,23 @@ void InsertEvent(const G4Event* event, Builders& builders) {
     }
     if (builders.fields.contains("id")) {
         builders.id.append(event->GetEventID());
+    }
+    if (builders.fields.contains("primaries")) {
+        builders.primaries.begin_list();
+        const auto primaryVertex = event->GetPrimaryVertex();
+        for (int i = 0; i < primaryVertex->GetNumberOfParticle(); i++) {
+            const auto primary = primaryVertex->GetPrimary(i);
+            const auto particle = primary->GetParticleDefinition();
+            const auto energy = primary->GetKineticEnergy();
+            const auto position = primaryVertex->GetPosition();
+            const auto direction = primary->GetMomentumDirection();
+
+            builders.primaries.content().content<0>().append(particle->GetParticleName());
+            builders.primaries.content().content<1>().append(energy / units::energy);
+            builders.primaries.content().content<2>().append(position / units::length);
+            builders.primaries.content().content<3>().append(direction);
+        }
+        builders.primaries.end_list();
     }
 }
 
@@ -418,6 +436,9 @@ py::object SnapshotBuilder(Builders& builder) {
     }
     if (builder.fields.contains("id")) {
         snapshot["id"] = snapshot_builder(builder.id);
+    }
+    if (builder.fields.contains("primaries")) {
+        snapshot["primaries"] = snapshot_builder(builder.primaries);
     }
     if (builder.fields.contains("track_id")) {
         snapshot["track_id"] = snapshot_builder(builder.track_id);

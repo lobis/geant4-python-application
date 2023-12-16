@@ -15,7 +15,9 @@ from geant4_python_application._geant4_application import (
 Message = namedtuple("Message", ["target", "method", "args", "kwargs"])
 
 _default_event_fields = {
+    "run",
     "id",
+    "primaries",
     "track_id",
     "track_parent_id",
     "track_initial_energy",

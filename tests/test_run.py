@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import awkward as ak
+import numpy as np
 import pytest
 import requests
 
@@ -13,17 +14,23 @@ complex_gdml = requests.get(
 
 @pytest.mark.parametrize("n_threads", [0, 4])
 def test_awkward_primaries(n_threads):
+    # numpy random seed
+    np.random.seed(1234)
+
     primaries = ak.Array(
         [
             {
-                "particle": "neutron",
-                "energy": 100,
+                "particle": "geantino",
+                "energy": np.random.uniform(1, 1000),
                 "direction": {"x": 0, "y": -1, "z": 0},
                 "position": {"x": 0, "y": 10, "z": 0},
-            },
+            }
+            for _ in range(100)
         ]
-        * 100
     )
     with Application(gdml=basic_gdml, n_threads=n_threads) as app:
         events = app.run(primaries)
         assert len(events) == len(primaries)
+
+        event_primary_energy = ak.flatten(events.primaries.energy)
+        assert np.allclose(event_primary_energy, primaries.energy)
