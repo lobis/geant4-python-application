@@ -16,17 +16,21 @@ import geant4_python_application
 
 url = "https://cern.ch/geant4-data/datasets"
 
+
 # It is discouraged to use the package directory to store data
 # data_dir = os.path.join(os.path.dirname(__file__), "geant4/data")
 # another idea is to use 'platformdirs' to store data in a platform-specific location
 
-data_dir = os.path.join(
-    tempfile.gettempdir(),
-    geant4_python_application.__name__,
-    "geant4",
-    geant4_python_application.geant4_version,
-    "data",
-)
+
+def data_directory() -> str:
+    return os.path.join(
+        geant4_python_application.application_directory(),
+        geant4_python_application.__name__,
+        "geant4",
+        geant4_python_application.geant4_version,
+        "data",
+    )
+
 
 # the datasets versions should be updated with each Geant4 version
 # https://geant4.web.cern.ch/download/11.2.0.html#datasets
@@ -155,14 +159,14 @@ def _download_extract_dataset(dataset: Dataset, pbar: tqdm):
 
         f.seek(0)
         with tarfile.open(fileobj=f, mode="r:gz") as tar:
-            tar.extractall(data_dir)
+            tar.extractall(data_directory())
 
 
 def install_datasets(force: bool = False, show_progress: bool = True):
-    os.environ["GEANT4_DATA_DIR"] = data_dir
+    os.environ["GEANT4_DATA_DIR"] = data_directory()
     datasets_to_download = []
     for dataset in datasets:
-        path = os.path.join(data_dir, dataset.name + dataset.version)
+        path = os.path.join(data_directory(), dataset.name + dataset.version)
         os.environ[dataset.env] = path
         if not os.path.exists(path) or force:
             datasets_to_download.append(dataset)
@@ -170,12 +174,13 @@ def install_datasets(force: bool = False, show_progress: bool = True):
     if len(datasets_to_download) == 0:
         return
 
-    os.makedirs(data_dir, exist_ok=True)
+    os.makedirs(data_directory(), exist_ok=True)
     if show_progress:
         print(
             f"""
-Geant4 datasets (<2GB) will be installed to temporary directory {data_dir}
+Geant4 datasets (<2GB) will be installed to {data_directory()}
 This may take a while but only needs to be done once.
+You can override the default location by calling `application_directory(path)` or `application_directory(temp=True)` to use a temporary directory.
 The following Geant4 datasets will be installed: {", ".join([f"{dataset.name}@v{dataset.version}" for dataset in datasets_to_download])}"""
         )
 
@@ -196,14 +201,14 @@ The following Geant4 datasets will be installed: {", ".join([f"{dataset.name}@v{
             concurrent.futures.wait(futures)
 
     if show_progress:
-        total_size_gb = sum(fp.stat().st_size for fp in Path(data_dir).rglob("*")) / (
-            1024**3
-        )
+        total_size_gb = sum(
+            fp.stat().st_size for fp in Path(data_directory()).rglob("*")
+        ) / (1024**3)
         print(f"Geant4 datasets size on disk after extraction: {total_size_gb:.2f}GB")
 
 
 def uninstall_datasets():
-    dir_to_remove = os.path.dirname(data_dir)
+    dir_to_remove = os.path.dirname(data_directory())
     package_dir = os.path.dirname(__file__)
 
     if not os.path.relpath(package_dir, dir_to_remove).startswith(".."):

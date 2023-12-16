@@ -37,6 +37,7 @@ dependencies = [
     "awkward-pandas",
     "numpy",
     "requests",
+    "platformdirs",
     "tqdm",
 ]
 description = "Geant4 Python Application"

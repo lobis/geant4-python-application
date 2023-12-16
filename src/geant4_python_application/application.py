@@ -7,7 +7,6 @@ from collections import namedtuple
 import awkward as ak
 
 import geant4_python_application
-import geant4_python_application.datasets
 import geant4_python_application.events
 from geant4_python_application._geant4_application import (
     Application as Geant4Application,
@@ -71,7 +70,7 @@ class Application:
     def __init__(
         self, n_threads: int = 0, gdml: str = None, physics=None, seed: int = 0
     ):
-        geant4_python_application.datasets.install_datasets(show_progress=True)
+        geant4_python_application.install_datasets(show_progress=True)
 
         self._pipe, child_pipe = multiprocessing.Pipe()
         self._process = multiprocessing.Process(
