@@ -3,7 +3,6 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lobis/geant4-python-application/HEAD)
 [![Wheels](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml)
 [![Build and Test](https://github.com/lobis/geant4-python-application/actions/workflows/build-test.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/test.yaml)
-[![Docker Image](https://github.com/lobis/geant4-python-application/actions/workflows/docker.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/docker.yaml)
 
 ⚠️ This project is currently in a very early stage of development ⚠️
 
