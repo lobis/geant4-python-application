@@ -123,24 +123,41 @@ vector<py::object> Application::Run(const py::object& primaries) {
     if (eventFields.empty()) {
         throw runtime_error("Event fields cannot be empty");
     }
+    PrimaryGeneratorAction::ClearAwkwardPrimaries();
+
     // check if it's a python integer
     if (primaries.ptr()->ob_type == &PyLong_Type) {
-        auto nEvents = py::cast<long>(primaries);
+        auto nEvents = py::cast<G4int>(primaries);
         if (nEvents < 0) {
             throw runtime_error("Number of events cannot be negative");
         }
         runManager->BeamOn(nEvents);
         return RunAction::GetEvents();
     }
-    // check if its an awkward array
-    else if (py::hasattr(primaries, "layout")) {
+    // check if it is an awkward array
+    else {
+        py::gil_scoped_acquire acquire;
+        py::object ak = py::module::import("awkward");
+        py::object ak_array = ak.attr("Array");
+        if (!py::isinstance(primaries, ak_array)) {
+            throw runtime_error("primaries must be an integer or an awkward array");
+        }
         py::object len_func = py::module::import("builtins").attr("len");
-        const auto fields = py::cast<py::list>(primaries.attr("fields"));
+        const auto fields = py::cast<py::set>(primaries.attr("fields"));
         const auto nEvents = py::cast<G4int>(len_func(primaries));
+
+        // check if "energy" is in fields
+        if (fields.contains("energy")) {
+            std::vector<double> energies = py::cast<std::vector<double>>(primaries.attr("energy"));
+            for (auto& energy: energies) {
+                cout << energy << endl;
+            }
+        } else {
+            throw runtime_error("energy field is not in primaries");
+        }
+
         runManager->BeamOn(nEvents);
         return RunAction::GetEvents();
-    } else {
-        throw runtime_error("Number of events must be an integer or an awkward array");
     }
 }
 

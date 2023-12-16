@@ -26,15 +26,21 @@ public:
     static std::string GetGeneratorType() { return generatorType; }
     static void SetGeneratorType(const std::string& generatorType);
 
-    static py::function GetPythonGenerator() { return pythonGenerator; }
-    void SetPythonGenerator(const py::function& pythonGenerator);
+    inline static void SetAwkwardPrimaryEnergies(const std::vector<double>& energies) { awkwardPrimaryEnergies = energies; }
+    inline static void SetAwkwardPrimaryPositions(const std::vector<std::array<double, 3>>& positions) { awkwardPrimaryPositions = positions; }
+    inline static void SetAwkwardPrimaryDirections(const std::vector<std::array<double, 3>>& directions) { awkwardPrimaryDirections = directions; }
+    inline static void SetAwkwardPrimaryParticles(const std::vector<std::string>& particles) { awkwardPrimaryParticles = particles; }
+    static void ClearAwkwardPrimaries();
 
 private:
     G4ParticleGun gun;
     G4GeneralParticleSource gps;
-    static py::function pythonGenerator;
-    std::mutex pythonMutex;
     static std::string generatorType;
+
+    static std::vector<double> awkwardPrimaryEnergies;
+    static std::vector<std::array<double, 3>> awkwardPrimaryPositions;
+    static std::vector<std::array<double, 3>> awkwardPrimaryDirections;
+    static std::vector<std::string> awkwardPrimaryParticles;
 };
 
 }// namespace geant4_app
