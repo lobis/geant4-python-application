@@ -112,11 +112,34 @@ template<class T>
 using StepMomentumBuilder = ListOffsetBuilder<unsigned int,
                                               ListOffsetBuilder<unsigned int,
                                                                 MomentumVectorBuilder<T>>>;
+
+template<class PRIMITIVE>
+using PrimariesBuilderBase = RecordBuilder<
+        RecordField<0, StringBuilder<PRIMITIVE>>,     // particle. TODO: use PDG / particle
+        RecordField<1, NumpyBuilder<double>>,         // energy
+        RecordField<2, NumpyBuilder<double>>,         // time
+        RecordField<3, PositionVectorBuilder<double>>,// position
+        RecordField<4, MomentumVectorBuilder<double>> // direction
+        >;
+
+template<class PRIMITIVE>
+class PrimariesBuilder : public PrimariesBuilderBase<PRIMITIVE> {
+public:
+    PrimariesBuilder() : PrimariesBuilderBase<PRIMITIVE>() {
+        this->set_fields({{0, "particle"}, {1, "energy"}, {2, "time"}, {3, "position"}, {4, "direction"}});
+        this->set_parameters(R"""("__record__": "primaries")""");// not used for anything at the moment
+    }
+};
+
 struct Builders {
     std::unordered_set<std::string> fields;
+
+    // event
     NumpyBuilder<unsigned int> run;
     NumpyBuilder<unsigned int> id;
-    //
+    // primaries (a single event can have multiple primaries)
+    ListOffsetBuilder<unsigned int, PrimariesBuilder<unsigned int>> primaries;
+    // tracks
     TrackFieldBuilder<unsigned int> track_id;
     TrackFieldBuilder<unsigned int> track_parent_id;
     TrackFieldBuilder<double> track_initial_energy;
@@ -129,7 +152,8 @@ struct Builders {
     TrackStringBuilder track_creator_process;
     TrackStringBuilder track_creator_process_type;
     TrackFieldBuilder<double> track_weight;
-    //
+
+    // steps
     StepFieldBuilder<double> step_energy;
     StepFieldBuilder<double> step_time;
     StepFieldBuilder<double> step_track_kinetic_energy;
