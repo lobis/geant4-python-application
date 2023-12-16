@@ -26,6 +26,7 @@ class Application {
 private:
     std::unique_ptr<G4RunManager> runManager = nullptr;
     bool isInitialized = false;
+
     long randomSeed = 0;
 
     static Application* pInstance;

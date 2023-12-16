@@ -54,6 +54,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
     }
     gdmlTmpFile << gdml;
     gdmlTmpFile.close();
+    gdml = "";// clear gdml string to save memory
 
     parser.Read(gdmlTmpPath.string(), false);
     // we are storing a copy of the gdml string!
