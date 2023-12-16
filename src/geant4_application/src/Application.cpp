@@ -146,14 +146,33 @@ vector<py::object> Application::Run(const py::object& primaries) {
         const auto fields = py::cast<py::set>(primaries.attr("fields"));
         const auto nEvents = py::cast<G4int>(len_func(primaries));
 
-        // check if "energy" is in fields
         if (fields.contains("energy")) {
             std::vector<double> energies = py::cast<std::vector<double>>(primaries.attr("energy"));
-            for (auto& energy: energies) {
-                cout << energy << endl;
+            PrimaryGeneratorAction::SetAwkwardPrimaryEnergies(energies);
+        }
+        if (fields.contains("particle")) {
+            std::vector<std::string> particles = py::cast<std::vector<std::string>>(primaries.attr("particle"));
+            PrimaryGeneratorAction::SetAwkwardPrimaryParticles(particles);
+        }
+        if (fields.contains("position")) {
+            std::vector<double> positionX = py::cast<std::vector<double>>(primaries.attr("position")["x"]);
+            std::vector<double> positionY = py::cast<std::vector<double>>(primaries.attr("position")["y"]);
+            std::vector<double> positionZ = py::cast<std::vector<double>>(primaries.attr("position")["z"]);
+            std::vector<std::array<double, 3>> positions;
+            for (size_t i = 0; i < nEvents; i++) {
+                positions.push_back({positionX[i], positionY[i], positionZ[i]});
             }
-        } else {
-            throw runtime_error("energy field is not in primaries");
+            PrimaryGeneratorAction::SetAwkwardPrimaryPositions(positions);
+        }
+        if (fields.contains("direction")) {
+            std::vector<double> directionX = py::cast<std::vector<double>>(primaries.attr("direction")["x"]);
+            std::vector<double> directionY = py::cast<std::vector<double>>(primaries.attr("direction")["y"]);
+            std::vector<double> directionZ = py::cast<std::vector<double>>(primaries.attr("direction")["z"]);
+            std::vector<std::array<double, 3>> directions;
+            for (size_t i = 0; i < nEvents; i++) {
+                directions.push_back({directionX[i], directionY[i], directionZ[i]});
+            }
+            PrimaryGeneratorAction::SetAwkwardPrimaryDirections(directions);
         }
 
         runManager->BeamOn(nEvents);

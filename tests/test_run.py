@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import awkward as ak
+import pytest
 import requests
 
 from geant4_python_application import Application, basic_gdml
@@ -10,7 +11,8 @@ complex_gdml = requests.get(
 ).text
 
 
-def test_run():
+@pytest.mark.parametrize("n_threads", [0, 4])
+def test_awkward_primaries(n_threads):
     primaries = ak.Array(
         [
             {
@@ -22,6 +24,6 @@ def test_run():
         ]
         * 100
     )
-    with Application(gdml=basic_gdml) as app:
+    with Application(gdml=basic_gdml, n_threads=n_threads) as app:
         events = app.run(primaries)
-        assert len(events) == 100
+        assert len(events) == len(primaries)
