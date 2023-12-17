@@ -24,6 +24,10 @@ void RunAction::BeginOfRunAction(const G4Run* run) {
     }
 
     cout << "RUN ID: " << run->GetRunID() << " RANDOM SEED: " << G4Random::getTheSeed() << endl;
+
+    for (int i = 0; i < 10; ++i) {
+        cout << "RANDOM NUMBER: " << G4UniformRand() << endl;
+    }
 }
 
 void RunAction::EndOfRunAction(const G4Run*) {
@@ -42,7 +46,7 @@ void RunAction::EndOfRunAction(const G4Run*) {
         buildersToSnapshot.clear();
     }
 
-    cout << "END OF END OF RUN. Thread: " << G4Threading::G4GetThreadId() << endl;
+    cout << "- END OF RUN. Thread: " << G4Threading::G4GetThreadId() << endl;
 }
 
 data::Builders& RunAction::GetBuilder() {
