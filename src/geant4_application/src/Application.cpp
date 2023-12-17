@@ -88,6 +88,10 @@ void Application::SetupManager(unsigned short nThreads) {
     delete G4VSteppingVerbose::GetInstance();
     SteppingVerbose::SetInstance(new SteppingVerbose);
 
+    // https://geant4-forum.web.cern.ch/t/different-random-seeds-but-same-results/324/5
+    // seed needs to be setup before the run manager is created
+    SetupRandomEngine();
+
     const auto runManagerType = nThreads > 0 ? G4RunManagerType::MTOnly : G4RunManagerType::SerialOnly;
     runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));
     if (nThreads > 0) {
@@ -109,8 +113,6 @@ void Application::Initialize() {
     if (IsInitialized()) {
         throw runtime_error("Application is already initialized");
     }
-
-    SetupRandomEngine();
 
     runManager->Initialize();
     isInitialized = true;
