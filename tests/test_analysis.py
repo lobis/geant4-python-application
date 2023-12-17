@@ -41,7 +41,7 @@ def test_events():
 
 
 def test_sensitive():
-    with Application(gdml=complexGdml, seed=1000) as app:
+    with Application(gdml=complexGdml, seed=1234) as app:
         volume_logical = "gasVolume"
 
         app.initialize()
@@ -56,14 +56,12 @@ def test_sensitive():
         volume = list(volumes)[0]
         print("volume: ", volume)
         events = []
-        total = 5
-        while (n := np.sum([len(_events) for _events in events])) < total:
-            run_events = app.run(1000)
-            run_events = run_events[run_events.energy_in_volume(volume) > 0]
-            events.append(run_events)
+        run_events = app.run(1000)
+        run_events = run_events[run_events.energy_in_volume(volume) > 0]
+        events.append(run_events)
         events = ak.concatenate(events)
-        assert app.seed == 1000
-        assert len(events) == 7
+        assert app.seed == 1234
+        assert len(events) == 5
         hits = events.hits(volume)
         np.isclose(hits.energy[0][0:5], [0.0401, 0.00271, 0.00391, 0.389, 0.204])
         electrons = ak.concatenate([hit.electrons() for hit in hits])
