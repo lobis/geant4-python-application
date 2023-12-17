@@ -32,7 +32,7 @@ Application::Application() {
 Application::~Application() = default;
 
 void Application::SetupRandomEngine() {
-    G4Random::setTheEngine(new CLHEP::RanecuEngine);
+    G4Random::setTheEngine(new CLHEP::MTwistEngine);
     if (randomSeed == 0) {
         randomSeed = std::random_device()();
     }
