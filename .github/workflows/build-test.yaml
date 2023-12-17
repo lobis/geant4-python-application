@@ -209,7 +209,7 @@ jobs:
 
       - name: Run tests debug
         run: |
-          python -m pytest -s -vv tests/test_analysis.py
+          python -m pytest -s -vv tests/test_analysis.py::test_sensitive
 
       - name: Run tests
         run: |
