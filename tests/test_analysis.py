@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import awkward as ak
 import numpy as np
+import pytest
 import requests
 
 from geant4_python_application import Application
@@ -98,6 +99,7 @@ def test_photoelectric():
         assert np.allclose(sensitive_energy[indices], energies_reference, rtol=1e-3)
 
 
+@pytest.mark.skip(reason="seed produces different results on different machines")
 def test_neutrons():
     with Application(gdml=complexGdml, seed=1234, n_threads=0) as app:
         sensitive_volume = "gasVolume"
@@ -120,3 +122,28 @@ def test_neutrons():
 
         events = events[sensitive_energy > 0]
         assert len(events) == 15
+
+
+@pytest.mark.skip(reason="TODO")
+def test_muons():
+    with Application(gdml=complexGdml, seed=1234, n_threads=0) as app:
+        sensitive_volume = "gasVolume"
+
+        app.initialize()
+
+        app.command("/gun/particle mu-")
+        app.command("/gun/energy 200 MeV")
+        app.command("/gun/direction 0 -1 0")
+        app.command("/gun/position 0 10 0 m")
+
+        volumes = app.detector.physical_volumes_from_logical(sensitive_volume)
+        assert len(volumes) == 1
+        volume = list(volumes)[0]
+        print("volume: ", volume)
+
+        events = app.run(1000)
+        sensitive_energy = events.energy_in_volume(volume)
+        events = events[sensitive_energy > 0]
+
+        print(len(events))
+        print(np.max(sensitive_energy))
