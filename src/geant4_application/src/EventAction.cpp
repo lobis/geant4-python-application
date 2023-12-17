@@ -19,7 +19,7 @@ void EventAction::BeginOfEventAction(const G4Event* event) {
 void EventAction::EndOfEventAction(const G4Event* event) {
     data::InsertEventEnd(event, RunAction::GetBuilder());
 
-    cout << "event id: " << event->GetEventID() << " Sensitive energy: " << sensitiveEnergy << endl;
+    cout << "END OF EVENT: event id: " << event->GetEventID() << " Sensitive energy: " << sensitiveEnergy << endl;
 }
 
 double EventAction::sensitiveEnergy = 0.0;

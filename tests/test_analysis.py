@@ -58,7 +58,7 @@ def test_sensitive():
         assert len(volumes) == 1
         volume = list(volumes)[0]
         print("volume: ", volume)
-        events = app.run(1000)
+        events = app.run(2000)
         energy_in_sensitive = events.energy_in_volume(volume)
         for i, energy in enumerate(energy_in_sensitive):
             print(f"event {i} energy: {energy}")
