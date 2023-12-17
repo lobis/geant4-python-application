@@ -36,6 +36,7 @@ void Application::SetupRandomEngine() {
     if (randomSeed == 0) {
         randomSeed = std::random_device()();
     }
+    cout << "seed set to: " << randomSeed << endl;
     G4Random::setTheSeed(randomSeed);
 }
 
