@@ -2,6 +2,8 @@
 #include "geant4_application/RunAction.h"
 #include "geant4_application/SteppingVerbose.h"
 
+#include <G4Threading.hh>
+
 #include <iostream>
 
 using namespace std;
@@ -27,8 +29,10 @@ void RunAction::BeginOfRunAction(const G4Run* run) {
 void RunAction::EndOfRunAction(const G4Run*) {
     lock_guard<std::mutex> lock(mutex);
 
+    cout << "END OF RUN. Thread: " << G4Threading::G4GetThreadId() << endl;
     if (!isMaster || !G4Threading::IsMultithreadedApplication()) {
         buildersToSnapshot.push_back(std::move(builder));
+        cout << "LENGTH: " << buildersToSnapshot.back()->run.length() << endl;
     }
 
     if (isMaster) {
@@ -37,6 +41,8 @@ void RunAction::EndOfRunAction(const G4Run*) {
         }
         buildersToSnapshot.clear();
     }
+
+    cout << "END OF END OF RUN. Thread: " << G4Threading::G4GetThreadId() << endl;
 }
 
 data::Builders& RunAction::GetBuilder() {
