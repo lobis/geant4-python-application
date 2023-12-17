@@ -116,7 +116,7 @@ void Application::Initialize() {
     isInitialized = true;
 }
 
-vector<py::object> Application::Run(const py::object& primaries) {
+py::list Application::Run(const py::object& primaries) {
     if (!IsInitialized()) {
         Initialize();
     }
@@ -132,11 +132,10 @@ vector<py::object> Application::Run(const py::object& primaries) {
             throw runtime_error("Number of events cannot be negative");
         }
         runManager->BeamOn(nEvents);
-        return RunAction::GetEvents();
+        return *RunAction::GetContainer();
     }
     // check if it is an awkward array
     else {
-        py::gil_scoped_acquire acquire;
         py::object ak = py::module::import("awkward");
         py::object ak_array = ak.attr("Array");
         if (!py::isinstance(primaries, ak_array)) {
@@ -176,7 +175,7 @@ vector<py::object> Application::Run(const py::object& primaries) {
         }
 
         runManager->BeamOn(nEvents);
-        return RunAction::GetEvents();
+        return *RunAction::GetContainer();
     }
 }
 

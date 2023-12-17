@@ -81,7 +81,7 @@ def test_event_data_is_cleared():
 
 
 # raising the number of threads to a high value (e.g. 1000) has a very low chance to cause a segfault. TODO: investigate
-@pytest.mark.parametrize("n_threads", [0, 1, 2, 20])
+@pytest.mark.parametrize("n_threads", [0, 1, 4, 20, 5000])
 def test_complex_gdml(n_threads):
     with Application(gdml=complex_gdml) as app:
         app.detector.sensitive_volumes = {"gasVolume"}
