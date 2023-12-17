@@ -55,11 +55,12 @@ def test_sensitive():
         assert len(volumes) == 1
         volume = list(volumes)[0]
         print("volume: ", volume)
-        events = []
-        run_events = app.run(1000)
-        run_events = run_events[run_events.energy_in_volume(volume) > 0]
-        events.append(run_events)
-        events = ak.concatenate(events)
+        events = app.run(1000)
+        energy_in_sensitive = events.energy_in_volume(volume)
+        for i, energy in enumerate(energy_in_sensitive):
+            print(f"event {i} energy: {energy}")
+
+        events = events[energy_in_sensitive > 0]
         assert app.seed == 1234
         assert len(events) == 5
         hits = events.hits(volume)
