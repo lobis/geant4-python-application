@@ -20,6 +20,9 @@ void RunAction::BeginOfRunAction(const G4Run*) {
     if (IsMaster()) {
         container = make_unique<py::list>();
     }
+
+    auto seed = G4Random::getTheSeed();
+    cout << "RANDOM SEED: " << seed << endl;
 }
 
 void RunAction::EndOfRunAction(const G4Run*) {
