@@ -42,11 +42,8 @@ def test_events():
 
 
 def test_sensitive():
-    with Application(seed=1000) as app:
-        app.setup_detector(gdml=complexGdml).setup_action()
-
-        sensitive_volume = "gasVolume"
-        app.detector.sensitive_volumes = {sensitive_volume}
+    with Application(gdml=complexGdml, seed=1000) as app:
+        volume_logical = "gasVolume"
 
         app.initialize()
 
@@ -55,7 +52,7 @@ def test_sensitive():
         app.command("/gun/direction 0 -1 0")
         app.command("/gun/position 0 10 0 m")
 
-        volumes = app.detector.physical_volumes_from_logical(sensitive_volume)
+        volumes = app.detector.physical_volumes_from_logical(volume_logical)
         assert len(volumes) == 1
         volume = list(volumes)[0]
         print("volume: ", volume)
@@ -66,6 +63,7 @@ def test_sensitive():
             run_events = run_events[run_events.energy_in_volume(volume) > 0]
             events.append(run_events)
         events = ak.concatenate(events)
+        assert app.seed == 1000
         assert len(events) == 6
         hits = events.hits(volume)
         np.isclose(hits.energy[0][0:5], [0.0401, 0.00271, 0.00391, 0.389, 0.204])
