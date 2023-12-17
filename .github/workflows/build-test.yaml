@@ -15,10 +15,9 @@ on:
 
   pull_request:
   push:
-    branches:
-      [main]
+    branches: [main]
 
-      ## Paste this snippet into the workflow file to enable tmate debugging
+    ## Paste this snippet into the workflow file to enable tmate debugging
     #      - name: Setup tmate session
     #        uses: mxschmitt/action-tmate@v3
     #        if:
@@ -186,8 +185,10 @@ jobs:
         if: matrix.python-version != '3.11' && matrix.os != 'windows-latest'
         run: |
           GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.data_directory())")
+          echo "GEANT4_DATA_DIR=$GEANT4_DATA_DIR"
           mkdir -p ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
           mv ${{ github.workspace }}/geant4-data/* $GEANT4_DATA_DIR
+          ls -l $GEANT4_DATA_DIR
 
       # TODO: unify this with the above
       - name: Move Geant4 datasets (Windows)
