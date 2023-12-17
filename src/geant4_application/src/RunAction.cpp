@@ -30,10 +30,8 @@ void RunAction::EndOfRunAction(const G4Run*) {
     }
 
     if (isMaster) {
-        for (auto& builderToSnapshot: buildersToSnapshot) {
-            auto data = SnapshotBuilder(*builderToSnapshot);
-            container->append(data);
-            builderToSnapshot = nullptr;
+        for (auto& builders: buildersToSnapshot) {
+            container->append(BuilderToObject(std::move(builders)));
         }
         buildersToSnapshot.clear();
     }
