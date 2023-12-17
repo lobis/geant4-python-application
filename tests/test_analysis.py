@@ -41,7 +41,10 @@ def test_events():
 
 
 def test_sensitive():
-    with Application(gdml=complexGdml, seed=1234) as app:
+    with Application(seed=1234) as app:
+        app.setup_detector(gdml=complexGdml)
+
+        app.detector.sensitive_volumes = {"gasVolume"}
         volume_logical = "gasVolume"
 
         app.initialize()
@@ -57,9 +60,7 @@ def test_sensitive():
         print("volume: ", volume)
         events = app.run(1000)
         energy_in_sensitive = events.energy_in_volume(volume)
-        for i, energy in enumerate(
-            ak.flatten(ak.sum(events.track.step.energy, axis=-1))
-        ):
+        for i, energy in enumerate(energy_in_sensitive):
             print(f"event {i} energy: {energy}")
 
         events = events[energy_in_sensitive > 0]
