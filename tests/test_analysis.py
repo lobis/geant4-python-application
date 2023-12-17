@@ -42,8 +42,7 @@ def test_events():
 
 
 def test_sensitive():
-    with Application() as app:
-        app.seed = 1000
+    with Application(seed=1000) as app:
         app.setup_detector(gdml=complexGdml).setup_action()
 
         sensitive_volume = "gasVolume"
@@ -69,4 +68,5 @@ def test_sensitive():
         events = ak.concatenate(events)
         assert len(events) == 6
         hits = events.hits(volume)
+        np.isclose(hits.energy[0][0:5], [0.0401, 0.00271, 0.00391, 0.389, 0.204])
         electrons = ak.concatenate([hit.electrons() for hit in hits])
