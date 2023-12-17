@@ -58,12 +58,12 @@ def test_sensitive():
         events = []
         total = 5
         while (n := np.sum([len(_events) for _events in events])) < total:
-            run_events = app.run(500)
+            run_events = app.run(1000)
             run_events = run_events[run_events.energy_in_volume(volume) > 0]
             events.append(run_events)
         events = ak.concatenate(events)
         assert app.seed == 1000
-        assert len(events) == 6
+        assert len(events) == 7
         hits = events.hits(volume)
         np.isclose(hits.energy[0][0:5], [0.0401, 0.00271, 0.00391, 0.389, 0.204])
         electrons = ak.concatenate([hit.electrons() for hit in hits])
