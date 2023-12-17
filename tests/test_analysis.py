@@ -61,12 +61,12 @@ def test_sensitive():
         volume = list(volumes)[0]
         print("volume: ", volume)
         events = []
-        total = 2
+        total = 5
         while (n := np.sum([len(_events) for _events in events])) < total:
-            run_events = app.run(20)
+            run_events = app.run(100)
             run_events = run_events[run_events.energy_in_volume(volume) > 0]
             events.append(run_events)
         events = ak.concatenate(events)
-        # ak.to_parquet(events.hits(volume), "hits.parquet")
+        assert len(events) == 6
         hits = events.hits(volume)
         electrons = ak.concatenate([hit.electrons() for hit in hits])
