@@ -9,7 +9,7 @@ using namespace geant4_app;
 
 RunAction::RunAction() : G4UserRunAction() {}
 
-void RunAction::BeginOfRunAction(const G4Run*) {
+void RunAction::BeginOfRunAction(const G4Run* run) {
     lock_guard<std::mutex> lock(mutex);
 
     builder = make_unique<data::Builders>(Application::GetEventFields());
@@ -21,8 +21,7 @@ void RunAction::BeginOfRunAction(const G4Run*) {
         container = make_unique<py::list>();
     }
 
-    auto seed = G4Random::getTheSeed();
-    cout << "RANDOM SEED: " << seed << endl;
+    cout << "RUN ID: " << run->GetRunID() << " RANDOM SEED: " << G4Random::getTheSeed() << endl;
 }
 
 void RunAction::EndOfRunAction(const G4Run*) {
