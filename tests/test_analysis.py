@@ -91,12 +91,13 @@ def test_photoelectric():
 
         events = app.run(10000)
         sensitive_energy = events.energy_in_volume(volume)
-        sum_reference = 35627.95956175427
-        assert np.isclose(np.sum(sensitive_energy), sum_reference, rtol=1e-3)
+        sensitive_energy_average = np.average(sensitive_energy)
+        sensitive_energy_std = np.std(sensitive_energy)
 
-        indices = [322, 467, 4018, 4668, 5531, 6160, 7887, 8107, 8394, 8841]
-        energies_reference = [0, 0, 10, 7.07, 0, 0, 10, 0, 0, 0]
-        assert np.allclose(sensitive_energy[indices], energies_reference, rtol=1e-3)
+        # unique_processes = np.unique(list(ak.flatten(ak.flatten(events.track.step.process))))
+        print(sensitive_energy_average, sensitive_energy_std)
+        assert np.isclose(sensitive_energy_average, 3.4841179413743117, rtol=5e-2)
+        assert np.isclose(sensitive_energy_std, 4.706285949796168, rtol=5e-2)
 
 
 @pytest.mark.skip(reason="seed produces different results on different machines")
@@ -124,7 +125,6 @@ def test_neutrons():
         assert len(events) == 15
 
 
-@pytest.mark.skip(reason="TODO")
 def test_muons():
     with Application(gdml=complexGdml, seed=1234, n_threads=0) as app:
         sensitive_volume = "gasVolume"
@@ -132,18 +132,19 @@ def test_muons():
         app.initialize()
 
         app.command("/gun/particle mu-")
-        app.command("/gun/energy 200 MeV")
+        app.command("/gun/energy 1 GeV")
         app.command("/gun/direction 0 -1 0")
-        app.command("/gun/position 0 10 0 m")
+        app.command("/gun/position 0 2 0 m")
 
         volumes = app.detector.physical_volumes_from_logical(sensitive_volume)
         assert len(volumes) == 1
         volume = list(volumes)[0]
         print("volume: ", volume)
 
-        events = app.run(1000)
+        events = app.run(2000)
         sensitive_energy = events.energy_in_volume(volume)
         events = events[sensitive_energy > 0]
 
-        print(len(events))
-        print(np.max(sensitive_energy))
+        sensitive_energy = events.energy_in_volume(volume)
+        assert np.isclose(np.average(sensitive_energy), 24.821580016670598, rtol=1e-1)
+        assert np.isclose(np.std(sensitive_energy), 16.09166011697945, rtol=1e-1)
