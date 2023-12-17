@@ -15,10 +15,9 @@ on:
 
   pull_request:
   push:
-    branches:
-      [main]
+    branches: [main]
 
-      ## Paste this snippet into the workflow file to enable tmate debugging
+    ## Paste this snippet into the workflow file to enable tmate debugging
     #      - name: Setup tmate session
     #        uses: mxschmitt/action-tmate@v3
     #        if:
@@ -207,6 +206,10 @@ jobs:
           max_attempts: 5
           command: |
             python -c "import geant4_python_application as g4; g4.install_datasets()"
+
+      - name: Run tests debug
+        run: |
+          python -m pytest -s -vv tests/test_analysis.py::test_sensitive
 
       - name: Run tests
         run: |

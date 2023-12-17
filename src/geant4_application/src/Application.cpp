@@ -32,10 +32,11 @@ Application::Application() {
 Application::~Application() = default;
 
 void Application::SetupRandomEngine() {
-    G4Random::setTheEngine(new CLHEP::RanecuEngine);
+    G4Random::setTheEngine(new CLHEP::MTwistEngine);
     if (randomSeed == 0) {
         randomSeed = std::random_device()();
     }
+    cout << "seed set to: " << randomSeed << endl;
     G4Random::setTheSeed(randomSeed);
 }
 
@@ -88,6 +89,10 @@ void Application::SetupManager(unsigned short nThreads) {
     delete G4VSteppingVerbose::GetInstance();
     SteppingVerbose::SetInstance(new SteppingVerbose);
 
+    // https://geant4-forum.web.cern.ch/t/different-random-seeds-but-same-results/324/5
+    // seed needs to be setup before the run manager is created
+    SetupRandomEngine();
+
     const auto runManagerType = nThreads > 0 ? G4RunManagerType::MTOnly : G4RunManagerType::SerialOnly;
     runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));
     if (nThreads > 0) {
@@ -110,13 +115,11 @@ void Application::Initialize() {
         throw runtime_error("Application is already initialized");
     }
 
-    SetupRandomEngine();
-
     runManager->Initialize();
     isInitialized = true;
 }
 
-py::list Application::Run(const py::object& primaries) {
+vector<py::object> Application::Run(const py::object& primaries) {
     if (!IsInitialized()) {
         Initialize();
     }

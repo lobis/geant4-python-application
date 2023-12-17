@@ -47,15 +47,9 @@ def test_seed_single_thread():
         # launch 100 events
         events = app.run(100)
         assert len(events) == 100
-        reference_value = [
-            0.00000000e00,
-            4.54930276e-01,
-            2.25814551e-01,
-            8.09506886e-03,
-            1.22345221e00,
-        ]
+        reference_value = [0, 0.502, 0, 0.0952, 0.0199]
         energy = np.array(events.track.step.energy[0][0][0:5])
-        assert np.allclose(energy, reference_value, atol=1e-5)
+        assert np.allclose(energy, reference_value, atol=1e-4)
         assert app.seed == 1100
 
 

@@ -49,7 +49,7 @@ public:
     void SetupAction();
 
     void Initialize();
-    py::list Run(const py::object& primaries);
+    std::vector<py::object> Run(const py::object& primaries);
 
     bool IsSetup() const;
     bool IsInitialized() const;

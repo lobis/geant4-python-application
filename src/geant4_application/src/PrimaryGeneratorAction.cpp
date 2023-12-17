@@ -16,34 +16,8 @@ using namespace geant4_app;
 PrimaryGeneratorAction::PrimaryGeneratorAction() : G4VUserPrimaryGeneratorAction() {}
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
-    if (!awkwardPrimaryEnergies.empty()) {
-        const double energy = awkwardPrimaryEnergies[event->GetEventID()];
-        gun.SetParticleEnergy(energy * keV);
-    }
-    if (!awkwardPrimaryPositions.empty()) {
-        const auto& position = awkwardPrimaryPositions[event->GetEventID()];
-        gun.SetParticlePosition(G4ThreeVector(position[0] * cm, position[1] * cm, position[2] * cm));
-    }
-    if (!awkwardPrimaryDirections.empty()) {
-        const auto& direction = awkwardPrimaryDirections[event->GetEventID()];
-        gun.SetParticleMomentumDirection(G4ThreeVector(direction[0], direction[1], direction[2]));
-    }
-    if (!awkwardPrimaryParticles.empty()) {
-        const auto& particleAwkward = awkwardPrimaryParticles[event->GetEventID()];
-        auto* particle = G4ParticleTable::GetParticleTable()->FindParticle(particleAwkward);
-        if (particle == nullptr) {
-            throw runtime_error("PrimaryGeneratorAction::GeneratePrimaries - particle '" + particleAwkward + "' not found");
-        }
-        gun.SetParticleDefinition(particle);
-    }
 
-    if (generatorType == "gun") {
-        gun.GeneratePrimaryVertex(event);
-    } else if (generatorType == "gps") {
-        gps.GeneratePrimaryVertex(event);
-    } else {
-        throw runtime_error("PrimaryGeneratorAction::GeneratePrimaries - generatorType must be 'gun', 'gps'");
-    }
+    gun.GeneratePrimaryVertex(event);
 }
 
 void PrimaryGeneratorAction::SetGeneratorType(const string& type) {
