@@ -21,12 +21,12 @@ public:
 
     /// Only one instance of RunAction is created for each thread.
     static data::Builders& GetBuilder();
-    static std::unique_ptr<py::list> GetContainer();
+    static std::unique_ptr<std::vector<py::object>> GetContainer();
 
 private:
     std::unique_ptr<data::Builders> builder = nullptr;
     std::mutex mutex;
-    static std::unique_ptr<py::list> container;
+    static std::unique_ptr<std::vector<py::object>> container;
     static std::vector<std::unique_ptr<data::Builders>> buildersToSnapshot;
 };
 

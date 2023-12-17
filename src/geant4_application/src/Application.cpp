@@ -119,7 +119,7 @@ void Application::Initialize() {
     isInitialized = true;
 }
 
-py::list Application::Run(const py::object& primaries) {
+vector<py::object> Application::Run(const py::object& primaries) {
     if (!IsInitialized()) {
         Initialize();
     }

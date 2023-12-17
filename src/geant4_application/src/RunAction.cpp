@@ -18,7 +18,7 @@ void RunAction::BeginOfRunAction(const G4Run* run) {
     steppingVerbose->Initialize();
 
     if (IsMaster()) {
-        container = make_unique<py::list>();
+        container = make_unique<vector<py::object>>();
     }
 
     cout << "RUN ID: " << run->GetRunID() << " RANDOM SEED: " << G4Random::getTheSeed() << endl;
@@ -33,7 +33,7 @@ void RunAction::EndOfRunAction(const G4Run*) {
 
     if (isMaster) {
         for (auto& builders: buildersToSnapshot) {
-            container->append(BuilderToObject(std::move(builders)));
+            container->push_back(BuilderToObject(std::move(builders)));
         }
         buildersToSnapshot.clear();
     }
@@ -44,9 +44,9 @@ data::Builders& RunAction::GetBuilder() {
     return *runAction->builder;
 }
 
-unique_ptr<py::list> RunAction::container = nullptr;
+unique_ptr<vector<py::object>> RunAction::container = nullptr;
 
-unique_ptr<py::list> RunAction::GetContainer() {
+unique_ptr<vector<py::object>> RunAction::GetContainer() {
     return std::move(RunAction::container);
 }
 
