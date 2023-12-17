@@ -184,11 +184,11 @@ jobs:
       - name: Move Geant4 datasets (Ubuntu/MacOS)
         if: matrix.python-version != '3.11' && matrix.os != 'windows-latest'
         run: |
-          GEANT4_DATA_DIR="$(python -c "import geant4_python_application; print(geant4_python_application.data_directory())")"
+          GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.data_directory())")
           echo "GEANT4_DATA_DIR=$GEANT4_DATA_DIR"
-          mkdir -p ${{ github.workspace }}/geant4-data $GEANT4_DATA_DIR
-          mv ${{ github.workspace }}/geant4-data/* $GEANT4_DATA_DIR
-          ls -l $GEANT4_DATA_DIR
+          mkdir -p ${{ github.workspace }}/geant4-data "$GEANT4_DATA_DIR"
+          mv ${{ github.workspace }}/geant4-data/* "$GEANT4_DATA_DIR"
+          ls -l "$GEANT4_DATA_DIR"
 
       # TODO: unify this with the above
       - name: Move Geant4 datasets (Windows)
