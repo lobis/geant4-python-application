@@ -10,29 +10,29 @@ using namespace geant4_app;
 RunAction::RunAction() : G4UserRunAction() {}
 
 void RunAction::BeginOfRunAction(const G4Run*) {
+    lock_guard<std::mutex> lock(mutex);
+
     builder = make_unique<data::Builders>(Application::GetEventFields());
 
     auto steppingVerbose = ((SteppingVerbose*) G4VSteppingVerbose::GetInstance());
     steppingVerbose->Initialize();
 
     if (IsMaster()) {
-        events = make_unique<std::vector<py::object>>();
-    } else {
-        //
+        container = make_unique<py::list>();
     }
 }
 
 void RunAction::EndOfRunAction(const G4Run*) {
+    lock_guard<std::mutex> lock(mutex);
+
     if (!isMaster || !G4Threading::IsMultithreadedApplication()) {
-        lock_guard<std::mutex> lock(mutex);
         buildersToSnapshot.push_back(std::move(builder));
     }
 
     if (isMaster) {
-        // snapshot not working on worker threads, why?
-        py::gil_scoped_acquire acquire;
         for (auto& builderToSnapshot: buildersToSnapshot) {
-            events->push_back(SnapshotBuilder(*builderToSnapshot));
+            auto data = SnapshotBuilder(*builderToSnapshot);
+            container->append(data);
             builderToSnapshot = nullptr;
         }
         buildersToSnapshot.clear();
@@ -44,12 +44,10 @@ data::Builders& RunAction::GetBuilder() {
     return *runAction->builder;
 }
 
-unique_ptr<std::vector<py::object>> RunAction::events = nullptr;
+unique_ptr<py::list> RunAction::container = nullptr;
 
-vector<py::object> RunAction::GetEvents() {
-    // how to avoid this copy?
-    py::gil_scoped_acquire acquire;
-    return *std::move(RunAction::events);
+unique_ptr<py::list> RunAction::GetContainer() {
+    return std::move(RunAction::container);
 }
 
 vector<std::unique_ptr<data::Builders>> RunAction::buildersToSnapshot = {};
