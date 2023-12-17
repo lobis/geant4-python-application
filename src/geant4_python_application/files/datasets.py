@@ -178,7 +178,7 @@ def install_datasets(force: bool = False, show_progress: bool = True):
     if show_progress:
         print(
             f"""
-Geant4 datasets (<2GB) will be installed to {data_directory()}
+Geant4 datasets (<2GB) will be installed to "{data_directory()}".
 This may take a while but only needs to be done once.
 You can override the default location by calling `application_directory(path)` or `application_directory(temp=True)` to use a temporary directory.
 The following Geant4 datasets will be installed: {", ".join([f"{dataset.name}@v{dataset.version}" for dataset in datasets_to_download])}"""
