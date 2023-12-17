@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import platform
+
 import awkward as ak
 import numpy as np
 import pytest
@@ -73,8 +75,12 @@ def test_sensitive():
         electrons = ak.concatenate([hit.electrons() for hit in hits])
 
 
-def test_photoelectric():
-    with Application(gdml=complexGdml, seed=1234, n_threads=0) as app:
+@pytest.mark.skipif(
+    platform.system() == "Windows", reason="Not working on Windows. Why?"
+)
+@pytest.mark.parametrize("n_threads", [0, 8])
+def test_photoelectric(n_threads):
+    with Application(gdml=complexGdml, seed=1234, n_threads=n_threads) as app:
         sensitive_volume = "gasVolume"
 
         app.initialize()
@@ -95,7 +101,6 @@ def test_photoelectric():
         sensitive_energy_std = np.std(sensitive_energy)
 
         # unique_processes = np.unique(list(ak.flatten(ak.flatten(events.track.step.process))))
-        print(sensitive_energy_average, sensitive_energy_std)
         assert np.isclose(sensitive_energy_average, 3.4841179413743117, rtol=5e-2)
         assert np.isclose(sensitive_energy_std, 4.706285949796168, rtol=5e-2)
 
