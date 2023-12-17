@@ -70,3 +70,29 @@ def test_sensitive():
         # ak.to_parquet(events.hits(volume), "hits.parquet")
         hits = events.hits(volume)
         electrons = ak.concatenate([hit.electrons() for hit in hits])
+
+
+def test_photoelectric():
+    with Application(gdml=complexGdml, seed=1234, n_threads=0) as app:
+        sensitive_volume = "gasVolume"
+
+        app.initialize()
+
+        app.command("/gun/particle gamma")
+        app.command("/gun/energy 10 keV")
+        app.command("/gun/direction 0 0 -1")
+        app.command("/gun/position 0 0 20 cm")
+
+        volumes = app.detector.physical_volumes_from_logical(sensitive_volume)
+        assert len(volumes) == 1
+        volume = list(volumes)[0]
+        print("volume: ", volume)
+
+        events = app.run(10000)
+        sensitive_energy = events.energy_in_volume(volume)
+        sum_reference = 35627.95956175427
+        assert np.isclose(np.sum(sensitive_energy), sum_reference, rtol=1e-3)
+
+        indices = [322, 467, 4018, 4668, 5531, 6160, 7887, 8107, 8394, 8841]
+        energies_reference = [0, 0, 10, 7.07, 0, 0, 10, 0, 0, 0]
+        assert np.allclose(sensitive_energy[indices], energies_reference, rtol=1e-3)
