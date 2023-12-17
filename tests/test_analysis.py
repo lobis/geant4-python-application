@@ -12,8 +12,7 @@ complexGdml = requests.get(
 
 
 def test_events():
-    with Application() as app:
-        app.seed = 1000
+    with Application(seed=1000) as app:
         app.setup_detector(gdml=complexGdml)
 
         sensitive_volume = "gasVolume"
@@ -59,7 +58,7 @@ def test_sensitive():
         events = []
         total = 5
         while (n := np.sum([len(_events) for _events in events])) < total:
-            run_events = app.run(100)
+            run_events = app.run(500)
             run_events = run_events[run_events.energy_in_volume(volume) > 0]
             events.append(run_events)
         events = ak.concatenate(events)
