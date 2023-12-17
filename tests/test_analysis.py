@@ -49,16 +49,16 @@ def test_sensitive():
 
         app.initialize()
 
-        app.command("/gun/particle neutron")
-        app.command("/gun/energy 100 MeV")
-        app.command("/gun/direction 0 -1 0")
-        app.command("/gun/position 0 10 0 m")
+        app.command("/gun/particle gamma")
+        app.command("/gun/energy 10 keV")
+        app.command("/gun/direction 0 0 -1")
+        app.command("/gun/position 0 0 20 cm")
 
         volumes = app.detector.physical_volumes_from_logical(volume_logical)
         assert len(volumes) == 1
         volume = list(volumes)[0]
         print("volume: ", volume)
-        events = app.run(2000)
+        events = app.run(1000)
         energy_in_sensitive = events.energy_in_volume(volume)
         for i, energy in enumerate(energy_in_sensitive):
             print(f"event {i} energy: {energy}")
