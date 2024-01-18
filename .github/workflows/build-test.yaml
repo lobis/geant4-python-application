@@ -53,7 +53,7 @@ jobs:
 
       - name: Cache Xerces-C Installation
         id: cache-xerces
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/xerces
           key: xerces-v${{ env.XERCES_VERSION }}-cpp${{ env.CPP_STANDARD }}
@@ -68,7 +68,7 @@ jobs:
 
       - name: Cache Geant4 Installation
         id: cache-geant4
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.Geant4_DIR }}
           key: geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}
@@ -93,7 +93,7 @@ jobs:
     steps:
       - name: Cache Geant4 Installation
         id: cache-geant4
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/geant4
           key: geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}
@@ -101,7 +101,7 @@ jobs:
 
       - name: Cache Geant4 Datasets
         id: cache-geant4-data
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/geant4-data
           key: geant4-${{ env.GEANT4_VERSION }}-data
@@ -153,7 +153,7 @@ jobs:
 
       - name: Cache Xerces-C Installation
         id: cache-xerces
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/xerces
           key: xerces-v${{ env.XERCES_VERSION }}-cpp${{ env.CPP_STANDARD }}
@@ -161,7 +161,7 @@ jobs:
 
       - name: Cache Geant4 Installation
         id: cache-geant4
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/geant4
           key: geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}
@@ -175,7 +175,7 @@ jobs:
       - name: Cache Geant4 Datasets
         if: matrix.python-version != '3.11'
         id: cache-geant4-data
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/geant4-data
           key: geant4-${{ env.GEANT4_VERSION }}-data
