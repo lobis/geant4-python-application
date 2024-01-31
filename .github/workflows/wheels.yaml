@@ -129,7 +129,7 @@ jobs:
       - name: Cache Xerces-C Installation
         if: matrix.os != 'ubuntu-latest'
         id: cache-xerces
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/xerces
           key:
@@ -149,7 +149,7 @@ jobs:
       - name: Cache Geant4 Installation
         if: matrix.os != 'ubuntu-latest'
         id: cache-geant4
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.Geant4_DIR }}
           key:
