@@ -200,7 +200,7 @@ jobs:
           Move-Item "${{ github.workspace }}\geant4-data\*" $env:GEANT4_DATA_DIR -Force
 
       - name: Install datasets
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           timeout_minutes: 30
           retry_wait_seconds: 60
