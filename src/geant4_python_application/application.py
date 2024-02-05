@@ -183,7 +183,7 @@ class Application:
             for key in events[0].keys()
         }
         # make sure they all have the same length
-        for key in concatenated_dict.keys():
+        for key in concatenated_dict:
             if len(concatenated_dict[key]) != len(
                 concatenated_dict[list(concatenated_dict.keys())[0]]
             ):
@@ -191,7 +191,7 @@ class Application:
 
         keys_to_remove = set()
         step_array_dict = {}
-        for key in concatenated_dict.keys():
+        for key in concatenated_dict:
             prefix = "step_"
             if key.startswith(prefix):
                 new_key = key[len(prefix) :]
@@ -199,7 +199,7 @@ class Application:
                 keys_to_remove.add(key)
 
         track_array_dict = {}
-        for key in concatenated_dict.keys():
+        for key in concatenated_dict:
             prefix = "track_"
             if key.startswith(prefix):
                 new_key = key[len(prefix) :]
@@ -212,7 +212,7 @@ class Application:
                     key: concatenated_dict[key]
                     for key in [
                         key
-                        for key in concatenated_dict.keys()
+                        for key in concatenated_dict
                         if key not in keys_to_remove
                     ]
                 },
@@ -222,7 +222,7 @@ class Application:
                             {
                                 **{
                                     key: track_array_dict[key]
-                                    for key in track_array_dict.keys()
+                                    for key in track_array_dict
                                 },
                                 **(
                                     {
@@ -230,7 +230,7 @@ class Application:
                                             {
                                                 **{
                                                     key: step_array_dict[key]
-                                                    for key in step_array_dict.keys()
+                                                    for key in step_array_dict
                                                 }
                                             },
                                             with_name="step",
