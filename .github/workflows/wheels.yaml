@@ -174,7 +174,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.16.5
         env:
           CIBW_TEST_COMMAND:
-            python -m pytest {project}/tests -vv --reruns 3 --reruns-delay 30
+            python -m pytest {project}/tests -vv --reruns 10 --reruns-delay 30
             --only-rerun "(?i)http|timeout|connection|socket|resolve"
           CIBW_ENVIRONMENT: >
             SKLEARN_SKIP_NETWORK_TESTS=1 SKLEARN_BUILD_PARALLEL=3
@@ -232,7 +232,7 @@ jobs:
 
   upload-test-pypi:
     name: Upload wheels to Test PyPI
-    needs: [sdist, wheels, check-wheels-size]
+    needs: [ sdist, wheels, check-wheels-size ]
     runs-on: ubuntu-latest
     if:
       (github.event_name == 'release' && github.event.action == 'published') ||
@@ -258,7 +258,7 @@ jobs:
 
   upload-pypi:
     name: Upload wheels to PyPI
-    needs: [sdist, wheels, check-wheels-size]
+    needs: [ sdist, wheels, check-wheels-size ]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
 
