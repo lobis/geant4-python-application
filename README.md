@@ -34,7 +34,7 @@ needed to perform any kind of simulation. They will be downloaded to a temporary
 directory automatically during simulation startup.
 
 ```bash
-pip install -i https://test.pypi.org/simple/ geant4-python-application==0.0.2.dev1
+pip install -i https://test.pypi.org/simple/ geant4-python-application
 ```
 
 ### Geant4 data files

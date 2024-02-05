@@ -232,7 +232,7 @@ jobs:
 
   upload-test-pypi:
     name: Upload wheels to Test PyPI
-    needs: [ sdist, wheels, check-wheels-size ]
+    needs: [sdist, wheels, check-wheels-size]
     runs-on: ubuntu-latest
     if:
       (github.event_name == 'release' && github.event.action == 'published') ||
@@ -258,7 +258,7 @@ jobs:
 
   upload-pypi:
     name: Upload wheels to PyPI
-    needs: [ sdist, wheels, check-wheels-size ]
+    needs: [sdist, wheels, check-wheels-size]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
 
