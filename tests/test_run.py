@@ -13,8 +13,9 @@ complex_gdml = requests.get(
 
 
 @pytest.mark.parametrize("n_threads", [0, 4])
-@pytest.mark.skip(reason="This test is not working atm")
 def test_awkward_primaries(n_threads):
+    if n_threads > 0:
+        pytest.skip("Not working for MT right now")
     # numpy random seed
     np.random.seed(1234)
 
