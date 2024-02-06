@@ -169,6 +169,7 @@ jobs:
       - name: pip install the package
         run: |
           python -m pip install .[test]
+          git tag
           python -c "import geant4_python_application; print(geant4_python_application.version)"
 
       # test ability to download datasets in one job and use the cache in the others
