@@ -4,10 +4,7 @@
 [![Wheels](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml)
 [![Build and Test](https://github.com/lobis/geant4-python-application/actions/workflows/build-test.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/test.yaml)
 
-⚠️ This project is currently in a very early stage of development ⚠️
-
-The goal of this project is to provide an accessible pythonic interface to do
-radiation transport simulations with Geant4.
+This is an experiment at providing a pythonic interface to Geant4.
 
 The goal is not to provide a full python interface to Geant4, but rather to
 provide a high-level interface to a generic Geant4 application which is highly
@@ -34,7 +31,7 @@ needed to perform any kind of simulation. They will be downloaded to a temporary
 directory automatically during simulation startup.
 
 ```bash
-pip install -i https://test.pypi.org/simple/ geant4-python-application
+pip install geant4-python-application
 ```
 
 ### Geant4 data files
