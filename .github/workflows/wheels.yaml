@@ -3,12 +3,10 @@ name: Wheels
 on:
   schedule:
     - cron: "0 4 * * *" # every day at 4am UTC
-  workflow_dispatch:
-    inputs:
-      publish_to_test_pypi:
-        type: boolean
-        description: Publish to Test PyPI
-        default: false
+
+  release:
+    types:
+      - published
 
 env:
   GEANT4_VERSION: 11.2.0
