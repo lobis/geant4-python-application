@@ -1,18 +1,18 @@
 name: Wheels
 
 on:
+  workflow_dispatch:
+
   schedule:
     - cron: "0 4 * * *" # every day at 4am UTC
-  workflow_dispatch:
-    inputs:
-      publish_to_test_pypi:
-        type: boolean
-        description: Publish to Test PyPI
-        default: false
+
+  release:
+    types:
+      - published
 
 env:
   GEANT4_VERSION: 11.2.0
-  XERCES_VERSION: 3.2.4
+  XERCES_VERSION: 3.2.5
   CPP_STANDARD: 17
   Geant4_DIR: ${{ github.workspace }}/geant4
 
@@ -31,7 +31,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: 3.12
 
       - name: Build sdist
         run: |
@@ -69,6 +69,10 @@ jobs:
             python: 311
             platform_id: manylinux_x86_64
             manylinux_image: manylinux2014
+          - os: ubuntu-latest
+            python: 312
+            platform_id: manylinux_x86_64
+            manylinux_image: manylinux2014
 
           - os: macos-latest
             python: 38
@@ -82,6 +86,9 @@ jobs:
           - os: macos-latest
             python: 311
             platform_id: macosx_x86_64
+          - os: macos-latest
+            python: 312
+            platform_id: macosx_x86_64
 
           - os: macos-latest
             python: 38
@@ -95,6 +102,9 @@ jobs:
           - os: macos-latest
             python: 311
             platform_id: macosx_arm64
+          - os: macos-latest
+            python: 312
+            platform_id: macosx_arm64
 
           - os: windows-latest
             python: 38
@@ -108,12 +118,16 @@ jobs:
           - os: windows-latest
             python: 311
             platform_id: win_amd64
+          - os: windows-latest
+            python: 312
+            platform_id: win_amd64
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup CMake
-        uses: lukka/get-cmake@v3.28.0
+        uses: lukka/get-cmake@v3.28.3
 
       - name: Setup Windows environment variables
         if: matrix.os == 'windows-latest'
@@ -129,7 +143,7 @@ jobs:
       - name: Cache Xerces-C Installation
         if: matrix.os != 'ubuntu-latest'
         id: cache-xerces
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/xerces
           key:
@@ -149,7 +163,7 @@ jobs:
       - name: Cache Geant4 Installation
         if: matrix.os != 'ubuntu-latest'
         id: cache-geant4
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.Geant4_DIR }}
           key:
@@ -168,13 +182,13 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: 3.12
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.16.2
+        uses: pypa/cibuildwheel@v2.16.5
         env:
           CIBW_TEST_COMMAND:
-            python -m pytest {project}/tests -vv --reruns 3 --reruns-delay 30
+            python -m pytest {project}/tests -vv --reruns 10 --reruns-delay 30
             --only-rerun "(?i)http|timeout|connection|socket|resolve"
           CIBW_ENVIRONMENT: >
             SKLEARN_SKIP_NETWORK_TESTS=1 SKLEARN_BUILD_PARALLEL=3
@@ -201,7 +215,7 @@ jobs:
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: wheelhouse/*.whl
 
   check-wheels-size:
@@ -210,10 +224,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download wheels
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: dist
           path: dist
+          merge-multiple: true
 
       - name: Check wheel size
         shell: bash
@@ -230,35 +244,9 @@ jobs:
             fi
           done
 
-  upload-test-pypi:
-    name: Upload wheels to Test PyPI
-    needs: [sdist, wheels, check-wheels-size]
-    runs-on: ubuntu-latest
-    if:
-      (github.event_name == 'release' && github.event.action == 'published') ||
-      github.event.inputs.publish_to_test_pypi == 'true'
-
-    steps:
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
-
-      - name: Download wheels
-        uses: actions/download-artifact@v3
-        with:
-          name: dist
-          path: dist
-
-      - name: Publish to Test PyPI
-        uses: pypa/gh-action-pypi-publish@v1.8.11
-        with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository-url: https://test.pypi.org/legacy/
-
   upload-pypi:
     name: Upload wheels to PyPI
-    needs: [sdist, wheels, check-wheels-size]
+    needs: [ sdist, wheels, check-wheels-size ]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
 
@@ -266,15 +254,55 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: 3.12
 
       - name: Download wheels
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: dist
           path: dist
+          merge-multiple: true
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@v1.8.11
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+  publish-docker:
+    name: Publish Docker image
+    needs: [ upload-pypi ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to the GitHub Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.CONTAINER_REGISTRY_GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: |
+            ghcr.io/lobis/geant4-python-application:latest
+            ghcr.io/lobis/geant4-python-application:${{ github.event.release.tag_name }}
+
+          labels: |
+            maintainer.name=Luis Antonio Obis Aparicio
+            maintainer.email=luis.antonio.obis@gmail.com
+            org.opencontainers.image.source=${{ github.repository }}
+
+      - name: Test image
+        run: |
+          docker run --rm ghcr.io/lobis/geant4-python-application:latest -c 'import geant4_python_application; app = geant4_python_application.Application()'
+
+      - name: Publish
+        run: |
+          docker push ghcr.io/lobis/geant4-python-application:latest

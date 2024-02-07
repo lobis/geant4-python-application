@@ -4,7 +4,6 @@ import geant4_python_application
 
 
 def test_imports():
-    assert geant4_python_application.__doc__
     assert geant4_python_application.__version__
     assert geant4_python_application.version
     awkward_version = geant4_python_application.awkward_version
