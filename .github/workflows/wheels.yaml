@@ -37,7 +37,7 @@ jobs:
           python -m build --sdist .
 
       - name: Upload sdist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/*.tar.gz
@@ -197,9 +197,9 @@ jobs:
             'macosx_arm64' && 'SKIP_PYBIND11_STUBGEN=1' || '' }}
 
       - name: Upload wheel
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: wheelhouse/*.whl
 
   check-wheels-size:
@@ -208,9 +208,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download wheels
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: dist
           path: dist
 
       - name: Check wheel size
@@ -241,9 +240,8 @@ jobs:
           python-version: 3.11
 
       - name: Download wheels
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: dist
           path: dist
 
       - name: Publish to PyPI
