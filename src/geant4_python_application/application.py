@@ -211,9 +211,7 @@ class Application:
                 **{
                     key: concatenated_dict[key]
                     for key in [
-                        key
-                        for key in concatenated_dict
-                        if key not in keys_to_remove
+                        key for key in concatenated_dict if key not in keys_to_remove
                     ]
                 },
                 **(
