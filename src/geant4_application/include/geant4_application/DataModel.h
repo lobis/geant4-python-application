@@ -37,21 +37,7 @@ template<class T>
 using TrackFieldBuilder = ListOffsetBuilder<unsigned int, NumpyBuilder<T>>;
 
 template<class PRIMITIVE>
-class StringBuilder : public ListOffsetBuilder<PRIMITIVE, NumpyBuilder<uint8_t>> {
-public:
-    StringBuilder() : ListOffsetBuilder<PRIMITIVE, NumpyBuilder<uint8_t>>() {
-        this->set_parameters(R"""("__array__": "string")""");
-        this->content().set_parameters(R"""("__array__": "char")""");
-    }
-
-    void append(const std::string& value) {
-        this->begin_list();
-        for (const auto c: value) {
-            this->content().append(c);
-        }
-        this->end_list();
-    }
-};
+using StringBuilder = awkward::LayoutBuilder::String<PRIMITIVE>;
 
 template<class PRIMITIVE>
 class VectorBuilder : public RecordBuilder<
