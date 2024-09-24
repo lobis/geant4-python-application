@@ -115,7 +115,7 @@ jobs:
           ls ${{ env.Geant4_DIR }}
           ls ${{ env.Geant4_DIR }}/bin
           ls ${{ env.Geant4_DIR }}/share/Geant4/data
-          
+
           bash ${{ env.Geant4_DIR }}/bin/geant4-config --install-datasets
           bash ${{ env.Geant4_DIR }}/bin/geant4-config --check-datasets
           mv ${{ env.Geant4_DIR }}/share/Geant4/data ${{ github.workspace }}/geant4-data
