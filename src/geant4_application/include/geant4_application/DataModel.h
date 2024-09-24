@@ -150,7 +150,7 @@ struct Builders {
     StepPositionBuilder<double> step_position;
     StepMomentumBuilder<double> step_momentum;
 
-    Builders(const std::unordered_set<std::string>& fields) : fields(fields){};
+    Builders(const std::unordered_set<std::string>& fields) : fields(fields) {};
 };
 
 
