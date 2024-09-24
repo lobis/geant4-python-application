@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Setup CMake
-        uses: lukka/get-cmake@v3.29.3
+        uses: lukka/get-cmake@v3.30.3
 
       - name: Cache Xerces-C Installation
         id: cache-xerces
