@@ -256,7 +256,7 @@ filesystem::path Application::GetTemporaryApplicationDirectory() {
 
 void Application::SetEventFields(const unordered_set<string>& fields) {
     for (const auto& field: fields) {
-        if (!eventFieldsComplete.contains(field)) {
+        if (eventFieldsComplete.find(field) == eventFieldsComplete.end()) {
             throw runtime_error("Invalid event field: " + field);
         }
     }
