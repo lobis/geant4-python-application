@@ -94,7 +94,7 @@ jobs:
         id: cache-geant4
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/geant4
+          path: ${{ env.Geant4_DIR }}
           key: geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}
           fail-on-cache-miss: true
 
@@ -111,9 +111,14 @@ jobs:
         if: steps.cache-geant4-data.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          bash ${{ github.workspace }}/geant4/bin/geant4-config --install-datasets
-          bash ${{ github.workspace }}/geant4/bin/geant4-config --check-datasets
-          mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
+          # in windows, list the contents of the directory
+          ls ${{ env.Geant4_DIR }}
+          ls ${{ env.Geant4_DIR }}/bin
+          ls ${{ env.Geant4_DIR }}/share/Geant4/data
+          
+          bash ${{ env.Geant4_DIR }}/bin/geant4-config --install-datasets
+          bash ${{ env.Geant4_DIR }}/bin/geant4-config --check-datasets
+          mv ${{ env.Geant4_DIR }}/share/Geant4/data ${{ github.workspace }}/geant4-data
 
   build-test:
     name:
@@ -162,7 +167,7 @@ jobs:
         id: cache-geant4
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/geant4
+          path: ${{ env.Geant4_DIR }}
           key: geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}
           fail-on-cache-miss: true
 
