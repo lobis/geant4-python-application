@@ -31,7 +31,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GEANT4_VERSION: 11.2.0
+  GEANT4_VERSION: 11.2.2
   XERCES_VERSION: 3.2.5
   CPP_STANDARD: 17
   Geant4_DIR: ${{ github.workspace }}/geant4
