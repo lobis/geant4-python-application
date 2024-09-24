@@ -123,11 +123,12 @@ jobs:
           'windows-latest'
         shell: powershell
         run: |
-          Get-ChildItem -Path $env:Geant4_DIR
-          Get-ChildItem -Path $env:Geant4_DIR\bin
-          $env:Geant4_DIR\bin\geant4-config --install-datasets
-          $env:Geant4_DIR\bin\geant4-config --check-datasets
-          Move-Item $env:Geant4_DIR\share\Geant4\data ${{ github.workspace }}\geant4-data
+          Get-ChildItem -Path .
+          Get-ChildItem -Path ${{ env.Geant4_DIR }}
+          Get-ChildItem -Path ${{ env.Geant4_DIR }}\bin
+          ${{ env.Geant4_DIR }}\bin\geant4-config --install-datasets
+          ${{ env.Geant4_DIR }}\bin\geant4-config --check-datasets
+          Move-Item ${{ env.Geant4_DIR }}\share\Geant4\data ${{ github.workspace }}\geant4-data
 
   build-test:
     name:
