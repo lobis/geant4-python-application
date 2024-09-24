@@ -164,7 +164,7 @@ void InsertEvent(const G4Event* event, Builders& builder);
 void InsertTrack(const G4Track* track, Builders& builder);
 void InsertStep(const G4Step* step, Builders& builder);
 
-py::object SnapshotBuilder(Builders& builder);
+py::object BuilderToObject(std::unique_ptr<Builders> builders);
 
 namespace units {
 static constexpr auto energy = CLHEP::keV;

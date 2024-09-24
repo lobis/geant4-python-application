@@ -429,82 +429,83 @@ py::object snapshot_builder(const T& builder) {
     return from_buffers(builder.form(), builder.length(), container);
 }
 
-py::object SnapshotBuilder(Builders& builder) {
+py::object BuilderToObject(unique_ptr<Builders> builder) {
+    // this will automatically clear the builders after the pointer goes out of scope
     py::dict snapshot;
-    if (builder.fields.contains("run")) {
-        snapshot["run"] = snapshot_builder(builder.run);
+    if (builder->fields.contains("run")) {
+        snapshot["run"] = snapshot_builder(builder->run);
     }
-    if (builder.fields.contains("id")) {
-        snapshot["id"] = snapshot_builder(builder.id);
+    if (builder->fields.contains("id")) {
+        snapshot["id"] = snapshot_builder(builder->id);
     }
-    if (builder.fields.contains("primaries")) {
-        snapshot["primaries"] = snapshot_builder(builder.primaries);
+    if (builder->fields.contains("primaries")) {
+        snapshot["primaries"] = snapshot_builder(builder->primaries);
     }
-    if (builder.fields.contains("track_id")) {
-        snapshot["track_id"] = snapshot_builder(builder.track_id);
+    if (builder->fields.contains("track_id")) {
+        snapshot["track_id"] = snapshot_builder(builder->track_id);
     }
-    if (builder.fields.contains("track_parent_id")) {
-        snapshot["track_parent_id"] = snapshot_builder(builder.track_parent_id);
+    if (builder->fields.contains("track_parent_id")) {
+        snapshot["track_parent_id"] = snapshot_builder(builder->track_parent_id);
     }
-    if (builder.fields.contains("track_initial_energy")) {
-        snapshot["track_initial_energy"] = snapshot_builder(builder.track_initial_energy);
+    if (builder->fields.contains("track_initial_energy")) {
+        snapshot["track_initial_energy"] = snapshot_builder(builder->track_initial_energy);
     }
-    if (builder.fields.contains("track_initial_time")) {
-        snapshot["track_initial_time"] = snapshot_builder(builder.track_initial_time);
+    if (builder->fields.contains("track_initial_time")) {
+        snapshot["track_initial_time"] = snapshot_builder(builder->track_initial_time);
     }
-    if (builder.fields.contains("track_weight")) {
-        snapshot["track_weight"] = snapshot_builder(builder.track_weight);
+    if (builder->fields.contains("track_weight")) {
+        snapshot["track_weight"] = snapshot_builder(builder->track_weight);
     }
-    if (builder.fields.contains("track_initial_position")) {
-        snapshot["track_initial_position"] = snapshot_builder(builder.track_initial_position);
+    if (builder->fields.contains("track_initial_position")) {
+        snapshot["track_initial_position"] = snapshot_builder(builder->track_initial_position);
     }
-    if (builder.fields.contains("track_initial_momentum")) {
-        snapshot["track_initial_momentum"] = snapshot_builder(builder.track_initial_momentum);
+    if (builder->fields.contains("track_initial_momentum")) {
+        snapshot["track_initial_momentum"] = snapshot_builder(builder->track_initial_momentum);
     }
-    if (builder.fields.contains("track_particle")) {
-        snapshot["track_particle"] = snapshot_builder(builder.track_particle);
+    if (builder->fields.contains("track_particle")) {
+        snapshot["track_particle"] = snapshot_builder(builder->track_particle);
     }
-    if (builder.fields.contains("track_particle_type")) {
-        snapshot["track_particle_type"] = snapshot_builder(builder.track_particle_type);
+    if (builder->fields.contains("track_particle_type")) {
+        snapshot["track_particle_type"] = snapshot_builder(builder->track_particle_type);
     }
-    if (builder.fields.contains("track_creator_process")) {
-        snapshot["track_creator_process"] = snapshot_builder(builder.track_creator_process);
+    if (builder->fields.contains("track_creator_process")) {
+        snapshot["track_creator_process"] = snapshot_builder(builder->track_creator_process);
     }
-    if (builder.fields.contains("track_creator_process_type")) {
-        snapshot["track_creator_process_type"] = snapshot_builder(builder.track_creator_process_type);
+    if (builder->fields.contains("track_creator_process_type")) {
+        snapshot["track_creator_process_type"] = snapshot_builder(builder->track_creator_process_type);
     }
-    if (builder.fields.contains("track_children_ids")) {
-        snapshot["track_children_ids"] = snapshot_builder(builder.track_children_ids);
+    if (builder->fields.contains("track_children_ids")) {
+        snapshot["track_children_ids"] = snapshot_builder(builder->track_children_ids);
     }
-    if (builder.fields.contains("step_energy")) {
-        snapshot["step_energy"] = snapshot_builder(builder.step_energy);
+    if (builder->fields.contains("step_energy")) {
+        snapshot["step_energy"] = snapshot_builder(builder->step_energy);
     }
-    if (builder.fields.contains("step_time")) {
-        snapshot["step_time"] = snapshot_builder(builder.step_time);
+    if (builder->fields.contains("step_time")) {
+        snapshot["step_time"] = snapshot_builder(builder->step_time);
     }
-    if (builder.fields.contains("step_track_kinetic_energy")) {
-        snapshot["step_track_kinetic_energy"] = snapshot_builder(builder.step_track_kinetic_energy);
+    if (builder->fields.contains("step_track_kinetic_energy")) {
+        snapshot["step_track_kinetic_energy"] = snapshot_builder(builder->step_track_kinetic_energy);
     }
-    if (builder.fields.contains("step_process")) {
-        snapshot["step_process"] = snapshot_builder(builder.step_process);
+    if (builder->fields.contains("step_process")) {
+        snapshot["step_process"] = snapshot_builder(builder->step_process);
     }
-    if (builder.fields.contains("step_process_type")) {
-        snapshot["step_process_type"] = snapshot_builder(builder.step_process_type);
+    if (builder->fields.contains("step_process_type")) {
+        snapshot["step_process_type"] = snapshot_builder(builder->step_process_type);
     }
-    if (builder.fields.contains("step_volume")) {
-        snapshot["step_volume"] = snapshot_builder(builder.step_volume);
+    if (builder->fields.contains("step_volume")) {
+        snapshot["step_volume"] = snapshot_builder(builder->step_volume);
     }
-    if (builder.fields.contains("step_volume_post")) {
-        snapshot["step_volume_post"] = snapshot_builder(builder.step_volume_post);
+    if (builder->fields.contains("step_volume_post")) {
+        snapshot["step_volume_post"] = snapshot_builder(builder->step_volume_post);
     }
-    if (builder.fields.contains("step_nucleus")) {
-        snapshot["step_nucleus"] = snapshot_builder(builder.step_nucleus);
+    if (builder->fields.contains("step_nucleus")) {
+        snapshot["step_nucleus"] = snapshot_builder(builder->step_nucleus);
     }
-    if (builder.fields.contains("step_position")) {
-        snapshot["step_position"] = snapshot_builder(builder.step_position);
+    if (builder->fields.contains("step_position")) {
+        snapshot["step_position"] = snapshot_builder(builder->step_position);
     }
-    if (builder.fields.contains("step_momentum")) {
-        snapshot["step_momentum"] = snapshot_builder(builder.step_momentum);
+    if (builder->fields.contains("step_momentum")) {
+        snapshot["step_momentum"] = snapshot_builder(builder->step_momentum);
     }
     return snapshot;
 }

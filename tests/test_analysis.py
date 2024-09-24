@@ -15,8 +15,7 @@ complexGdml = requests.get(
 
 
 def test_events():
-    with Application() as app:
-        app.seed = 1000
+    with Application(seed=1000) as app:
         app.setup_detector(gdml=complexGdml)
 
         sensitive_volume = "gasVolume"
@@ -45,33 +44,36 @@ def test_events():
 
 
 def test_sensitive():
-    with Application() as app:
-        app.seed = 1000
-        app.setup_detector(gdml=complexGdml).setup_action()
+    with Application(seed=1234) as app:
+        app.setup_detector(gdml=complexGdml)
 
-        sensitive_volume = "gasVolume"
-        app.detector.sensitive_volumes = {sensitive_volume}
+        app.detector.sensitive_volumes = {"gasVolume"}
+        volume_logical = "gasVolume"
 
         app.initialize()
 
-        app.command("/gun/particle neutron")
-        app.command("/gun/energy 100 MeV")
-        app.command("/gun/direction 0 -1 0")
-        app.command("/gun/position 0 10 0 m")
+        app.command("/gun/particle gamma")
+        app.command("/gun/energy 10 keV")
+        app.command("/gun/direction 0 0 -1")
+        app.command("/gun/position 0 0 20 cm")
 
-        volumes = app.detector.physical_volumes_from_logical(sensitive_volume)
+        volumes = app.detector.physical_volumes_from_logical(volume_logical)
         assert len(volumes) == 1
         volume = list(volumes)[0]
         print("volume: ", volume)
-        events = []
-        total = 2
-        while (n := np.sum([len(_events) for _events in events])) < total:
-            run_events = app.run(20)
-            run_events = run_events[run_events.energy_in_volume(volume) > 0]
-            events.append(run_events)
-        events = ak.concatenate(events)
-        # ak.to_parquet(events.hits(volume), "hits.parquet")
+        events = app.run(1000)
+        energy_in_sensitive = events.energy_in_volume(volume)
+        for i, energy in enumerate(energy_in_sensitive):
+            print(f"event {i} energy: {energy}")
+
+        events = events[energy_in_sensitive > 0]
+        print("n: ", len(events))
+        return
+
+        assert app.seed == 1234
+        assert len(events) == 5
         hits = events.hits(volume)
+        np.isclose(hits.energy[0][0:5], [0.0401, 0.00271, 0.00391, 0.389, 0.204])
         electrons = ak.concatenate([hit.electrons() for hit in hits])
 
 

@@ -208,6 +208,10 @@ jobs:
           command: |
             python -c "import geant4_python_application as g4; g4.install_datasets()"
 
+      - name: Run tests debug
+        run: |
+          python -m pytest -s -vv tests/test_analysis.py::test_sensitive
+
       - name: Run tests
         run: |
           python -m pytest -vv --reruns 3 --reruns-delay 30 --only-rerun "(?i)http|timeout|connection|socket|resolve"
