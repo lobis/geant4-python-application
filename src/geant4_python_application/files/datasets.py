@@ -33,13 +33,13 @@ def data_directory() -> str:
 
 
 # the datasets versions should be updated with each Geant4 version
-# https://geant4.web.cern.ch/download/11.2.0.html#datasets
+# https://geant4.web.cern.ch/download/11.2.2.html#datasets
 Dataset = namedtuple("Dataset", ["name", "version", "filename", "env", "md5sum"])
 
 datasets = (
     Dataset(
         name="G4NDL",
-        version="4.7",
+        version="4.7.1",
         filename="G4NDL",
         env="G4NEUTRONHPDATA",
         md5sum="b001a2091bf9392e6833830347672ea2",

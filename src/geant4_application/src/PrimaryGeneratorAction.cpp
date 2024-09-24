@@ -47,7 +47,8 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event) {
 }
 
 void PrimaryGeneratorAction::SetGeneratorType(const string& type) {
-    if (!set<string>({"gun", "gps", "python"}).contains(type)) {
+    const auto allowedTypes = set<string>({"gun", "gps", "python"});
+    if (allowedTypes.find(type) == allowedTypes.end()) {
         throw runtime_error("PrimaryGeneratorAction::SetGeneratorType - type must be 'gun', 'gps', or 'python'");
     }
     generatorType = type;

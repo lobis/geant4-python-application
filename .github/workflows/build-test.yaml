@@ -31,7 +31,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GEANT4_VERSION: 11.2.0
+  GEANT4_VERSION: 11.2.2
   XERCES_VERSION: 3.2.5
   CPP_STANDARD: 17
   Geant4_DIR: ${{ github.workspace }}/geant4
@@ -94,7 +94,7 @@ jobs:
         id: cache-geant4
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/geant4
+          path: ${{ env.Geant4_DIR }}
           key: geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}
           fail-on-cache-miss: true
 
@@ -107,13 +107,26 @@ jobs:
           enableCrossOsArchive: true
           lookup-only: true
 
-      - name: Move Geant4 Datasets
-        if: steps.cache-geant4-data.outputs.cache-hit != 'true'
+      - name: Move Geant4 datasets (Ubuntu/MacOS)
+        if:
+          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os !=
+          'windows-latest'
         shell: bash
         run: |
-          bash ${{ github.workspace }}/geant4/bin/geant4-config --install-datasets
-          bash ${{ github.workspace }}/geant4/bin/geant4-config --check-datasets
-          mv ${{ github.workspace }}/geant4/share/Geant4/data ${{ github.workspace }}/geant4-data
+          bash ${{ env.Geant4_DIR }}/bin/geant4-config --install-datasets
+          bash ${{ env.Geant4_DIR }}/bin/geant4-config --check-datasets
+          mv ${{ env.Geant4_DIR }}/share/Geant4/data ${{ github.workspace }}/geant4-data
+
+      - name: Move Geant4 datasets (Windows)
+        if:
+          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os ==
+          'windows-latest'
+        shell: powershell
+        run: |
+          Get-ChildItem -Path  ${{ env.Geant4_DIR }}\bin
+          cmd /c  ${{ env.Geant4_DIR }}\bin\geant4-config.cmd --install-datasets
+          cmd /c  ${{ env.Geant4_DIR }}\bin\geant4-config.cmd --check-datasets
+          Move-Item ${{ env.Geant4_DIR }}\share\Geant4\data ${{ github.workspace }}\geant4-data
 
   build-test:
     name:
@@ -126,6 +139,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version:
+          - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
@@ -161,7 +175,7 @@ jobs:
         id: cache-geant4
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/geant4
+          path: ${{ env.Geant4_DIR }}
           key: geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}
           fail-on-cache-miss: true
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25...3.28)
+cmake_minimum_required(VERSION 3.25...3.30)
 
 if (NOT DEFINED SKBUILD_PROJECT_NAME)
     # IDE
@@ -9,19 +9,19 @@ project(${SKBUILD_PROJECT_NAME} LANGUAGES CXX)
 
 set(PYTHON_MODULE_NAME _geant4_application)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(AWKWARD_VERSION "v2.6.1")
-set(PYBIND11_VERSION "v2.11.1")
+set(AWKWARD_VERSION "v2.6.8")
+set(PYBIND11_VERSION "v2.13.6")
 
 find_package(
     Python
     COMPONENTS Interpreter Development.Module
     REQUIRED)
 find_package(
-    Geant4 11.2.0 CONFIG
+    Geant4 11.2.2 CONFIG
     COMPONENTS gdml static
     REQUIRED)
 

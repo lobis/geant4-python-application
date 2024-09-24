@@ -10,8 +10,8 @@ using namespace geant4_app;
 StackingAction::StackingAction() : G4UserStackingAction() {}
 
 G4ClassificationOfNewTrack StackingAction::ClassifyNewTrack(const G4Track* track) {
-    const auto particle = track->GetParticleDefinition();
-    if (particlesToIgnore.contains(particle->GetParticleName())) {
+    const auto particleName = track->GetParticleDefinition()->GetParticleName();
+    if (particlesToIgnore.find(particleName) != particlesToIgnore.end()) {
         return fKill;
     }
 
