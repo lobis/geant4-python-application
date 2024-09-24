@@ -112,6 +112,7 @@ jobs:
         shell: bash
         run: |
           # in windows, list the contents of the directory
+          ls ${{ github.workspace }}
           ls ${{ env.Geant4_DIR }}
           ls ${{ env.Geant4_DIR }}/bin
           ls ${{ env.Geant4_DIR }}/share/Geant4/data
