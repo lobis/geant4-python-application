@@ -107,19 +107,23 @@ jobs:
           enableCrossOsArchive: true
           lookup-only: true
 
-      - name: Move Geant4 Datasets
-        if: steps.cache-geant4-data.outputs.cache-hit != 'true'
+      - name: Move Geant4 datasets (Ubuntu/MacOS)
+        if: steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os != 'windows-latest'
         shell: bash
         run: |
-          # in windows, list the contents of the directory
-          ls ${{ github.workspace }}
-          ls ${{ env.Geant4_DIR }}
-          ls ${{ env.Geant4_DIR }}/bin
-          ls ${{ env.Geant4_DIR }}/share/Geant4/data
-
           bash ${{ env.Geant4_DIR }}/bin/geant4-config --install-datasets
           bash ${{ env.Geant4_DIR }}/bin/geant4-config --check-datasets
           mv ${{ env.Geant4_DIR }}/share/Geant4/data ${{ github.workspace }}/geant4-data
+
+      - name: Move Geant4 datasets (Windows)
+        if: steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os == 'windows-latest'
+        shell: powershell
+        run: |
+          Get-ChildItem -Path $env:Geant4_DIR
+          Get-ChildItem -Path $env:Geant4_DIR\bin
+          $env:Geant4_DIR\bin\geant4-config --install-datasets
+          $env:Geant4_DIR\bin\geant4-config --check-datasets
+          Move-Item $env:Geant4_DIR\share\Geant4\data ${{ github.workspace }}\geant4-data
 
   build-test:
     name:
