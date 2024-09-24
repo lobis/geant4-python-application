@@ -108,7 +108,9 @@ jobs:
           lookup-only: true
 
       - name: Move Geant4 datasets (Ubuntu/MacOS)
-        if: steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os != 'windows-latest'
+        if:
+          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os !=
+          'windows-latest'
         shell: bash
         run: |
           bash ${{ env.Geant4_DIR }}/bin/geant4-config --install-datasets
@@ -116,7 +118,9 @@ jobs:
           mv ${{ env.Geant4_DIR }}/share/Geant4/data ${{ github.workspace }}/geant4-data
 
       - name: Move Geant4 datasets (Windows)
-        if: steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os == 'windows-latest'
+        if:
+          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os ==
+          'windows-latest'
         shell: powershell
         run: |
           Get-ChildItem -Path $env:Geant4_DIR
