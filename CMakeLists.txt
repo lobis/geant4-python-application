@@ -37,7 +37,7 @@ FetchContent_Declare(
 )
 FetchContent_GetProperties(awkward-headers)
 if (NOT awkward-headers_POPULATED)
-    FetchContent_Populate(awkward-headers)
+    FetchContent_MakeAvailable(awkward-headers)
     add_subdirectory(${awkward-headers_SOURCE_DIR}
                      ${awkward-headers_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif ()
@@ -49,7 +49,7 @@ FetchContent_Declare(
     DOWNLOAD_EXTRACT_TIMESTAMP 1)
 FetchContent_GetProperties(pybind11)
 if (NOT pybind11_POPULATED)
-    FetchContent_Populate(pybind11)
+    FetchContent_MakeAvailable(pybind11)
     add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR}
                      EXCLUDE_FROM_ALL)
 endif ()
