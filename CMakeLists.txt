@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.25...3.30)
 cmake_policy(SET CMP0169 OLD)
 
+set(CMAKE_CXX_STANDARD 17)
+set(AWKWARD_VERSION "v2.6.8")
+set(PYBIND11_VERSION "v2.13.6")
+
 if (NOT DEFINED SKBUILD_PROJECT_NAME)
     # IDE
     set(SKBUILD_PROJECT_NAME geant4-python-application)
@@ -10,12 +14,8 @@ project(${SKBUILD_PROJECT_NAME} LANGUAGES CXX)
 
 set(PYTHON_MODULE_NAME _geant4_application)
 
-set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
-set(AWKWARD_VERSION "v2.6.8")
-set(PYBIND11_VERSION "v2.13.6")
 
 find_package(
     Python
