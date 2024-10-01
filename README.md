@@ -23,15 +23,16 @@ looking at [geant4_pybind](https://github.com/HaarigerHarald/geant4_pybind).
 
 ## Installation
 
-The package is pip installable and should work on all major platforms.
-Geant4 is not required to be installed on the system as the PyPI distribution includes a statically linked version of
-Geant4.
+The package is pip installable and should work on all major platforms. Geant4 is
+not required to be installed on the system as the PyPI distribution includes a
+statically linked version of Geant4.
 
-However, for the time being, it's recommended to install from the GitHub repository to get the latest version, which
-makes Geant4 a necessary dependency.
+However, for the time being, it's recommended to install from the GitHub
+repository to get the latest version, which makes Geant4 a necessary dependency.
 
-The provided `Dockerfile` can be used for development purposes and as documentation on the required dependencies.
-To build the image run from the root directory:
+The provided `Dockerfile` can be used for development purposes and as
+documentation on the required dependencies. To build the image run from the root
+directory:
 
 ```bash
 docker build -t geant4-python-application .
@@ -43,8 +44,8 @@ Geant4 can be installed using conda:
 conda install -c conda-forge geant4
 ```
 
-For development purposes however, it's recommended to install Geant4 from source with a similar configuration to the one
-used in the CI:
+For development purposes however, it's recommended to install Geant4 from source
+with a similar configuration to the one used in the CI:
 
 ```bash
 git clone https://github.com/Geant4/geant4.git ./geant4-source --depth 1 --branch v11.2.2
@@ -53,10 +54,10 @@ cmake -B ./geant4-build -S ./geant4-source -DCMAKE_INSTALL_PREFIX=./geant4-insta
 cmake --build ./geant4-build --parallel $(nproc) --config Release --target install
 ```
 
-One common installation issue is the dependency `xerces-c`.
-You may be able to install it from your package manager (e.g. `apt-get install libxerces-c-dev) but it's also possible
-to build it from source.
-In this case make sure the installation directory is accessible or just use the default system path.
+One common installation issue is the dependency `xerces-c`. You may be able to
+install it from your package manager (e.g. `apt-get install libxerces-c-dev) but
+it's also possible to build it from source. In this case make sure the
+installation directory is accessible or just use the default system path.
 
 ```bash
 git clone https://github.com/apache/xerces-c.git ./xerces-source
@@ -65,7 +66,8 @@ cmake -B ./xerces-build -S ./xerces-source -DCMAKE_INSTALL_PREFIX=./xerces-insta
 cmake --build ./xerces-build --parallel $(nproc) --config Release --target install
 ```
 
-After all dependencies are met, you should be able to install the package by running the following command from the root directory:
+After all dependencies are met, you should be able to install the package by
+running the following command from the root directory:
 
 ```bash
 pip install .
@@ -75,10 +77,11 @@ pip install .
 
 Geant4 comes with a large set of data files which are required in order to run.
 The data files are the bulk of the Geant4 installation and can be quite large.
-These data files are not included in the Python wheels for this package due to its size.
+These data files are not included in the Python wheels for this package due to
+its size.
 
-The python package automatically manages the download of the data files.
-To check the location of the data files, run the following command:
+The python package automatically manages the download of the data files. To
+check the location of the data files, run the following command:
 
 ```bash
 python -c "import geant4_python_application; print(geant4_python_application.get_data_path())"
