@@ -4,4 +4,3 @@ build
 *_cache
 .github
 tests
-.*
