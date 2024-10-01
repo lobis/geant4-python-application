@@ -19,28 +19,66 @@ looking at [geant4_pybind](https://github.com/HaarigerHarald/geant4_pybind).
 - Python interface to the application via
   [pybind11](https://github.com/pybind/pybind11)
 - The complete event data is available as an
-  [awkward array](https://github.com/scikit-hep/awkward) for further analysis
+  [awkward array](https://github.com/scikit-hep/awkward)
 
 ## Installation
 
-A lot of work has been done to make the installation as easy as possible. This
-package is fully pip installable and should work on all major platforms.
+The package is pip installable and should work on all major platforms.
+Geant4 is not required to be installed on the system as the PyPI distribution includes a statically linked version of
+Geant4.
 
-The package itself does not contain any Geant4 data files. These files are
-needed to perform any kind of simulation. They will be downloaded to a temporary
-directory automatically during simulation startup.
+However, for the time being, it's recommended to install from the GitHub repository to get the latest version, which
+makes Geant4 a necessary dependency.
+
+The provided `Dockerfile` can be used for development purposes and as documentation on the required dependencies.
+To build the image run from the root directory:
 
 ```bash
-pip install geant4-python-application
+docker build -t geant4-python-application .
+```
+
+Geant4 can be installed using conda:
+
+```bash
+conda install -c conda-forge geant4
+```
+
+For development purposes however, it's recommended to install Geant4 from source with a similar configuration to the one
+used in the CI:
+
+```bash
+git clone https://github.com/Geant4/geant4.git ./geant4-source --depth 1 --branch v11.2.2
+
+cmake -B ./geant4-build -S ./geant4-source -DCMAKE_INSTALL_PREFIX=./geant4-install -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF
+cmake --build ./geant4-build --parallel $(nproc) --config Release --target install
+```
+
+One common installation issue is the dependency `xerces-c`.
+You may be able to install it from your package manager (e.g. `apt-get install libxerces-c-dev) but it's also possible
+to build it from source.
+In this case make sure the installation directory is accessible or just use the default system path.
+
+```bash
+git clone https://github.com/apache/xerces-c.git ./xerces-source
+git -C ./xerces-source checkout tags/v3.2.5
+cmake -B ./xerces-build -S ./xerces-source -DCMAKE_INSTALL_PREFIX=./xerces-install  -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv
+cmake --build ./xerces-build --parallel $(nproc) --config Release --target install
+```
+
+After all dependencies are met, you should be able to install the package by running the following command from the root directory:
+
+```bash
+pip install .
 ```
 
 ### Geant4 data files
 
-The Python wheels for this package do not contain any Geant4 data files due to
-their size. These files will be downloaded on demand without the need of any
-user interaction.
+Geant4 comes with a large set of data files which are required in order to run.
+The data files are the bulk of the Geant4 installation and can be quite large.
+These data files are not included in the Python wheels for this package due to its size.
 
-The default location for these files can be obtained by calling:
+The python package automatically manages the download of the data files.
+To check the location of the data files, run the following command:
 
 ```bash
 python -c "import geant4_python_application; print(geant4_python_application.get_data_path())"
@@ -74,7 +112,7 @@ from geant4_python_application import application_directory
 application_directory(temp=True)
 ```
 
-The operating system will take care of cleaning up the temporary directory.
+The operating system should take care of cleaning up the temporary directory.
 
 It is possible that the operating system will delete only some of the files in
 the temporary directory which can lead to a Geant4 runtime error. In this case
