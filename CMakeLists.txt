@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.25...3.30)
+cmake_policy(SET CMP0169 OLD)
 
 if (NOT DEFINED SKBUILD_PROJECT_NAME)
     # IDE
