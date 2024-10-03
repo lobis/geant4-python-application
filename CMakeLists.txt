@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25...3.30)
-cmake_policy(SET CMP0169 OLD)
+# cmake_policy(SET CMP0169 OLD)
 
 set(CMAKE_CXX_STANDARD 17)
 set(AWKWARD_VERSION "v2.6.8")
