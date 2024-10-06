@@ -59,6 +59,8 @@ jobs:
 
       - name: Print Geant4 version
         run: |
+          source activate base
+          conda --version
           geant4-config --version
 
       - name: pip install the package from the repository
