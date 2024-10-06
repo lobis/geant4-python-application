@@ -21,7 +21,8 @@ find_package(
     COMPONENTS Interpreter Development.Module
     REQUIRED)
 
-# define geant4 components in a conditional way, "gdml static" if release build, "gdml" otherwise
+# define geant4 components in a conditional way, "gdml static" if release build,
+# "gdml" otherwise
 set(GEANT4_COMPONENTS "gdml")
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
     set(GEANT4_COMPONENTS "gdml static")
@@ -32,15 +33,14 @@ find_package(
     COMPONENTS ${GEANT4_COMPONENTS}
     REQUIRED)
 
-
 message(STATUS "Using Geant4 ${Geant4_VERSION} from ${Geant4_DIR}")
 message(STATUS "Using Python ${Python_VERSION} from ${Python_EXECUTABLE}")
 
 include(FetchContent)
 
 FetchContent_Declare(
-        awkward-headers
-        URL https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip
+    awkward-headers
+    URL https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip
 )
 FetchContent_GetProperties(awkward-headers)
 if (NOT awkward-headers_POPULATED)
