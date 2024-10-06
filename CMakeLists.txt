@@ -39,14 +39,12 @@ message(STATUS "Using Python ${Python_VERSION} from ${Python_EXECUTABLE}")
 include(FetchContent)
 
 FetchContent_Declare(
-    awkward-headers
-    URL https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip
+        awkward-headers
+        URL https://github.com/scikit-hep/awkward/releases/download/${AWKWARD_VERSION}/header-only.zip
 )
 FetchContent_GetProperties(awkward-headers)
 if (NOT awkward-headers_POPULATED)
     FetchContent_MakeAvailable(awkward-headers)
-    add_subdirectory(${awkward-headers_SOURCE_DIR}
-                     ${awkward-headers_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif ()
 
 FetchContent_Declare(
@@ -57,8 +55,6 @@ FetchContent_Declare(
 FetchContent_GetProperties(pybind11)
 if (NOT pybind11_POPULATED)
     FetchContent_MakeAvailable(pybind11)
-    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR}
-                     EXCLUDE_FROM_ALL)
 endif ()
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
