@@ -69,25 +69,44 @@ def _download_extract_dataset(dataset: Dataset, pbar: tqdm):
         with tarfile.open(fileobj=f, mode="r:gz") as tar:
             tar.extractall(data_directory())
 
-def install_datasets(force: bool = False, show_progress: bool = True):
-    os.environ["GEANT4_DATA_DIR"] = data_directory()
+def missing_datasets(directory: str | None = None) -> list[Dataset]:
+    if directory is None:
+        directory = data_directory()
     datasets_to_download = []
     
-    # Check if datasets are already downloaded
     for dataset in datasets:
-        path = os.path.join(data_directory(), dataset.name + dataset.version)
-        os.environ[dataset.env] = path
-        if not os.path.exists(path) or force:
+        path = os.path.join(directory, dataset.name + dataset.version)
+        if not os.path.exists(path):
             datasets_to_download.append(dataset)
+    return datasets_to_download
 
-    if len(datasets_to_download) == 0:
+def check_datasets() -> bool:
+    datasets_to_download = missing_datasets()
+    if datasets_to_download:
+        print(
+            f"Missing Geant4 datasets: {', '.join([f'{dataset.name}@v{dataset.version}' for dataset in datasets_to_download])}"
+        )
+        return False
+    return True
+
+
+def install_datasets(show_progress: bool = True):
+    # first try to see if the datasets are already installed in the Geant4 data directory
+    datasets_to_download = missing_datasets(os.environ["GEANT4_DATA_DIR"])
+    if not datasets_to_download:
+        return
+
+    os.environ["GEANT4_DATA_DIR"] = data_directory()
+    datasets_to_download = missing_datasets()
+
+    if datasets_to_download != 0:
         return
 
     os.makedirs(data_directory(), exist_ok=True)
     if show_progress:
         print(
             f"""
-Geant4 datasets (<2GB) will be installed to "{data_directory()}".
+Geant4 datasets will be installed to "{data_directory()}".
 This may take a while but only needs to be done once.
 You can override the default location by calling `application_directory(path)` or `application_directory(temp=True)` to use a temporary directory.
 The following Geant4 datasets will be installed: {", ".join([f"{dataset.name}@v{dataset.version}" for dataset in datasets_to_download])}"""
@@ -127,4 +146,4 @@ def uninstall_datasets():
 
 def reinstall_datasets():
     uninstall_datasets()
-    install_datasets(force=True)
+    install_datasets()
