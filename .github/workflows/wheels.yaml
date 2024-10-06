@@ -185,7 +185,7 @@ jobs:
           python-version: 3.12
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.21.1
+        uses: pypa/cibuildwheel@v2.21.2
         env:
           CIBW_TEST_COMMAND:
             python -m pytest {project}/tests -vv --reruns 10 --reruns-delay 30
