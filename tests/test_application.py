@@ -54,7 +54,7 @@ def test_seed_single_thread():
             8.09506886e-03,
             1.22345221e00,
         ]
-        energy = np.array(events.track.step.energy[0][0][0:5])
+        energy = np.asarray(events.track.step.energy[0][0][0:5])
         assert np.allclose(energy, reference_value, atol=1e-5)
         assert app.seed == 1100
 
