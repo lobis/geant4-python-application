@@ -199,7 +199,9 @@ def install_datasets(show_progress: bool = True):
         return
 
     # check if the datasets are present in the corresponding Geant4 directory
-    if not bool(missing_datasets(os.environ["GEANT4_DATA_DIR"])):
+    if "GEANT4_DATA_DIR" in os.environ and not bool(
+        missing_datasets(os.environ["GEANT4_DATA_DIR"])
+    ):
         # return
         ...
 
