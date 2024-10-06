@@ -37,7 +37,7 @@ env:
   Geant4_DIR: ${{ github.workspace }}/geant4
 
 jobs:
-  install-pip-from-git:
+  install-with-geant4-from-conda:
     name: Install with conda
     runs-on: ubuntu-latest
     defaults:
