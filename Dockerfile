@@ -20,7 +20,7 @@ COPY . /src
 
 RUN cd /src && pip install . --target=/install && cd / && rm -rf /src
 
-FROM python:3.12-slim-bookworm
+FROM python:3.12-bookworm
 
 COPY --from=build /install /usr/local/lib/python3.12/site-packages
 
@@ -37,10 +37,8 @@ RUN adduser --disabled-password \
     --uid ${NB_UID} \
     ${NB_USER}
 
-COPY ./examples/attenuation.ipynb ${HOME}/
+COPY ./examples/*.ipynb ${HOME}/
 RUN chown -R ${NB_UID} ${HOME}
 USER ${NB_USER}
 
 WORKDIR ${HOME}
-
-ENTRYPOINT ["python3"]
