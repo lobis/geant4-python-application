@@ -30,6 +30,10 @@ def data_directory() -> str:
     )
 
 
+def geant4_data_directory() -> str:
+    return os.environ["GEANT4_DATA_DIR"]
+
+
 # the datasets versions should be updated with each Geant4 version (remember to update the checksum too!)
 # https://geant4.web.cern.ch/download/11.2.2.html#datasets
 Dataset = namedtuple("Dataset", ["name", "version", "filename", "env", "md5sum"])
