@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        shell: bash
+        shell: bash -l {0}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,9 +57,8 @@ jobs:
         run: |
           conda install -c conda-forge geant4
 
-      - name: Print Geant4 version
+      - name: Print versions
         run: |
-          source activate base
           conda --version
           geant4-config --version
 
