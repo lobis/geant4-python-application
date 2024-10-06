@@ -231,7 +231,7 @@ jobs:
       - name: Run example notebooks
         if: matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
         run: |
-          python -m pip install jupyter nbconvert
+          python -m pip install jupyter nbconvert matplotlib
           for notebook in $(find examples -name '*.ipynb'); do
             jupyter nbconvert --to notebook --execute --inplace $notebook
           done
