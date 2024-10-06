@@ -20,10 +20,18 @@ find_package(
     Python
     COMPONENTS Interpreter Development.Module
     REQUIRED)
+
+# define geant4 components in a conditional way, "gdml static" if release build, "gdml" otherwise
+set(GEANT4_COMPONENTS "gdml")
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(GEANT4_COMPONENTS "gdml static")
+endif ()
+
 find_package(
     Geant4 11.2.2 CONFIG
-    COMPONENTS gdml static
+    COMPONENTS ${GEANT4_COMPONENTS}
     REQUIRED)
+
 
 message(STATUS "Using Geant4 ${Geant4_VERSION} from ${Geant4_DIR}")
 message(STATUS "Using Python ${Python_VERSION} from ${Python_EXECUTABLE}")
