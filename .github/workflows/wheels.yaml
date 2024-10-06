@@ -209,7 +209,7 @@ jobs:
             cmake --build /tmp/geant4/build --parallel $(nproc) --target install > /dev/null 2>&1
             rm -rf /tmp/geant4
           CIBW_ENVIRONMENT_MACOS: >
-            MACOSX_DEPLOYMENT_TARGET=10.15 ${{ matrix.platform_id ==
+            MACOSX_DEPLOYMENT_TARGET=11.0 ${{ matrix.platform_id ==
             'macosx_arm64' && 'SKIP_PYBIND11_STUBGEN=1' || '' }}
 
       - name: Upload wheel
