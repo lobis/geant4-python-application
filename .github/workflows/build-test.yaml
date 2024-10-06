@@ -15,7 +15,7 @@ on:
 
   pull_request:
   push:
-    branches: [main]
+    branches: [ main ]
 
     ## Paste this snippet into the workflow file to enable tmate debugging
     #      - name: Setup tmate session
@@ -57,6 +57,10 @@ jobs:
         run: |
           conda install -c conda-forge geant4
 
+      - name: Print Geant4 version
+        run: |
+          geant4-config --version
+
       - name: pip install the package from the repository
         run: |
           python -m pip install .
@@ -69,7 +73,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
 
     steps:
       - name: Setup CMake
@@ -106,13 +110,13 @@ jobs:
 
   install-geant4-datasets:
     name: Download Geant4 datasets for ${{ matrix.os }}
-    needs: [build-geant4]
+    needs: [ build-geant4 ]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
 
     steps:
       - name: Cache Geant4 Installation
@@ -156,13 +160,13 @@ jobs:
   build-test:
     name:
       Build and Test for ${{ matrix.os }} (Python ${{ matrix.python-version }})
-    needs: [install-geant4-datasets]
+    needs: [ install-geant4-datasets ]
     timeout-minutes: 30
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
         python-version:
           - "3.8"
           - "3.9"
