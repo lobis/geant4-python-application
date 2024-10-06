@@ -24,4 +24,23 @@ FROM python:3.12-slim-bookworm
 
 COPY --from=build /install /usr/local/lib/python3.12/site-packages
 
+RUN python3 -m pip install --no-cache-dir notebook jupyterlab
+
+ARG NB_USER=jovyan
+ARG NB_UID=1000
+ENV USER ${NB_USER}
+ENV NB_UID ${NB_UID}
+ENV HOME /home/${NB_USER}
+
+RUN adduser --disabled-password \
+    --gecos "Default user" \
+    --uid ${NB_UID} \
+    ${NB_USER}
+
+COPY ./examples/attenuation.ipynb ${HOME}/
+RUN chown -R ${NB_UID} ${HOME}
+USER ${NB_USER}
+
+WORKDIR ${HOME}
+
 ENTRYPOINT ["python3"]
