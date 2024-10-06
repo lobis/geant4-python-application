@@ -222,7 +222,7 @@ jobs:
           command: |
             python -c "import geant4_python_application as g4; g4.install_datasets()"
             # Check that the datasets are installed correctly
-            python -c "import geant4_python_application as g4; g4.check_datasets(throw=True)"
+            python -c "import geant4_python_application as g4; g4.files.datasets.check_datasets(throw=True)"
 
       - name: Run tests
         run: |
