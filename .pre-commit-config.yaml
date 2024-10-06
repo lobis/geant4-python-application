@@ -72,5 +72,3 @@ repos:
       - id: ruff
         args: [--fix-only, --show-fixes]
       - id: ruff-format
-        # For some reason ruff-format doesn't like some of the notebooks TODO: investigate
-        exclude: \.ipynb$
