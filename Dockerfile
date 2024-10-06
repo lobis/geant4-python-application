@@ -24,9 +24,9 @@ FROM python:3.12-bookworm
 
 COPY --from=build /install /usr/local/lib/python3.12/site-packages
 
-RUN python3 -m pip install --no-cache-dir notebook jupyterlab
+RUN python3 -m pip install --no-cache-dir notebook jupyterlab matplotlib
 
-ARG NB_USER=jovyan
+ARG NB_USER=user
 ARG NB_UID=1000
 ENV USER ${NB_USER}
 ENV NB_UID ${NB_UID}
