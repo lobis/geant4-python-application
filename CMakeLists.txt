@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.25...3.30)
-cmake_policy(SET CMP0169 OLD)
 
 set(CMAKE_CXX_STANDARD 17)
 set(AWKWARD_VERSION "v2.6.8")
@@ -21,9 +20,17 @@ find_package(
     Python
     COMPONENTS Interpreter Development.Module
     REQUIRED)
+
+# define geant4 components in a conditional way, "gdml static" if release build,
+# "gdml" otherwise
+set(GEANT4_COMPONENTS "gdml")
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(GEANT4_COMPONENTS "gdml static")
+endif ()
+
 find_package(
     Geant4 11.2.2 CONFIG
-    COMPONENTS gdml static
+    COMPONENTS ${GEANT4_COMPONENTS}
     REQUIRED)
 
 message(STATUS "Using Geant4 ${Geant4_VERSION} from ${Geant4_DIR}")
@@ -37,9 +44,7 @@ FetchContent_Declare(
 )
 FetchContent_GetProperties(awkward-headers)
 if (NOT awkward-headers_POPULATED)
-    FetchContent_Populate(awkward-headers)
-    add_subdirectory(${awkward-headers_SOURCE_DIR}
-                     ${awkward-headers_BINARY_DIR} EXCLUDE_FROM_ALL)
+    FetchContent_MakeAvailable(awkward-headers)
 endif ()
 
 FetchContent_Declare(
@@ -49,9 +54,7 @@ FetchContent_Declare(
     DOWNLOAD_EXTRACT_TIMESTAMP 1)
 FetchContent_GetProperties(pybind11)
 if (NOT pybind11_POPULATED)
-    FetchContent_Populate(pybind11)
-    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR}
-                     EXCLUDE_FROM_ALL)
+    FetchContent_MakeAvailable(pybind11)
 endif ()
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
