@@ -44,7 +44,8 @@ This project can then be installed via pip:
 python -m pip install git+https://github.com/lobis/geant4-python-application
 ```
 
-You may need additional dependencies to perform the build. I found that these are usually enuough:
+You may need additional dependencies to perform the build. I found that these
+are usually enuough:
 
 ```bash
 conda install cmake ninja gxx_linux-64
