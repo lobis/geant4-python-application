@@ -26,23 +26,15 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: Setup CMake
-        uses: lukka/get-cmake@v3.30.3
-
       - name: Setup conda
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: 3.12
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libc6
-
       - name: Install Geant4 using conda
         run: |
-          conda install -c conda-forge geant4=11.2.2
+          conda install -c conda-forge geant4=11.2.2 cmake ninja gxx_linux-64
 
       - name: Print versions
         run: |
