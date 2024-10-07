@@ -4,27 +4,9 @@ on:
   schedule:
     - cron: 0 */24 * * *
   workflow_dispatch:
-  #     inputs:
-  #       debug_enabled:
-  #         type: boolean
-  #         description:
-  #           Run the build with tmate debugging enabled
-  #           (https://github.com/marketplace/actions/debugging-with-tmate)
-  #         required: false
-  #         default: false
-
   pull_request:
   push:
     branches: [main]
-
-    ## Paste this snippet into the workflow file to enable tmate debugging
-    #      - name: Setup tmate session
-    #        uses: mxschmitt/action-tmate@v3
-    #        if:
-    #          ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled
-    #          }}
-    #        with:
-    #          limit-access-to-actor: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -60,7 +42,7 @@ jobs:
 
       - name: Install Geant4 using conda
         run: |
-          conda install -c conda-forge geant4
+          conda install -c conda-forge geant4=11.2.2
 
       - name: Print versions
         run: |
