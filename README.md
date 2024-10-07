@@ -32,6 +32,24 @@ statically linked version of Geant4.
 However, for the time being, it's recommended to install from the GitHub
 repository to get the latest version, which makes Geant4 a necessary dependency.
 
+Geant4 is available on conda-forge and can be installed with:
+
+```bash
+conda install -c conda-forge geant4=11.2.2
+```
+
+This project can then be installed via pip:
+
+```bash
+python -m pip install git+https://github.com/lobis/geant4-python-application
+```
+
+You may need additional dependencies to perform the build. I found that these are usually enuough:
+
+```bash
+conda install cmake ninja gxx_linux-64
+```
+
 The provided `Dockerfile` can be used for development purposes and as
 documentation on the required dependencies. To build the image run from the root
 directory:
