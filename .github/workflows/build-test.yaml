@@ -44,10 +44,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: pip install the package from github url
+        run: |
+          branch_name=$(git rev-parse --abbrev-ref HEAD)
+          python -m pip install git+https://github.com/lobis/geant4-python-application@${branch_name}
+          python -c "import geant4_python_application; print(geant4_python_application.version)"
+
       - name: pip install the package from source
         run: |
           python -m pip install .
           python -c "import geant4_python_application; print(geant4_python_application.version)"
+
+      - name: Run example notebooks
+        run: |
+          python -m pip install jupyter nbconvert matplotlib
+          for notebook in $(find examples -name '*.ipynb'); do
+            jupyter nbconvert --to notebook --execute --inplace $notebook
+          done
 
   build-geant4:
     name: Build Geant4 on ${{ matrix.os }}
