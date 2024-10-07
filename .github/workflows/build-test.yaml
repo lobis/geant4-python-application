@@ -247,3 +247,11 @@ jobs:
       - name: Run tests
         run: |
           python -m pytest -vv --reruns 3 --reruns-delay 30 --only-rerun "(?i)http|timeout|connection|socket|resolve"
+
+      - name: Run example notebooks
+        if: matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
+        run: |
+          python -m pip install jupyter nbconvert matplotlib
+          for notebook in $(find examples -name '*.ipynb'); do
+            jupyter nbconvert --to notebook --execute --inplace $notebook
+          done
