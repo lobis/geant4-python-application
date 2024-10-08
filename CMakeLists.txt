@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.25...3.30)
 
 set(CMAKE_CXX_STANDARD 17)
-set(AWKWARD_VERSION "v2.6.8")
+
+set(AWKWARD_VERSION "v2.6.9")
 set(PYBIND11_VERSION "v2.13.6")
+set(Geant4_VERSION "11.2.2")
 
 if (NOT DEFINED SKBUILD_PROJECT_NAME)
     # IDE
@@ -29,7 +31,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif ()
 
 find_package(
-    Geant4 11.2.2 CONFIG
+    Geant4 ${Geant4_VERSION} CONFIG
     COMPONENTS ${GEANT4_COMPONENTS}
     REQUIRED)
 
