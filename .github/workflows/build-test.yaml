@@ -55,7 +55,11 @@ jobs:
         run: |
           conda --version
           cmake --version
+
+          echo "Geant4: ${{ env.GEANT4_VERSION }}"
+
           geant4-config --version
+          geant4-config --check-datasets
 
       - name: Checkout
         uses: actions/checkout@v4
