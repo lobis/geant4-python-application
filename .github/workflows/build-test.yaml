@@ -20,7 +20,7 @@ env:
 
 jobs:
   install-using-conda:
-    name: Install dependencies with conda
+    name: Install package using conda
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
