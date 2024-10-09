@@ -19,6 +19,38 @@ env:
   Geant4_DIR: ${{ github.workspace }}/geant4
 
 jobs:
+  install-using-conda:
+    name: Install package using conda
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Setup conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: 3.12
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install package using conda (from the meta.yaml)
+        run: |
+          cd conda_recipe
+          conda build .
+          conda install --use-local geant4-python-application
+
+      - name: Check installation
+        run: |
+          conda list geant4-python-application
+          python -c "import geant4_python_application; print(geant4_python_application.version)"
+
   install-with-geant4-from-conda:
     name: Install dependencies with conda
     runs-on: ${{ matrix.os }}
