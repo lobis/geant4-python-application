@@ -9,6 +9,7 @@ import tarfile
 import tempfile
 from collections import namedtuple
 from pathlib import Path
+from typing import Union
 
 import requests
 from tqdm import tqdm
@@ -45,7 +46,7 @@ def geant4_data_directory() -> str:
 
         return geant4_data_path
 
-    except subprocess.CalledProcessError:
+    except Union[subprocess.CalledProcessError, FileNotFoundError]:
         return ""
 
 
