@@ -46,7 +46,7 @@ def geant4_data_directory() -> str:
 
         return geant4_data_path
 
-    except Union[subprocess.CalledProcessError, FileNotFoundError]:
+    except FileNotFoundError:
         return ""
 
 
@@ -147,7 +147,7 @@ def _get_dataset_download_size(dataset: Dataset) -> int:
 
 def _get_total_download_size(datasets_to_download: list[Dataset] = datasets) -> int:
     with concurrent.futures.ThreadPoolExecutor(
-        max_workers=len(datasets_to_download)
+            max_workers=len(datasets_to_download)
     ) as executor:
         futures = [
             executor.submit(_get_dataset_download_size, dataset)
@@ -237,14 +237,14 @@ The following Geant4 datasets will be installed: {", ".join([f"{dataset.name}@v{
         )
 
     with tqdm(
-        total=_get_total_download_size(datasets_to_download),
-        desc="Downloading Geant4 datasets",
-        disable=not show_progress,
-        unit="B",
-        unit_scale=True,
+            total=_get_total_download_size(datasets_to_download),
+            desc="Downloading Geant4 datasets",
+            disable=not show_progress,
+            unit="B",
+            unit_scale=True,
     ) as pbar:
         with concurrent.futures.ThreadPoolExecutor(
-            max_workers=len(datasets_to_download)
+                max_workers=len(datasets_to_download)
         ) as executor:
             futures = [
                 executor.submit(_download_extract_dataset, dataset, pbar)
@@ -255,7 +255,7 @@ The following Geant4 datasets will be installed: {", ".join([f"{dataset.name}@v{
     if show_progress:
         total_size_gb = sum(
             fp.stat().st_size for fp in Path(application_data_directory()).rglob("*")
-        ) / (1024**3)
+        ) / (1024 ** 3)
         print(f"Geant4 datasets size on disk after extraction: {total_size_gb:.2f}GB")
 
 
