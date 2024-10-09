@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   pull_request:
   push:
-    branches: [main]
+    branches: [ main ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ ubuntu-latest, macos-latest ] # Geant4 is not available on conda for windows TODO: update this when it is
     defaults:
       run:
         shell: bash -l {0}
@@ -39,12 +39,17 @@ jobs:
 
       - name: Install Geant4 and cmake using conda
         run: |
-          conda install -c conda-forge cmake geant4=${{ env.GEANT4_VERSION }}
+          conda install -c conda-forge cmake ninja geant4=${{ env.GEANT4_VERSION }}
 
-      - name: Install additional dependencies
+      - name: Install additional dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          conda install -c conda-forge ninja gxx_linux-64
+          conda install -c conda-forge gxx_linux-64
+
+      - name: Install additional dependencies (MacOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          conda install -c conda-forge clang_osx-64
 
       - name: Print versions
         run: |
@@ -57,7 +62,7 @@ jobs:
 
       - name: pip install the package from source
         run: |
-          python -m pip install .
+          python -m pip install .[test]
           python -c "import geant4_python_application; print(geant4_python_application.version)"
 
       - name: Run tests
@@ -79,7 +84,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
 
     steps:
       - name: Setup CMake
@@ -116,13 +121,13 @@ jobs:
 
   install-geant4-datasets:
     name: Download Geant4 datasets for ${{ matrix.os }}
-    needs: [build-geant4]
+    needs: [ build-geant4 ]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
 
     steps:
       - name: Cache Geant4 Installation
@@ -166,13 +171,13 @@ jobs:
   build-test:
     name:
       Build and Test for ${{ matrix.os }} (Python ${{ matrix.python-version }})
-    needs: [install-geant4-datasets]
+    needs: [ install-geant4-datasets ]
     timeout-minutes: 30
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
         python-version:
           - "3.8"
           - "3.9"
