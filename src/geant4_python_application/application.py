@@ -231,21 +231,21 @@ class Application:
                                                     for key in step_array_dict
                                                 }
                                             },
-                                            with_name="step",
+                                            with_name="geant4_step",
                                         )
                                     }
                                     if len(step_array_dict) > 0
                                     else {}
                                 ),
                             },
-                            with_name="track",
+                            with_name="geant4_track",
                         )
                     }
                     if len(track_array_dict) > 0 or len(step_array_dict) > 0
                     else {}
                 ),
             },
-            with_name="event",
+            with_name="geant4_event",
         )
 
         # events = ak.str.to_categorical(events)
