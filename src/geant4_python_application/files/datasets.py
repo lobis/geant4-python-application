@@ -4,6 +4,7 @@ import concurrent.futures
 import hashlib
 import os
 import shutil
+import subprocess
 import tarfile
 import tempfile
 from collections import namedtuple
@@ -20,7 +21,7 @@ url = "https://cern.ch/geant4-data/datasets"
 # It is discouraged to use the python package directory to store data
 # data_dir = os.path.join(os.path.dirname(__file__), "geant4/data")
 # another idea is to use 'platformdirs' to store data in a platform-specific location
-def data_directory() -> str:
+def application_data_directory() -> str:
     return os.path.join(
         geant4_python_application.application_directory(),
         geant4_python_application.__name__,
@@ -31,7 +32,21 @@ def data_directory() -> str:
 
 
 def geant4_data_directory() -> str:
-    return os.environ["GEANT4_DATA_DIR"]
+    try:
+        # capture stdout, save into a str
+        geant4_prefix = subprocess.run(
+            ["geant4-config", "--prefix"], capture_output=True, check=False
+        )
+        geant4_data_path = os.path.join(
+            geant4_prefix.stdout.decode().strip(), "share", "Geant4", "data"
+        )
+        if not os.path.exists(geant4_data_path):
+            return ""
+
+        return geant4_data_path
+
+    except FileNotFoundError:
+        return ""
 
 
 # the datasets versions should be updated with each Geant4 version (remember to update the checksum too!)
@@ -164,14 +179,11 @@ def _download_extract_dataset(dataset: Dataset, pbar: tqdm):
 
         f.seek(0)
         with tarfile.open(fileobj=f, mode="r:gz") as tar:
-            tar.extractall(data_directory())
+            tar.extractall(application_data_directory())
 
 
-def missing_datasets(directory: str | None = None) -> list[Dataset]:
-    if directory is None:
-        directory = data_directory()
+def missing_datasets(directory: str) -> list[Dataset]:
     datasets_to_download = []
-
     for dataset in datasets:
         path = os.path.join(directory, dataset.name + dataset.version)
         if not os.path.exists(path):
@@ -180,7 +192,12 @@ def missing_datasets(directory: str | None = None) -> list[Dataset]:
 
 
 def check_datasets(throw: bool = False) -> bool:
-    datasets_to_download = missing_datasets()
+    datasets_to_download = missing_datasets(directory=application_data_directory())
+    if datasets_to_download:
+        # if not found in the application data directory, try to find them in the Geant4 installation data directory
+        if geant4_data_directory():
+            datasets_to_download = missing_datasets(directory=geant4_data_directory())
+
     if datasets_to_download:
         if throw:
             raise RuntimeError(
@@ -192,27 +209,27 @@ def check_datasets(throw: bool = False) -> bool:
 
 def install_datasets(show_progress: bool = True):
     # first try to see if the datasets are installed in the application directory
-    datasets_to_download = missing_datasets()
+    datasets_to_download = missing_datasets(directory=application_data_directory())
     if not datasets_to_download:
         # datasets are installed in application directory
-        os.environ["GEANT4_DATA_DIR"] = data_directory()
+        os.environ["GEANT4_DATA_DIR"] = application_data_directory()
         return
 
-    # check if the datasets are present in the corresponding Geant4 directory
-    if "GEANT4_DATA_DIR" in os.environ and not bool(
-        missing_datasets(os.environ["GEANT4_DATA_DIR"])
-    ):
-        # return
-        ...
+    if geant4_data_directory():
+        datasets_to_download = missing_datasets(directory=geant4_data_directory())
+        if not datasets_to_download:
+            # datasets are installed in Geant4 data directory, no need to install them in the application data directory
+            os.environ["GEANT4_DATA_DIR"] = geant4_data_directory()
+            return
 
-    # download and extract the datasets
-    os.environ["GEANT4_DATA_DIR"] = data_directory()
+    # download and extract the datasets to the application data directory
+    os.environ["GEANT4_DATA_DIR"] = application_data_directory()
 
-    os.makedirs(data_directory(), exist_ok=True)
+    os.makedirs(application_data_directory(), exist_ok=True)
     if show_progress:
         print(
             f"""
-Geant4 datasets will be installed to "{data_directory()}".
+Geant4 datasets will be installed to "{application_data_directory()}".
 This may take a while but only needs to be done once.
 You can override the default location by calling `application_directory(path)` or `application_directory(temp=True)` to use a temporary directory.
 The following Geant4 datasets will be installed: {", ".join([f"{dataset.name}@v{dataset.version}" for dataset in datasets_to_download])}"""
@@ -236,13 +253,13 @@ The following Geant4 datasets will be installed: {", ".join([f"{dataset.name}@v{
 
     if show_progress:
         total_size_gb = sum(
-            fp.stat().st_size for fp in Path(data_directory()).rglob("*")
+            fp.stat().st_size for fp in Path(application_data_directory()).rglob("*")
         ) / (1024**3)
         print(f"Geant4 datasets size on disk after extraction: {total_size_gb:.2f}GB")
 
 
 def uninstall_datasets():
-    dir_to_remove = os.path.dirname(data_directory())
+    dir_to_remove = os.path.dirname(application_data_directory())
     package_dir = os.path.dirname(__file__)
 
     if not os.path.relpath(package_dir, dir_to_remove).startswith(".."):

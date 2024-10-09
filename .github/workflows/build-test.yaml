@@ -20,8 +20,13 @@ env:
 
 jobs:
   install-with-geant4-from-conda:
-    name: Install with conda
-    runs-on: ubuntu-latest
+    name: Install dependencies with conda
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest] # Geant4 is not available on conda for windows TODO: update this when it is
     defaults:
       run:
         shell: bash -l {0}
@@ -32,29 +37,50 @@ jobs:
           auto-update-conda: true
           python-version: 3.12
 
-      - name: Install Geant4 using conda
+      - name: Install Geant4 and cmake using conda
         run: |
-          conda install -c conda-forge geant4=11.2.2 cmake ninja gxx_linux-64
+          conda install -c conda-forge cmake ninja geant4=${{ env.GEANT4_VERSION }}
+
+      - name: Install additional dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          conda install -c conda-forge gxx_linux-64
+
+      - name: Install additional dependencies (MacOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          conda install -c conda-forge clang_osx-64
 
       - name: Print versions
         run: |
           conda --version
+          cmake --version
+
+          echo "Geant4: ${{ env.GEANT4_VERSION }}"
+
           geant4-config --version
+          geant4-config --check-datasets
+
+      - name: Install datasets if missing # Shouldn't they be available after the conda install?
+        run: |
+          geant4-config --install-datasets
+          geant4-config --check-datasets
 
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: pip install the package from source
         run: |
-          python -m pip install .
+          python -m pip install .[test]
           python -c "import geant4_python_application; print(geant4_python_application.version)"
 
-      - name: Run example notebooks
+      - name: Check datasets are accessible # Datasets should have been installed by the conda package, and should be accessible
         run: |
-          python -m pip install jupyter nbconvert matplotlib
-          for notebook in $(find examples -name '*.ipynb'); do
-            jupyter nbconvert --to notebook --execute --inplace $notebook
-          done
+          python -c "import geant4_python_application as g4; g4.files.datasets.check_datasets(throw=True)"
+
+      - name: Run tests
+        run: |
+          python -m pytest -vv --reruns 3 --reruns-delay 30 --only-rerun "(?i)http|timeout|connection|socket|resolve"
 
   build-geant4:
     name: Build Geant4 on ${{ matrix.os }}
@@ -200,6 +226,7 @@ jobs:
 
       - name: pip install the package
         run: |
+          python -m pip install --upgrade pip
           python -m pip install .[test]
           git tag
           python -c "import geant4_python_application; print(geant4_python_application.version)"
