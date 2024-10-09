@@ -65,17 +65,13 @@ jobs:
           python -m pip install .[test]
           python -c "import geant4_python_application; print(geant4_python_application.version)"
 
+      - name: Check datasets are accessible # Datasets should have been installed by the conda package, and should be accessible
+        run: |
+          python -c "import geant4_python_application as g4; g4.files.datasets.check_datasets(throw=True)"
+
       - name: Run tests
         run: |
           python -m pytest -vv --reruns 3 --reruns-delay 30 --only-rerun "(?i)http|timeout|connection|socket|resolve"
-
-      - name: Run example notebooks
-        if: matrix.os == 'macos-latest' # notebooks are already run on ubuntu-latest in another step
-        run: |
-          python -m pip install jupyter nbconvert matplotlib
-          for notebook in $(find examples -name '*.ipynb'); do
-            jupyter nbconvert --to notebook --execute --inplace $notebook
-          done
 
   build-geant4:
     name: Build Geant4 on ${{ matrix.os }}
