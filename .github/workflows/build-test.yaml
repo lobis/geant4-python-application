@@ -226,6 +226,7 @@ jobs:
 
       - name: pip install the package
         run: |
+          python -m pip upgrade pip
           python -m pip install .[test]
           git tag
           python -c "import geant4_python_application; print(geant4_python_application.version)"
