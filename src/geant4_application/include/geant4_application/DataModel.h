@@ -112,7 +112,7 @@ class PrimariesBuilder : public PrimariesBuilderBase<PRIMITIVE> {
 public:
     PrimariesBuilder() : PrimariesBuilderBase<PRIMITIVE>() {
         this->set_fields({{0, "particle"}, {1, "energy"}, {2, "position"}, {3, "direction"}});
-        this->set_parameters(R"""("__record__": "primaries")""");// not used for anything at the moment
+        this->set_parameters(R"""("__record__": "Geant4Primaries")""");// not used for anything at the moment
     }
 };
 

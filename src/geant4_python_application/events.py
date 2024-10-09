@@ -25,7 +25,7 @@ class EventArray(ak.Array):
             hits = hits[hits.volume == volume]
         # only keep x,y,z, time, and energy
         hits = hits[["position", "time", "energy"]]
-        return ak.Array(hits, with_name="geant4_hits")
+        return ak.Array(hits, with_name="Geant4Hits")
 
 
 class HitsRecord(ak.Record):
@@ -44,7 +44,7 @@ class HitsRecord(ak.Record):
                     ]
                     for i in range(len(self.energy))
                 ],
-                with_name="geant4_tpc_electrons",
+                with_name="Geant4Electrons",
             )
         )
 
@@ -76,9 +76,9 @@ class ElectronsRecord(ak.Array):
         return self
 
 
-ak.behavior["geant4_event"] = EventRecord
-ak.behavior["*", "geant4_event"] = EventArray
+ak.behavior["Geant4Event"] = EventRecord
+ak.behavior["*", "Geant4Event"] = EventArray
 
-ak.behavior["geant4_hits"] = HitsRecord
+ak.behavior["Geant4Hits"] = HitsRecord
 
-ak.behavior["geant4_tpc_electrons"] = ElectronsRecord
+ak.behavior["Geant4Electrons"] = ElectronsRecord
