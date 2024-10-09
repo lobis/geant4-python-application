@@ -8,7 +8,10 @@ from geant4_python_application._geant4_application import (
 from geant4_python_application._version import version, version_tuple
 from geant4_python_application.application import Application
 from geant4_python_application.detector import Detector
-from geant4_python_application.files.datasets import application_data_directory as data_directory, install_datasets
+from geant4_python_application.files.datasets import (
+    application_data_directory as data_directory,
+)
+from geant4_python_application.files.datasets import install_datasets
 from geant4_python_application.files.directories import application_directory
 from geant4_python_application.gdml import basic_gdml
 
