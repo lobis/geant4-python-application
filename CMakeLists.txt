@@ -22,8 +22,6 @@ find_package(
     COMPONENTS Interpreter Development.Module
     REQUIRED)
 
-# define geant4 components in a conditional way, "gdml static" if release build,
-# "gdml" otherwise
 set(GEANT4_COMPONENTS "gdml")
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
     set(GEANT4_COMPONENTS "gdml static")
