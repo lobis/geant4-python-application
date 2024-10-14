@@ -7,8 +7,7 @@ set(PYBIND11_VERSION "v2.13.6")
 set(Geant4_VERSION "11.2.2")
 
 if (NOT DEFINED SKBUILD_PROJECT_NAME)
-    # IDE
-    set(SKBUILD_PROJECT_NAME geant4-python-application)
+    set(SKBUILD_PROJECT_NAME geant4-python-application) # required for JetBrains IDEs to show a readable name
 endif ()
 
 project(${SKBUILD_PROJECT_NAME} LANGUAGES CXX)
@@ -35,8 +34,11 @@ find_package(
     COMPONENTS ${GEANT4_COMPONENTS}
     REQUIRED)
 
-message(STATUS "Using Geant4 ${Geant4_VERSION} from ${Geant4_DIR}")
+message(STATUS "Using CMake ${CMAKE_VERSION}. CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 message(STATUS "Using Python ${Python_VERSION} from ${Python_EXECUTABLE}")
+message(STATUS "Using awkward ${AWKWARD_VERSION}")
+message(STATUS "Using pybind11 ${PYBIND11_VERSION}")
+message(STATUS "Using Geant4 ${Geant4_VERSION} from ${Geant4_DIR} with components: ${GEANT4_COMPONENTS}")
 
 include(FetchContent)
 
