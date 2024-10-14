@@ -1,7 +1,7 @@
 FROM continuumio/miniconda3:main
 
-# install conda deps
-RUN conda install -c conda-forge gxx_linux-64 cmake geant4=11.2.2 matplotlib jupyterlab
+# install conda deps (auto y)
+RUN conda install --yes -c conda-forge gxx_linux-64 cmake geant4=11.2.2 matplotlib jupyterlab
 
 COPY . /src
 
