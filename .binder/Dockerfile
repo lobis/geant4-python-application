@@ -5,7 +5,7 @@ RUN conda install --yes -c conda-forge gxx_linux-64 cmake geant4=11.2.2 matplotl
 
 COPY . /src
 
-RUN cd /src && pip install . && rm -rf /src
+RUN cd /src && export CXX=$(which g++) && pip install . && rm -rf /src
 
 ARG NB_USER=user
 ARG NB_UID=1000
