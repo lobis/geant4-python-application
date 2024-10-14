@@ -1,7 +1,0 @@
-name: geant4-python-application
-channels:
-  - conda-forge
-dependencies:
-  - python=3.12
-  - geant4=11.2.2
-  - matplotlib
