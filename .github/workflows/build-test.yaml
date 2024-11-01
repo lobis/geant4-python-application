@@ -93,7 +93,7 @@ jobs:
 
     steps:
       - name: Setup CMake
-        uses: lukka/get-cmake@v3.30.3
+        uses: lukka/get-cmake@v3.30.5
 
       - name: Cache Xerces-C Installation
         id: cache-xerces
@@ -200,7 +200,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Setup CMake
-        uses: lukka/get-cmake@v3.30.3
+        uses: lukka/get-cmake@v3.30.5
 
       - name: Setup Windows environment variables
         if: matrix.os == 'windows-latest'
