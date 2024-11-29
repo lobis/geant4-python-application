@@ -1,0 +1,26 @@
+package:
+  name: geant4-python-application
+  version: "0.0.5"
+
+source:
+  path: ../
+
+requirements:
+  build:
+    - python
+    - setuptools
+
+  host:
+    - python
+    - setuptools
+    - cmake
+    - geant4=11.2.2
+
+  run:
+    - python
+    - geant4=11.2.2
+
+about:
+  home: https://github.com/lobis/geant4-python-application
+  license: BSD-3-Clause
+  summary: "A pythonic Geant4 application with awkward-array integration"
