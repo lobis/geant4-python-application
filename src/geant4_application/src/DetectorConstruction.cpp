@@ -100,6 +100,15 @@ set<string> DetectorConstruction::GetMaterialNames() {
     return names;
 }
 
+set<string> DetectorConstruction::GetNISTMaterialNames() {
+    set<string> names;
+    const auto materialTable = G4NistManager::Instance()->GetNistMaterialNames();
+    for (const auto& material: materialTable) {
+        names.insert(material);
+    }
+    return names;
+}
+
 set<string> DetectorConstruction::GetLogicalVolumeNames() {
     set<string> names;
     const auto logicalVolumeTable = G4LogicalVolumeStore::GetInstance();

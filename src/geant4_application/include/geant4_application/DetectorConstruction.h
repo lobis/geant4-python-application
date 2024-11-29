@@ -29,6 +29,7 @@ public:
     void SetGDML(const std::string& gdml);
 
     static std::set<std::string> GetMaterialNames();
+    static std::set<std::string> GetNISTMaterialNames();
     static std::set<std::string> GetLogicalVolumeNames();
     static std::set<std::string> GetPhysicalVolumeNames();
 
