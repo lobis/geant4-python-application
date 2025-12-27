@@ -18,5 +18,8 @@ namespace geant4_app {
 class PhysicsList : public G4VModularPhysicsList {
 public:
     PhysicsList();
+
+    static std::set<std::string> GetPhysicsListNames();
+    static std::set<std::string> GetProcessNames();
 };
 }// namespace geant4_app

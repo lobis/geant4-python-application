@@ -35,7 +35,8 @@ PYBIND11_MODULE(_geant4_application, m) {
             .def_static("list_commands", &Application::ListCommands, py::arg("directory") = "/")
             .def_property_readonly("generator", &Application::GetPrimaryGeneratorAction, py::return_value_policy::reference_internal)
             .def_property_readonly("detector", &Application::GetDetectorConstruction, py::return_value_policy::reference_internal)
-            .def_property_readonly("stacking", &Application::GetStackingAction, py::return_value_policy::reference_internal);
+            .def_property_readonly("stacking", &Application::GetStackingAction, py::return_value_policy::reference_internal)
+            .def_property_readonly("physics", &Application::GetPhysicsList, py::return_value_policy::reference_internal);
 
     py::class_<PrimaryGeneratorAction>(m, "PrimaryGeneratorAction")
             .def_property_static(
