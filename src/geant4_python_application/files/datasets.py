@@ -5,6 +5,7 @@ import os
 import shutil
 import tarfile
 import tempfile
+import time
 from collections import namedtuple
 from pathlib import Path
 
@@ -53,17 +54,36 @@ def _get_total_download_size(datasets_to_download: list[Dataset] = datasets) -> 
         futures = [executor.submit(_get_dataset_download_size, dataset) for dataset in datasets_to_download]
         return sum(f.result() for f in concurrent.futures.as_completed(futures))
 
-def _download_extract_dataset(dataset: Dataset, pbar: tqdm):
-    filename = dataset.filename
-    urlpath = f"{url}/{filename}.{dataset.version}.tar.gz"
-    r = requests.get(urlpath, stream=True)
-    r.raise_for_status()
+chunk_size = 1024 * 1024
+max_attempts = 5
 
-    chunk_size = 1024
+
+def _download_extract_dataset(dataset: Dataset, pbar: tqdm):
+    urlpath = _dataset_url(dataset)
+
     with tempfile.TemporaryFile() as f:
-        for chunk in r.iter_content(chunk_size=chunk_size):
-            f.write(chunk)
-            pbar.update(chunk_size)
+        downloaded = 0
+        for attempt in range(max_attempts):
+            # resume where the previous attempt died instead of restarting a multi-GB download
+            headers = {"Range": f"bytes={downloaded}-"} if downloaded else {}
+            try:
+                r = requests.get(urlpath, stream=True, headers=headers, timeout=60)
+                r.raise_for_status()
+                if downloaded and r.status_code != 206:
+                    # server ignored the range request, so start over
+                    f.seek(0)
+                    f.truncate()
+                    pbar.update(-downloaded)
+                    downloaded = 0
+                for chunk in r.iter_content(chunk_size=chunk_size):
+                    f.write(chunk)
+                    downloaded += len(chunk)
+                    pbar.update(len(chunk))
+                break
+            except requests.RequestException:
+                if attempt == max_attempts - 1:
+                    raise
+                time.sleep(2**attempt)
 
         f.seek(0)
         with tarfile.open(fileobj=f, mode="r:gz") as tar:
@@ -107,7 +127,9 @@ The following Geant4 datasets will be installed: {", ".join([f"{dataset.name}@v{
                 executor.submit(_download_extract_dataset, dataset, pbar)
                 for dataset in datasets_to_download
             ]
-            concurrent.futures.wait(futures)
+            for future in concurrent.futures.as_completed(futures):
+                # surface download/extraction errors instead of reporting a partial install as success
+                future.result()
 
     if show_progress:
         total_size_gb = sum(
