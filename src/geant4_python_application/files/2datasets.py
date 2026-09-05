@@ -7,7 +7,6 @@ import shutil
 import tarfile
 import tempfile
 from collections import namedtuple
-from pathlib import Path
 
 import requests
 from tqdm import tqdm
@@ -200,4 +199,3 @@ def reinstall_datasets():
     # Uninstall and reinstall datasets
     uninstall_datasets()
     install_datasets(force=True)
-
