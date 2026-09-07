@@ -1,7 +1,73 @@
 from __future__ import annotations
 
+from pathlib import Path
+from typing import TYPE_CHECKING
+
 import awkward as ak
 import numpy as np
+
+if TYPE_CHECKING:
+    from geant4_python_application.application import Application
+
+
+class NativeScoringMesh:
+    """Configure a Geant4 command-based Cartesian scoring mesh.
+
+    This uses Geant4's native ``G4ScoringManager`` commands. It is distinct
+    from :class:`Scoring`, which bins recorded steps in Python after a run.
+    """
+
+    def __init__(
+        self,
+        application: Application,
+        name: str = "mesh",
+        quantity: str = "eDep",
+    ):
+        self.application = application
+        self.name = name
+        self.quantity = quantity
+        self._closed = False
+
+    def box(
+        self,
+        half_size: tuple[float, float, float],
+        bins: tuple[int, int, int],
+        *,
+        unit: str = "mm",
+        center: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    ) -> NativeScoringMesh:
+        """Create a box mesh; ``half_size`` follows Geant4 mesh semantics."""
+        if self._closed:
+            raise RuntimeError("scoring mesh is already closed")
+        sx, sy, sz = half_size
+        nx, ny, nz = bins
+        cx, cy, cz = center
+        self.application.commands(
+            [
+                f"/score/create/boxMesh {self.name}",
+                f"/score/mesh/boxSize {sx} {sy} {sz} {unit}",
+                f"/score/mesh/nBin {nx} {ny} {nz}",
+                f"/score/mesh/translate/xyz {cx} {cy} {cz} {unit}",
+                f"/score/quantity/energyDeposit {self.quantity}",
+                "/score/close",
+            ]
+        )
+        self._closed = True
+        return self
+
+    def dump(self, path: str | Path, *, option: str = "") -> Path:
+        """Dump the native mesh quantity after a run and return its path."""
+        if not self._closed:
+            raise RuntimeError("configure and close the scoring mesh before dumping")
+        output = Path(path).expanduser().resolve()
+        output.parent.mkdir(parents=True, exist_ok=True)
+        if " " in str(output):
+            raise ValueError("Geant4 scoring output paths cannot contain spaces")
+        suffix = f" {option}" if option else ""
+        self.application.command(
+            f"/score/dumpQuantityToFile {self.name} {self.quantity} {output}{suffix}"
+        )
+        return output
 
 
 class Scoring:

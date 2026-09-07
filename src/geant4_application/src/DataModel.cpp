@@ -42,7 +42,7 @@ void InsertEvent(const G4Event* event, Builders& builders) {
     }
     if (builders.fields.find("primaries") != builders.fields.end()) {
         builders.primaries.begin_list();
-        const auto primaryVertex = event->GetPrimaryVertex();
+        for (auto primaryVertex = event->GetPrimaryVertex(); primaryVertex != nullptr; primaryVertex = primaryVertex->GetNext()) {
         for (int i = 0; i < primaryVertex->GetNumberOfParticle(); i++) {
             const auto primary = primaryVertex->GetPrimary(i);
             const auto particle = primary->GetParticleDefinition();
@@ -54,6 +54,7 @@ void InsertEvent(const G4Event* event, Builders& builders) {
             builders.primaries.content().content<1>().append(energy / units::energy);
             builders.primaries.content().content<2>().append(position / units::length);
             builders.primaries.content().content<3>().append(direction);
+        }
         }
         builders.primaries.end_list();
     }

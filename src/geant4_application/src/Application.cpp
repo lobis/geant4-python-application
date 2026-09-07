@@ -8,6 +8,7 @@
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
+#include <G4ScoringManager.hh>
 #include <G4PhysListFactory.hh>
 #include <G4OpticalPhysics.hh>
 #include <G4EmExtraPhysics.hh>
@@ -201,6 +202,9 @@ void Application::SetupManager(unsigned short nThreads) {
 
     const auto runManagerType = nThreads > 0 ? G4RunManagerType::MTOnly : G4RunManagerType::SerialOnly;
     runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));
+    // Instantiate the command-based scoring manager so /score/* UI commands
+    // are available to Python before initialization.
+    G4ScoringManager::GetScoringManager();
     if (nThreads > 0) {
         runManager->SetNumberOfThreads((G4int) nThreads);
     }
@@ -264,30 +268,42 @@ py::list Application::Run(const py::object& primaries) {
         const auto fields = py::cast<py::set>(primaries.attr("fields"));
         const auto nEvents = py::cast<G4int>(len_func(primaries));
 
-        if (fields.contains("energy")) {
-            std::vector<double> energies = py::cast<std::vector<double>>(primaries.attr("energy"));
+        py::object primaryRecords = primaries;
+        if (fields.contains("primaries")) {
+            primaryRecords = primaries.attr("primaries");
+            auto countsObject = ak.attr("to_list")(ak.attr("num")(primaryRecords, py::arg("axis") = 1));
+            auto counts = py::cast<vector<size_t>>(countsObject);
+            vector<size_t> offsets = {0};
+            for (const auto count: counts) offsets.push_back(offsets.back() + count);
+            PrimaryGeneratorAction::SetAwkwardPrimaryEventOffsets(offsets);
+            primaryRecords = ak.attr("flatten")(primaryRecords, py::arg("axis") = 1);
+        }
+        const auto primaryFields = py::cast<py::set>(primaryRecords.attr("fields"));
+
+        if (primaryFields.contains("energy")) {
+            std::vector<double> energies = py::cast<std::vector<double>>(primaryRecords.attr("energy"));
             PrimaryGeneratorAction::SetAwkwardPrimaryEnergies(energies);
         }
-        if (fields.contains("particle")) {
-            std::vector<std::string> particles = py::cast<std::vector<std::string>>(primaries.attr("particle"));
+        if (primaryFields.contains("particle")) {
+            std::vector<std::string> particles = py::cast<std::vector<std::string>>(primaryRecords.attr("particle"));
             PrimaryGeneratorAction::SetAwkwardPrimaryParticles(particles);
         }
-        if (fields.contains("position")) {
-            std::vector<double> positionX = py::cast<std::vector<double>>(primaries.attr("position")["x"]);
-            std::vector<double> positionY = py::cast<std::vector<double>>(primaries.attr("position")["y"]);
-            std::vector<double> positionZ = py::cast<std::vector<double>>(primaries.attr("position")["z"]);
+        if (primaryFields.contains("position")) {
+            std::vector<double> positionX = py::cast<std::vector<double>>(primaryRecords.attr("position")["x"]);
+            std::vector<double> positionY = py::cast<std::vector<double>>(primaryRecords.attr("position")["y"]);
+            std::vector<double> positionZ = py::cast<std::vector<double>>(primaryRecords.attr("position")["z"]);
             std::vector<std::array<double, 3>> positions;
-            for (size_t i = 0; i < nEvents; i++) {
+            for (size_t i = 0; i < positionX.size(); i++) {
                 positions.push_back({positionX[i], positionY[i], positionZ[i]});
             }
             PrimaryGeneratorAction::SetAwkwardPrimaryPositions(positions);
         }
-        if (fields.contains("direction")) {
-            std::vector<double> directionX = py::cast<std::vector<double>>(primaries.attr("direction")["x"]);
-            std::vector<double> directionY = py::cast<std::vector<double>>(primaries.attr("direction")["y"]);
-            std::vector<double> directionZ = py::cast<std::vector<double>>(primaries.attr("direction")["z"]);
+        if (primaryFields.contains("direction")) {
+            std::vector<double> directionX = py::cast<std::vector<double>>(primaryRecords.attr("direction")["x"]);
+            std::vector<double> directionY = py::cast<std::vector<double>>(primaryRecords.attr("direction")["y"]);
+            std::vector<double> directionZ = py::cast<std::vector<double>>(primaryRecords.attr("direction")["z"]);
             std::vector<std::array<double, 3>> directions;
-            for (size_t i = 0; i < nEvents; i++) {
+            for (size_t i = 0; i < directionX.size(); i++) {
                 directions.push_back({directionX[i], directionY[i], directionZ[i]});
             }
             PrimaryGeneratorAction::SetAwkwardPrimaryDirections(directions);

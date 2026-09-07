@@ -34,6 +34,31 @@ def test_optical_scintillation():
     assert len(opt.scintillation_commands()) == 2
 
 
+def test_lxe_and_wls_optical_materials():
+    for gdml, particle, energy in (
+        (opt.lxe_scintillator_gdml, "e-", "1 MeV"),
+        (opt.wls_fiber_gdml, "opticalphoton", "3.5 eV"),
+    ):
+        with g4.Application(gdml=gdml, optical=True, seed=110) as app:
+            app.command(f"/gun/particle {particle}")
+            app.command(f"/gun/energy {energy}")
+            app.command("/gun/position 0 0 0 mm")
+            app.command("/gun/direction 0 0 1")
+            events = app.run(1)
+        particles = ak.flatten(events.track.particle, axis=None)
+        assert bool(ak.any(particles == "opticalphoton"))
+
+
+def test_expanded_parameterised_geometry():
+    gdml = g4.geometry.linear_array_gdml(5, spacing_mm=15, box_size_mm=5)
+    assert gdml.count('<physvol name="cell_') == 5
+    with g4.Application(gdml=gdml, seed=111) as app:
+        app.command("/gun/particle geantino")
+        app.command("/gun/position -45 0 0 mm")
+        app.command("/gun/direction 1 0 0")
+        assert len(app.run(1)) == 1
+
+
 def test_callbacks():
     counts = {"run": 0, "event": 0, "track": 0, "step": 0}
     with g4.Application(gdml=g4.basic_gdml, seed=103) as app:
@@ -107,3 +132,15 @@ def test_distributed_split():
     _, c1 = dist.split_count(3, 1, 2)
     assert c0 + c1 == 3
     assert s0 == 0
+
+
+def test_native_scoring_mesh(tmp_path):
+    with g4.Application(gdml=g4.basic_gdml, seed=109) as app:
+        mesh = g4.NativeScoringMesh(app, "testMesh", "edep")
+        mesh.box((250, 250, 250), (2, 2, 2))
+        app.command("/gun/particle e-")
+        app.command("/gun/energy 1 MeV")
+        app.run(1)
+        output = mesh.dump(tmp_path / "mesh.csv")
+    assert output.exists()
+    assert output.stat().st_size > 0
