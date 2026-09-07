@@ -19,11 +19,18 @@ PYBIND11_MODULE(_geant4_application, m) {
     py::class_<Application>(m, "Application")
             .def(py::init<>())
             .def("setup_manager", &Application::SetupManager, py::arg("n_threads"))
+            .def_static("multithreading_available", &Application::MultithreadingAvailable)
             .def("setup_detector", &Application::SetupDetector, py::arg("gdml"))
-            .def("setup_physics", &Application::SetupPhysics)
+            .def("setup_physics", &Application::SetupPhysics,
+                 py::arg("physics_list") = "custom", py::arg("optical") = false)
+            .def_static("available_physics_lists", &Application::GetAvailablePhysicsLists)
+            .def("add_physics", &Application::AddExtraPhysics, py::arg("constructor_name"))
+            .def_static("available_extra_physics", &Application::GetAvailableExtraPhysics)
             .def("setup_action", &Application::SetupAction)
             .def("initialize", &Application::Initialize)
             .def("run", &Application::Run, py::arg("n_events"))
+            .def("visualize", &Application::StartVisualization, py::arg("commands"))
+            .def_static("visualization_available", &Application::VisualizationAvailable)
             .def("is_setup", &Application::IsSetup)
             .def("is_initialized", &Application::IsInitialized)
             .def("get_seed", &Application::GetRandomSeed)
@@ -44,6 +51,9 @@ PYBIND11_MODULE(_geant4_application, m) {
                     [](const py::object&, const string& type) {
                         return PrimaryGeneratorAction::SetGeneratorType(type);
                     })
+            .def_static("get_type", &PrimaryGeneratorAction::GetGeneratorType)
+            .def_static("set_type", &PrimaryGeneratorAction::SetGeneratorType,
+                        py::arg("type"))
             .def_static("set_energy", &PrimaryGeneratorAction::SetEnergy, py::arg("energy"))
             .def_static("set_position", &PrimaryGeneratorAction::SetPosition, py::arg("position"))
             .def_static("set_direction", &PrimaryGeneratorAction::SetDirection, py::arg("direction"))
@@ -56,6 +66,12 @@ PYBIND11_MODULE(_geant4_application, m) {
             .def_static("get_physical_volumes", &DetectorConstruction::GetPhysicalVolumeNames)
             .def("get_sensitive_volumes", &DetectorConstruction::GetSensitiveVolumes)
             .def("set_sensitive_volumes", &DetectorConstruction::SetSensitiveVolumes, py::arg("volumes"))
+            .def("get_magnetic_field", &DetectorConstruction::GetMagneticField)
+            .def("set_magnetic_field", &DetectorConstruction::SetMagneticField,
+                 py::arg("field_tesla"))
+            .def("get_electric_field", &DetectorConstruction::GetElectricField)
+            .def("set_electric_field", &DetectorConstruction::SetElectricField,
+                 py::arg("field_kV_per_cm"))
             .def_static("get_physical_volumes_from_logical_volume", &DetectorConstruction::GetPhysicalVolumesFromLogicalVolume, py::arg("logical_volume"))
             .def_static("get_logical_volume_from_physical_volume", &DetectorConstruction::GetLogicalVolumeFromPhysicalVolume, py::arg("physical_volume"))
             .def_static("get_material_from_volume", &DetectorConstruction::GetMaterialFromVolume, py::arg("volume"))

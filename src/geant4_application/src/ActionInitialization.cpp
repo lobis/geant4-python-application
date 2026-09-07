@@ -8,6 +8,8 @@
 #include "geant4_application/SteppingVerbose.h"
 #include "geant4_application/TrackingAction.h"
 
+#include <G4EventManager.hh>
+#include <G4RunManager.hh>
 #include <iostream>
 
 using namespace std;
@@ -27,7 +29,8 @@ void ActionInitialization::Build() const {
     SetUserAction(new StackingAction);
     SetUserAction(new TrackingAction);
 
-    // G4EventManager::GetEventManager()->SetNumberOfAdditionalWaitingStacks(1);  // optical stack
+    // Required for optical photons (scintillation/Cerenkov use an extra stack).
+    G4RunManager::GetRunManager()->SetNumberOfAdditionalWaitingStacks(1);
 }
 
 G4VSteppingVerbose* ActionInitialization::InitializeSteppingVerbose() const {

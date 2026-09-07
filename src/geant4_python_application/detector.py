@@ -47,6 +47,36 @@ class Detector:
             Message("detector", "set_sensitive_volumes", (volumes,), {})
         )
 
+    @property
+    def magnetic_field(self) -> tuple[float, float, float]:
+        """Uniform global magnetic field vector in tesla."""
+        return tuple(
+            self._application._send_and_recv(
+                Message("detector", "get_magnetic_field", (), {})
+            )
+        )
+
+    @magnetic_field.setter
+    def magnetic_field(self, field_tesla: tuple[float, float, float]):
+        self._application._send_and_recv(
+            Message("detector", "set_magnetic_field", (field_tesla,), {})
+        )
+
+    @property
+    def electric_field(self) -> tuple[float, float, float]:
+        """Uniform global electric field vector in kV/cm."""
+        return tuple(
+            self._application._send_and_recv(
+                Message("detector", "get_electric_field", (), {})
+            )
+        )
+
+    @electric_field.setter
+    def electric_field(self, field_kv_per_cm: tuple[float, float, float]):
+        self._application._send_and_recv(
+            Message("detector", "set_electric_field", (field_kv_per_cm,), {})
+        )
+
     def material_from_volume(self, volume: str) -> str:
         return self._application._send_and_recv(
             Message("detector", "get_material_from_volume", (volume,), {})

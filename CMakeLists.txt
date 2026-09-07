@@ -13,6 +13,8 @@ endif ()
 project(${SKBUILD_PROJECT_NAME} LANGUAGES CXX)
 
 set(PYTHON_MODULE_NAME _geant4_application)
+option(GEANT4_PYTHON_APPLICATION_VISUALIZATION
+       "Build support for the interactive Geant4 Qt visualizer" OFF)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -21,10 +23,17 @@ find_package(
     Python
     COMPONENTS Interpreter Development.Module
     REQUIRED)
-find_package(
-    Geant4 11.2.2 CONFIG
-    COMPONENTS gdml static
-    REQUIRED)
+if (GEANT4_PYTHON_APPLICATION_VISUALIZATION)
+    find_package(
+        Geant4 11.2.2 CONFIG
+        COMPONENTS gdml ui_all vis_all
+        REQUIRED)
+else ()
+    find_package(
+        Geant4 11.2.2 CONFIG
+        COMPONENTS gdml static
+        REQUIRED)
+endif ()
 
 message(STATUS "Using Geant4 ${Geant4_VERSION} from ${Geant4_DIR}")
 message(STATUS "Using Python ${Python_VERSION} from ${Python_EXECUTABLE}")
@@ -69,6 +78,29 @@ target_compile_definitions(
             GEANT4_VERSION=${Geant4_VERSION}
             AWKWARD_VERSION=${AWKWARD_VERSION}
             PYBIND11_VERSION=${PYBIND11_VERSION})
+
+get_filename_component(GEANT4_PREFIX "${Geant4_DIR}/../../.." ABSOLUTE)
+set_target_properties(${PYTHON_MODULE_NAME} PROPERTIES
+                      BUILD_RPATH "${GEANT4_PREFIX}/lib"
+                      INSTALL_RPATH "${GEANT4_PREFIX}/lib")
+if (GEANT4_PYTHON_APPLICATION_VISUALIZATION)
+    target_compile_definitions(${PYTHON_MODULE_NAME}
+                               PRIVATE GEANT4_PYTHON_APPLICATION_VISUALIZATION)
+    # Homebrew may expose Qt 6 from its global include directory while this
+    # Geant4 installation was built with Qt 5. Put Qt 5's forwarding headers
+    # first so framework headers do not accidentally include their Qt 6 peers.
+    if (APPLE AND DEFINED Qt5Core_DIR)
+        get_filename_component(QT5_PREFIX "${Qt5Core_DIR}/../../.." ABSOLUTE)
+        target_include_directories(${PYTHON_MODULE_NAME} SYSTEM BEFORE PRIVATE
+                                   "${QT5_PREFIX}/include")
+        set(QT5_COCOA_PLUGIN
+            "${QT5_PREFIX}/plugins/platforms/libqcocoa.dylib")
+        if (EXISTS "${QT5_COCOA_PLUGIN}")
+            install(FILES "${QT5_COCOA_PLUGIN}"
+                    DESTINATION "${PROJECT_NAME}/qt/plugins/platforms")
+        endif ()
+    endif ()
+endif ()
 
 target_include_directories(
     ${PYTHON_MODULE_NAME}

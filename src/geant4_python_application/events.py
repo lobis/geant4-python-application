@@ -23,8 +23,9 @@ class EventArray(ak.Array):
         hits = hits[hits.energy > 0]
         if volume is not None:
             hits = hits[hits.volume == volume]
-        # only keep x,y,z, time, and energy
-        hits = hits[["position", "time", "energy"]]
+        # Keep available hit fields; event-field selection may omit time or position.
+        fields = [field for field in ("position", "time", "energy") if field in hits.fields]
+        hits = hits[fields]
         return ak.Array(hits, with_name="hits")
 
 

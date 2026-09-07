@@ -101,6 +101,31 @@ from geant4_python_application import application_directory
 application_directory("/some/other/path")
 ```
 
+By default datasets are stored under the active Python environment at
+`$CONDA_PREFIX/share/geant4_python_application` (or the equivalent `sys.prefix`
+for a virtual environment). Set `GEANT4_PYTHON_APPLICATION_DIR` before import to
+choose another persistent location.
+
+### Relocatable macOS wheel
+
+The ordinary source build links to the Geant4 and Qt installation used at build
+time. To create a wheel containing Geant4, Xerces-C, Expat, and their non-system
+transitive libraries, run:
+
+```bash
+PYTHON="$CONDA_PREFIX/bin/python" \
+Geant4_DIR=/usr/local/lib/cmake/Geant4 \
+tools/build_macos_self_contained.sh
+```
+
+Install the wheel from `dist/self-contained/repaired`. Geant4 datasets remain
+outside the wheel because they are about 2 GB, but are downloaded into the
+active environment on first use, so they move together with that environment.
+The current Homebrew Qt 5 build uses macOS framework bundles and remains an
+external GUI dependency. A completely standalone GUI distribution requires Qt
+to be rebuilt as non-framework dylibs (or linked statically); flattening the
+Homebrew frameworks causes Qt to crash during platform initialization.
+
 Overriding the default data directory is encouraged when submitting batch jobs
 to a cluster in order to avoid downloading the data files multiple times. In
 this case the application directory should point to some shared location.
@@ -134,4 +159,103 @@ with g4.Application(gdml=g4.basic_gdml, seed=137) as app:
     events = app.run(n_events=100)
 
 print(events)
+```
+
+A Geant4 reference physics list can be selected by name:
+
+```python
+with g4.Application(gdml=g4.basic_gdml, physics="FTFP_BERT") as app:
+    events = app.run(100)
+
+print(g4.Application.available_physics_lists())
+```
+
+Particle guns and Geant4's General Particle Source have a Python interface:
+
+```python
+with g4.Application(gdml=g4.basic_gdml) as app:
+    app.generator.use_gps().particle("gamma").energy(2, "MeV")
+    app.generator.position(0, 0, -10, "cm").direction(0, 0, 1)
+    events = app.run(100)
+```
+
+Advanced GPS distributions remain accessible through
+`app.generator.commands(["/gps/pos/type Plane", ...])`.
+
+Optical physics and uniform global magnetic/electric fields can be enabled directly:
+
+```python
+with g4.Application(gdml=my_optical_gdml, optical=True) as app:
+    app.detector.magnetic_field = (0.0, 0.0, 1.5)  # tesla
+    app.detector.electric_field = (0.0, 0.0, 0.5)  # kV/cm
+    events = app.run(100)
+```
+
+Optical scintillator GDML + tuning helpers:
+
+```python
+from geant4_python_application import optical as gopt
+
+with g4.Application(gdml=gopt.optical_water_gdml, optical=True) as app:
+    app.commands(gopt.scintillation_commands(yield_factor=1.0))
+    events = app.run(100)  # track.particle contains 'opticalphoton'
+```
+
+Recorded steps can be scored per event or into a Cartesian energy mesh:
+
+```python
+energy_per_event = g4.Scoring.energy_deposit(events, volume="detector")
+mesh, edges = g4.Scoring.energy_mesh(events, bins=(20, 20, 40))
+```
+
+Python run/event/track/step callbacks (offline over awkward arrays):
+
+```python
+with g4.Application(gdml=g4.basic_gdml) as app:
+    events = app.run_with_callbacks(
+        100, on_run=lambda evs: print(len(evs)),
+        on_event=lambda ev: None, on_track=lambda tr, ev: None,
+        on_step=lambda st, tr, ev: None,
+    )
+```
+
+Extra physics constructors incl. DNA, CAD/VTK/ROOT/HepMC, and MPI splitting:
+
+```python
+print(g4.Application.available_extra_physics())
+with g4.Application(gdml=g4.basic_gdml, physics="FTFP_BERT") as app:
+    app.add_physics("G4EmDNAPhysics_option2")  # or G4EmExtraPhysics, G4OpticalPhysics...
+    events = app.run(100)
+
+from geant4_python_application import cad, io as gio, distributed as dist
+
+gdml = cad.mesh_to_gdml(*cad.cube_mesh(100.0))  # or cad.stl_ascii_to_gdml(stl_text)
+gio.mesh_to_vtk(mesh, edges, "mesh.vtk")
+gio.events_to_parquet(events, "events.parquet")
+gio.events_to_root(events, "events.root")  # needs uproot
+primaries = gio.hepmc_to_primaries(open("events.hepmc").read())
+
+rank, size = dist.get_rank_size()
+start, count = dist.split_count(1000, rank, size)  # mpiexec -n 2 python run.py
+```
+
+### Interactive Qt visualization
+
+When the extension is built against a Geant4 installation with Qt and OpenGL,
+enable visualization at install time:
+
+```bash
+pip install . -Ccmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON
+```
+
+Then open Geant4's interactive Qt viewer. The call returns when the window is
+closed, and commands can be entered in the viewer's command panel:
+
+```python
+import geant4_python_application as g4
+
+with g4.Application(gdml=g4.basic_gdml, seed=137) as app:
+    app.command("/gun/particle e-")
+    app.command("/gun/energy 100 MeV")
+    app.visualize()
 ```

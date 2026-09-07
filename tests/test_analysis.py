@@ -8,6 +8,7 @@ import pytest
 import requests
 
 from geant4_python_application import Application
+from geant4_python_application import Scoring
 
 complexGdml = requests.get(
     "https://raw.githubusercontent.com/rest-for-physics/restG4/dc3a8f42cea4978206a13325261fa85ec1b26261/examples/13.IAXO/geometry/setup.gdml"
@@ -80,6 +81,8 @@ def test_sensitive():
 )
 @pytest.mark.parametrize("n_threads", [0, 8])
 def test_photoelectric(n_threads):
+    if n_threads > 0 and not Application.multithreading_available():
+        pytest.skip("linked Geant4 runtime was built without multithreading")
     with Application(gdml=complexGdml, seed=1234, n_threads=n_threads) as app:
         sensitive_volume = "gasVolume"
 
@@ -152,4 +155,21 @@ def test_muons():
 
         sensitive_energy = events.energy_in_volume(volume)
         assert np.isclose(np.average(sensitive_energy), 24.821580016670598, rtol=1e-1)
-        assert np.isclose(np.std(sensitive_energy), 16.09166011697945, rtol=1e-1)
+    assert np.isclose(np.std(sensitive_energy), 16.09166011697945, rtol=1e-1)
+
+
+def test_scoring_helpers():
+    with Application(gdml=complexGdml, seed=1234) as app:
+        app.set_event_fields(
+            {"id", "track_id", "step_energy", "step_volume", "step_position"}
+        )
+        app.command("/gun/particle gamma")
+        app.command("/gun/energy 10 keV")
+        app.command("/gun/position 0 0 20 cm")
+        app.command("/gun/direction 0 0 -1")
+        events = app.run(10)
+
+    assert len(Scoring.energy_deposit(events)) == 10
+    mesh, edges = Scoring.energy_mesh(events, bins=(4, 5, 6))
+    assert mesh.shape == (4, 5, 6)
+    assert len(edges) == 3

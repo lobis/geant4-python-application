@@ -37,6 +37,20 @@ def test_run():
         assert len(events) == 100
 
 
+def test_reference_physics_list():
+    assert "custom" in Application.available_physics_lists()
+    assert "FTFP_BERT" in Application.available_physics_lists()
+    with Application(gdml=basic_gdml, physics="FTFP_BERT") as app:
+        assert len(app.run(1)) == 1
+
+
+def test_optical_physics_and_magnetic_field():
+    with Application(gdml=basic_gdml, optical=True) as app:
+        app.detector.magnetic_field = (0.0, 0.0, 1.5)
+        assert app.detector.magnetic_field == (0.0, 0.0, 1.5)
+        assert len(app.run(1)) == 1
+
+
 def test_seed_single_thread():
     with Application(gdml=basic_gdml, seed=1100) as app:
         app.command("/gun/particle e-")

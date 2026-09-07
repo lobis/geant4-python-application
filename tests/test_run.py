@@ -36,3 +36,12 @@ def test_awkward_primaries(n_threads):
 
         event_primary_energy = ak.flatten(events.primaries.energy)
         assert np.allclose(event_primary_energy, primaries.energy)
+
+
+def test_general_particle_source():
+    with Application(gdml=basic_gdml) as app:
+        app.generator.use_gps().particle("geantino").energy(2, "MeV")
+        app.generator.position(0, 0, -10, "cm").direction(0, 0, 1)
+        events = app.run(2)
+        assert len(events) == 2
+        assert np.allclose(ak.flatten(events.primaries.energy), 2000)
