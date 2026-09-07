@@ -73,6 +73,22 @@ running the following command from the root directory:
 pip install .
 ```
 
+> **Note - Qt visualization / `b1.py` error:**
+> Problem: `python examples/.../basic/B1/b1.py` (without flags) fails with
+> `RuntimeError: Visualization support was not built. Reinstall with
+> -Ccmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON`.
+> Cause: the default build has `GEANT4_PYTHON_APPLICATION_VISUALIZATION=OFF`,
+> but `b1.py` defaults to `app.visualize()` unless `--batch` is given.
+> Fix (no source change needed, requires Geant4 with Qt/OpenGL, e.g. conda-forge
+> `geant4` which has `qt[yes]` / `opengl-x11[yes]`):
+> ```bash
+> pip install --force-reinstall --no-deps . -Ccmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON
+> ```
+> Or run headless without rebuilding:
+> ```bash
+> python examples/geant4-examples/Geant4-11.4.2-examples-python/basic/B1/b1.py --batch -n 10
+> ```
+
 ### Geant4 data files
 
 Geant4 comes with a large set of data files which are required in order to run.
