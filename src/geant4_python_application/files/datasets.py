@@ -241,15 +241,14 @@ The following Geant4 datasets will be installed: {", ".join([f"{dataset.name}@v{
         disable=not show_progress,
         unit="B",
         unit_scale=True,
-    ) as pbar:
-        with concurrent.futures.ThreadPoolExecutor(
-            max_workers=len(datasets_to_download)
-        ) as executor:
-            futures = [
-                executor.submit(_download_extract_dataset, dataset, pbar)
-                for dataset in datasets_to_download
-            ]
-            concurrent.futures.wait(futures)
+    ) as pbar, concurrent.futures.ThreadPoolExecutor(
+        max_workers=len(datasets_to_download)
+    ) as executor:
+        futures = [
+            executor.submit(_download_extract_dataset, dataset, pbar)
+            for dataset in datasets_to_download
+        ]
+        concurrent.futures.wait(futures)
 
     if show_progress:
         total_size_gb = sum(
