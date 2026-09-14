@@ -32,15 +32,21 @@ or reach out to kavyavadhwa@gmail.com.
 
 ## Installation
 
+Not yet published on PyPI — install from source, which requires Geant4 as a
+build dependency:
+
 ```bash
-pip install geant4-python-application
+git clone https://github.com/lobis/geant4-python-application.git
+cd geant4-python-application
+pip install .
 ```
 
-No system Geant4 install is required — the wheel is statically linked.
-Physics data files download automatically on first use.
+No manual dataset setup needed — just run an example. Geant4's physics data
+files download automatically on first use.
 
-Building from source, Qt visualization, the relocatable macOS wheel, and data
-file management are covered in [INSTALLATION.md](INSTALLATION.md).
+Setting up the Geant4 build dependency, Qt visualization, the relocatable
+macOS wheel, and data file management are covered in
+[INSTALLATION.md](INSTALLATION.md).
 
 ## Usage
 

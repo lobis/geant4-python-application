@@ -1,18 +1,9 @@
 # Installation
 
-## PyPI (recommended)
-
-```bash
-pip install geant4-python-application
-```
-
-The wheel ships a statically linked Geant4, so no system Geant4 install is
-required. Data files are downloaded separately on first use (see below).
+This package is not yet published on PyPI, so install from source. Building
+requires a system Geant4 installation as a build dependency.
 
 ## From source
-
-Building from source requires a system Geant4 installation and makes it a
-build dependency.
 
 ### 1. Install Geant4
 
@@ -67,6 +58,8 @@ cmake --build ./xerces-build --parallel $(nproc) --config Release --target insta
 ### 2. Build the package
 
 ```bash
+git clone https://github.com/lobis/geant4-python-application.git
+cd geant4-python-application
 pip install .
 ```
 
