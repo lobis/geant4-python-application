@@ -40,7 +40,7 @@ No system Geant4 install is required — the wheel is statically linked.
 Physics data files download automatically on first use.
 
 Building from source, Qt visualization, the relocatable macOS wheel, and data
-file management are covered in [docs/INSTALLATION.md](docs/INSTALLATION.md).
+file management are covered in [INSTALLATION.md](INSTALLATION.md).
 
 ## Usage
 
