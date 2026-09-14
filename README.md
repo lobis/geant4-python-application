@@ -42,10 +42,18 @@ pip install .
 ```
 
 No manual dataset setup needed — just run an example. Geant4's physics data
-files download automatically on first use.
+files download automatically on first use:
+
+```bash
+python examples/geant4-examples/Geant4-11.4.2-examples-python/basic/B1/b1.py --batch -n 10
+```
+
+`--batch` runs headless (no Qt build required); drop it to open the
+interactive Qt viewer instead, which needs a visualization-enabled build —
+see [INSTALLATION.md](INSTALLATION.md).
 
 Setting up the Geant4 build dependency, Qt visualization, the relocatable
-macOS wheel, and data file management are covered in
+macOS wheel, and data file management are also covered in
 [INSTALLATION.md](INSTALLATION.md).
 
 ## Usage
