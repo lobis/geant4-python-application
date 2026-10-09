@@ -29,8 +29,6 @@ PYBIND11_MODULE(_geant4_application, m) {
             .def("setup_action", &Application::SetupAction)
             .def("initialize", &Application::Initialize)
             .def("run", &Application::Run, py::arg("n_events"))
-            .def("visualize", &Application::StartVisualization, py::arg("commands"))
-            .def_static("visualization_available", &Application::VisualizationAvailable)
             .def("is_setup", &Application::IsSetup)
             .def("is_initialized", &Application::IsInitialized)
             .def("get_seed", &Application::GetRandomSeed)

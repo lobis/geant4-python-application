@@ -29,11 +29,6 @@
 #include <G4DecayPhysics.hh>
 #include <G4VModularPhysicsList.hh>
 
-#ifdef GEANT4_PYTHON_APPLICATION_VISUALIZATION
-#include <G4UIExecutive.hh>
-#include <G4VisExecutive.hh>
-#endif
-
 #include <algorithm>
 #include <random>
 #include <unordered_set>
@@ -314,39 +309,6 @@ py::list Application::Run(const py::object& primaries) {
     }
 }
 
-bool Application::VisualizationAvailable() {
-#ifdef GEANT4_PYTHON_APPLICATION_VISUALIZATION
-    return true;
-#else
-    return false;
-#endif
-}
-
-void Application::StartVisualization(const vector<string>& commands) {
-#ifdef GEANT4_PYTHON_APPLICATION_VISUALIZATION
-    if (!IsInitialized()) {
-        Initialize();
-    }
-
-    int argc = 1;
-    char applicationName[] = "geant4-python-application";
-    char* argv[] = {applicationName, nullptr};
-
-    auto visualization = make_unique<G4VisExecutive>();
-    visualization->Initialize();
-
-    auto ui = make_unique<G4UIExecutive>(argc, argv, "qt");
-    for (const auto& command: commands) {
-        Command(command);
-    }
-    ui->SessionStart();
-#else
-    (void) commands;
-    throw runtime_error(
-            "Visualization support was not built. Reinstall with "
-            "-Ccmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON using a Geant4 build with Qt/OpenGL.");
-#endif
-}
 
 bool Application::IsSetup() const {
     return runManager != nullptr && runManager->GetUserDetectorConstruction() != nullptr &&

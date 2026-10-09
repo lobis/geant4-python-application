@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import importlib.util
 import multiprocessing
+import os
 import threading
 from collections import namedtuple
+from pathlib import Path
 
 import awkward as ak
 
@@ -33,6 +36,45 @@ _default_event_fields = {
 }
 
 
+_package_dir = Path(__file__).parent
+# Written into wheels whose Qt-linked libraries were repointed at the Qt shipped
+# in the PyQt5-Qt5 package (see tools/relink_qt_wheel.py).
+_PIP_QT_MARKER = _package_dir / "_qt_from_pyqt5_qt5"
+_PIP_QT_DIR = _package_dir.parent / "PyQt5" / "Qt5"
+
+
+def _visualization_problem() -> str | None:
+    """Why the Qt viewer can't be opened, or None if it can. Never loads Qt."""
+    if importlib.util.find_spec("geant4_python_application._geant4_vis") is None:
+        return (
+            "This installation was built without the Qt viewer. Reinstall from "
+            "source with -Ccmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON "
+            "using a Geant4 built with Qt and OpenGL."
+        )
+    if _PIP_QT_MARKER.exists() and not (_PIP_QT_DIR / "lib").is_dir():
+        return (
+            "The Qt viewer needs Qt from the 'gui' extra: "
+            "pip install 'geant4_python_application[gui]'"
+        )
+    return None
+
+
+def _visualize(app, commands: list[str]) -> None:
+    """Runs in the Geant4 child process, which then owns the Qt event loop."""
+    problem = _visualization_problem()
+    if problem is not None:
+        raise RuntimeError(problem)
+    # A platform plugin only loads into the exact Qt build it was compiled for,
+    # so point Qt at the plugins shipped alongside the Qt libraries in use.
+    if _PIP_QT_MARKER.exists():
+        os.environ["QT_PLUGIN_PATH"] = str(_PIP_QT_DIR / "plugins")
+    from geant4_python_application import _geant4_vis
+
+    if not app.is_initialized():
+        app.initialize()
+    _geant4_vis.start_visualization(commands)
+
+
 def _start_application(pipe: multiprocessing.Pipe):
     app = Geant4Application()
     app.set_event_fields(_default_event_fields)
@@ -44,6 +86,12 @@ def _start_application(pipe: multiprocessing.Pipe):
                 break
 
             counter, message = message_with_counter
+            if message.target == "" and message.method == "visualize":
+                # Handled here so the Qt viewer module is only ever imported in
+                # this process, and only when a viewer is actually requested.
+                _visualize(app, *message.args, **message.kwargs)
+                pipe.send((counter, None))
+                continue
             target = app
             target_list = message.target.split(".")
             target_list = [element for element in target_list if element]
@@ -361,7 +409,8 @@ class Application:
 
     @staticmethod
     def visualization_available() -> bool:
-        return Geant4Application.visualization_available()
+        """Whether the Qt viewer can be opened. Does not load Qt."""
+        return _visualization_problem() is None
 
     @staticmethod
     def multithreading_available() -> bool:

@@ -1,15 +1,5 @@
 from __future__ import annotations
 
-import os
-from pathlib import Path
-
-# A repaired macOS wheel carries Qt's Cocoa platform plugin beside the Python
-# package. Point Qt at it before loading the native extension. Source builds
-# without a bundled plugin continue to use Qt's normal discovery rules.
-_bundled_qt_plugins = Path(__file__).parent / "qt" / "plugins"
-if _bundled_qt_plugins.is_dir():
-    os.environ.setdefault("QT_PLUGIN_PATH", str(_bundled_qt_plugins))
-
 from geant4_python_application._geant4_application import (
     awkward_version,
     geant4_version,

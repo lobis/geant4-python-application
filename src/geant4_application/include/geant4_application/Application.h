@@ -54,8 +54,6 @@ public:
 
     void Initialize();
     py::list Run(const py::object& primaries);
-    void StartVisualization(const std::vector<std::string>& commands);
-    static bool VisualizationAvailable();
 
     bool IsSetup() const;
     bool IsInitialized() const;
