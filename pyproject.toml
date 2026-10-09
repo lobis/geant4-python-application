@@ -55,6 +55,11 @@ wheel.expand-macos-universal-tags = true
 write_to = "src/geant4_python_application/_version.py"
 
 [project.optional-dependencies]
+# Qt for the interactive viewer in the published wheels. Only Application.visualize()
+# loads it; source builds use the Qt that their Geant4 was built against instead.
+gui = [
+    "PyQt5-Qt5>=5.15.2,<5.16",
+]
 dev = [
     "boost_histogram",
     "hist",

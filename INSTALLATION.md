@@ -72,32 +72,39 @@ docker build -t geant4-python-application .
 
 ### Qt visualization
 
-Off by default. Enable it at install time (requires Geant4 built with
-Qt/OpenGL, e.g. conda-forge `geant4` with `qt[yes]`/`opengl-x11[yes]`):
+The Qt viewer is a separate module that only `app.visualize()` loads. Importing
+the package and running simulations never loads Qt, so headless machines and
+clusters need neither Qt nor OpenGL.
+
+For source builds it is off by default. Enable it at install time; this needs a
+Geant4 built as shared libraries with Qt/OpenGL (e.g. conda-forge `geant4` with
+`qt[yes]`/`opengl-x11[yes]`):
 
 ```bash
 pip install --force-reinstall --no-deps . -Ccmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON
 ```
 
-Without it, `app.visualize()` raises `RuntimeError: Visualization support was
-not built`. Scripts that default to visualization (e.g. `b1.py`) can be run
-headless instead with `--batch`.
+`Application.visualization_available()` reports whether the viewer can be
+opened, without loading Qt; otherwise `app.visualize()` raises a `RuntimeError`
+explaining what is missing. Scripts that default to visualization (e.g.
+`b1.py`) can be run headless instead with `--batch`.
 
 ### Relocatable macOS wheel
 
 Bundles Geant4, Xerces-C, Expat, and non-system transitive libraries into the
-wheel:
+wheel. Qt is not bundled: the wheel takes it from the `PyQt5-Qt5` package that
+the `gui` extra installs, so no Homebrew or system Qt is needed at runtime.
 
 ```bash
 PYTHON="$CONDA_PREFIX/bin/python" \
 Geant4_DIR=/usr/local/lib/cmake/Geant4 \
 tools/build_macos_self_contained.sh
+pip install "$(ls dist/self-contained/*.whl)[gui]"
 ```
 
-Install from `dist/self-contained/repaired`. Geant4 datasets (~2 GB) stay
-outside the wheel and download on first use. Homebrew's Qt 5 remains an
-external framework dependency; a fully standalone GUI build needs Qt built as
-non-framework dylibs or linked statically.
+Leave out `[gui]` for a physics-only install. Geant4 datasets (~2 GB) stay
+outside the wheel and download on first use. The wheel only installs on the
+macOS version (and newer) that the bundled Geant4 was built for.
 
 ## Data files
 

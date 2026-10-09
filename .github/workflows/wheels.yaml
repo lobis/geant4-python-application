@@ -14,7 +14,11 @@ env:
   GEANT4_VERSION: 11.2.2
   XERCES_VERSION: 3.2.5
   CPP_STANDARD: 17
-  Geant4_DIR: ${{ github.workspace }}/geant4
+  # Qt the viewer is built against. Headers and tools come from the official
+  # Qt 5.15.2 archive; at runtime the [gui] extra supplies Qt from PyQt5-Qt5.
+  QT_VERSION: 5.15.2
+  PYQT5_QT5_VERSION: 5.15.19
+  MACOSX_DEPLOYMENT_TARGET: "11.0"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -27,6 +31,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -45,159 +51,132 @@ jobs:
           path: dist/*.tar.gz
 
   wheels:
-    name:
-      Build wheel for cp${{ matrix.python }} ${{ matrix.platform_id }} ${{
-      matrix.manylinux_image }}
+    name: Wheels for ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
-            python: 38
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
-          - os: ubuntu-latest
-            python: 39
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
-          - os: ubuntu-latest
-            python: 310
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
-          - os: ubuntu-latest
-            python: 311
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
-          - os: ubuntu-latest
-            python: 312
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
-
-          - os: macos-latest
-            python: 38
-            platform_id: macosx_x86_64
-          - os: macos-latest
-            python: 39
-            platform_id: macosx_x86_64
-          - os: macos-latest
-            python: 310
-            platform_id: macosx_x86_64
-          - os: macos-latest
-            python: 311
-            platform_id: macosx_x86_64
-          - os: macos-latest
-            python: 312
-            platform_id: macosx_x86_64
-
-          - os: macos-latest
-            python: 38
-            platform_id: macosx_arm64
-          - os: macos-latest
-            python: 39
-            platform_id: macosx_arm64
-          - os: macos-latest
-            python: 310
-            platform_id: macosx_arm64
-          - os: macos-latest
-            python: 311
-            platform_id: macosx_arm64
-          - os: macos-latest
-            python: 312
-            platform_id: macosx_arm64
-
-          - os: windows-latest
-            python: 38
-            platform_id: win_amd64
-          - os: windows-latest
-            python: 39
-            platform_id: win_amd64
-          - os: windows-latest
-            python: 310
-            platform_id: win_amd64
-          - os: windows-latest
-            python: 311
-            platform_id: win_amd64
-          - os: windows-latest
-            python: 312
-            platform_id: win_amd64
+          - name: Linux x86_64
+            os: ubuntu-latest
+            arch: x86_64
+          - name: macOS arm64
+            os: macos-15
+            arch: arm64
+            pyqt5_qt5_platform: macosx_11_0_arm64
+          - name: macOS x86_64
+            os: macos-15-intel
+            arch: x86_64
+            pyqt5_qt5_platform: macosx_10_13_x86_64
+    env:
+      Geant4_DIR: ${{ github.workspace }}/geant4
+      QT_PREFIX: ${{ github.workspace }}/qt/5.15.2/clang_64
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup CMake
-        uses: lukka/get-cmake@v3.30.3
-
-      - name: Setup Windows environment variables
-        if: matrix.os == 'windows-latest'
-        shell: bash
-        run: |
-          echo "CMAKE_ARGS=-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" >> $GITHUB_ENV
-
-      - name: Setup MacOS environment variables
-        if: matrix.os == 'macos-latest'
-        run: |
-          echo "CMAKE_ARGS=-DCMAKE_OSX_ARCHITECTURES=${{ matrix.platform_id == 'macosx_x86_64' && 'x86_64' || 'arm64' }}" >> $GITHUB_ENV
-
-      - name: Cache Xerces-C Installation
-        if: matrix.os != 'ubuntu-latest'
-        id: cache-xerces
-        uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/xerces
-          key:
-            xerces-v${{ env.XERCES_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{
-            matrix.platform_id }}
-
-      - name: Build and Install Xerces-C
-        if:
-          steps.cache-xerces.outputs.cache-hit != 'true' && matrix.os !=
-          'ubuntu-latest'
-        run: |
-          git clone https://github.com/apache/xerces-c.git xerces-source
-          git -C xerces-source checkout tags/v${{ env.XERCES_VERSION }}
-          cmake -B xerces-build -S xerces-source ${{ env.CMAKE_ARGS }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DBUILD_SHARED_LIBS=OFF ${{ matrix.os == 'windows-latest' && '-DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv' }}
-          cmake --build xerces-build --parallel $(nproc) --config Release --target install
-
-      - name: Cache Geant4 Installation
-        if: matrix.os != 'ubuntu-latest'
-        id: cache-geant4
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.Geant4_DIR }}
-          key:
-            geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{
-            matrix.platform_id }}
-
-      - name: Build and Install Geant4 (without datasets)
-        if:
-          steps.cache-geant4.outputs.cache-hit != 'true' && matrix.os !=
-          'ubuntu-latest'
-        run: |
-          git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}
-          cmake -B geant4-build -S geant4-source ${{ env.CMAKE_ARGS }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ env.Geant4_DIR }} -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ${{ matrix.os == 'windows-latest' && '-DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF' }}
-          cmake --build geant4-build --parallel $(nproc) --config Release --target install
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.12
 
-      - name: Build wheel
-        uses: pypa/cibuildwheel@v2.21.1
+      - name: Setup CMake
+        if: runner.os == 'macOS'
+        uses: lukka/get-cmake@v3.30.3
+
+      - name: Install Rosetta (runs the x86_64 Qt 5.15.2 build tools)
+        if: runner.os == 'macOS' && matrix.arch == 'arm64'
+        run: sudo softwareupdate --install-rosetta --agree-to-license || true
+
+      - name: Cache Qt
+        if: runner.os == 'macOS'
+        id: cache-qt
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/qt
+          key:
+            qt-${{ env.QT_VERSION }}-pyqt5-qt5-${{ env.PYQT5_QT5_VERSION }}-${{
+            matrix.pyqt5_qt5_platform }}
+
+      - name: Install Qt (official headers and tools, PyQt5-Qt5 libraries)
+        if: runner.os == 'macOS' && steps.cache-qt.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install aqtinstall
+          aqt install-qt mac desktop ${{ env.QT_VERSION }} clang_64 --archives qtbase -O "${{ github.workspace }}/qt"
+          # Recent macOS SDKs dropped the AGL framework that Qt 5.15.2's CMake config still links.
+          grep -rl "AGL" "$QT_PREFIX/lib/cmake" | xargs sed -i '' -e 's#;[^;"]*/AGL\.framework##g' -e 's#"[^;"]*/AGL\.framework;#"#g'
+          # Link against the exact Qt binaries the [gui] extra installs at runtime;
+          # they carry @rpath install names, so wheels need no absolute Qt paths.
+          python -m pip download --no-deps --only-binary=:all: --platform ${{ matrix.pyqt5_qt5_platform }} "PyQt5-Qt5==${{ env.PYQT5_QT5_VERSION }}" -d pyqt5-qt5
+          unzip -q pyqt5-qt5/*.whl 'PyQt5/Qt5/lib/*' -d pyqt5-qt5
+          for framework in "$QT_PREFIX"/lib/*.framework; do
+            name=$(basename "$framework" .framework)
+            binary="pyqt5-qt5/PyQt5/Qt5/lib/$name.framework/Versions/5/$name"
+            if [ -f "$binary" ]; then cp "$binary" "$framework/Versions/5/$name"; fi
+          done
+          rm -rf pyqt5-qt5
+
+      - name: Cache Xerces-C Installation
+        if: runner.os == 'macOS'
+        id: cache-xerces
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/xerces
+          key:
+            xerces-v${{ env.XERCES_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{
+            matrix.arch }}-macos${{ env.MACOSX_DEPLOYMENT_TARGET }}
+
+      - name: Build and Install Xerces-C
+        if: runner.os == 'macOS' && steps.cache-xerces.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/apache/xerces-c.git xerces-source
+          git -C xerces-source checkout tags/v${{ env.XERCES_VERSION }}
+          cmake -G Ninja -B xerces-build -S xerces-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MACOSX_DEPLOYMENT_TARGET }} -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv
+          cmake --build xerces-build --parallel --config Release --target install
+
+      - name: Cache Geant4 Installation
+        if: runner.os == 'macOS'
+        id: cache-geant4
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.Geant4_DIR }}
+          key:
+            geant4-v${{ env.GEANT4_VERSION }}-shared-qt${{ env.QT_VERSION }}-pyqt5-qt5-${{
+            env.PYQT5_QT5_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{ matrix.arch
+            }}-macos${{ env.MACOSX_DEPLOYMENT_TARGET }}
+
+      - name: Build and Install Geant4 (shared, Qt viewer, without datasets)
+        if: runner.os == 'macOS' && steps.cache-geant4.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/Geant4/geant4.git geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}
+          cmake -G Ninja -B geant4-build -S geant4-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ env.Geant4_DIR }} -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MACOSX_DEPLOYMENT_TARGET }} -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DGEANT4_USE_GDML=ON -DGEANT4_USE_QT=ON -DGEANT4_USE_QT3D=OFF -DQt5_DIR=$QT_PREFIX/lib/cmake/Qt5 -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_USE_SYSTEM_EXPAT=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF
+          cmake --build geant4-build --parallel --config Release --target install
+          rm -rf geant4-source geant4-build
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.22.0
         env:
-          CIBW_TEST_COMMAND:
-            python -m pytest {project}/tests -vv --reruns 10 --reruns-delay 30
-            --only-rerun "(?i)http|timeout|connection|socket|resolve"
-          CIBW_ENVIRONMENT: >
-            SKLEARN_SKIP_NETWORK_TESTS=1 SKLEARN_BUILD_PARALLEL=3
-          CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
-          CIBW_ARCHS: all
-          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
-          CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux_image }}
-          CIBW_TEST_SKIP: "*-macosx_arm64" # test on arm64 is not supported yet
+          CIBW_BUILD: cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*
+          CIBW_SKIP: "*-musllinux_*"
+          CIBW_ARCHS: ${{ matrix.arch }}
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          CIBW_CONFIG_SETTINGS: cmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON
+          CIBW_TEST_EXTRAS: test,gui
+          CIBW_TEST_SKIP: ""
+
+          CIBW_ENVIRONMENT_MACOS: >
+            MACOSX_DEPLOYMENT_TARGET=${{ env.MACOSX_DEPLOYMENT_TARGET }}
+            Geant4_DIR=${{ env.Geant4_DIR }}
+            CMAKE_PREFIX_PATH=${{ env.QT_PREFIX }}
+            GEANT4_PYTHON_APPLICATION_DIR=${{ runner.temp }}/geant4-data
+          CIBW_ENVIRONMENT_LINUX: GEANT4_PYTHON_APPLICATION_DIR=/tmp/geant4-data
+
           CIBW_BEFORE_ALL_LINUX: |
+            set -ex
+            dnf install -y qt5-qtbase-devel mesa-libGL-devel mesa-libGLU-devel
             python3 -m pip install cmake ninja
             git clone https://github.com/apache/xerces-c.git /tmp/xerces
             git -C /tmp/xerces checkout tags/v${{ env.XERCES_VERSION }}
@@ -205,17 +184,43 @@ jobs:
             cmake --build /tmp/xerces/build --parallel $(nproc) --target install > /dev/null 2>&1
             rm -rf /tmp/xerces
             git clone https://github.com/Geant4/geant4.git /tmp/geant4 --branch=v${{ env.GEANT4_VERSION }} --depth=1
-            cmake -G Ninja -B /tmp/geant4/build -S /tmp/geant4 -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DCMAKE_BUILD_TYPE=Release -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF
+            cmake -G Ninja -B /tmp/geant4/build -S /tmp/geant4 -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=lib -DGEANT4_USE_GDML=ON -DGEANT4_USE_QT=ON -DGEANT4_USE_QT3D=OFF -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_USE_SYSTEM_EXPAT=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF
             cmake --build /tmp/geant4/build --parallel $(nproc) --target install > /dev/null 2>&1
             rm -rf /tmp/geant4
-          CIBW_ENVIRONMENT_MACOS: >
-            MACOSX_DEPLOYMENT_TARGET=10.15 ${{ matrix.platform_id ==
-            'macosx_arm64' && 'SKIP_PYBIND11_STUBGEN=1' || '' }}
 
-      - name: Upload wheel
+          # Bundle Geant4 into the wheel but leave Qt out; tools/relink_qt_wheel.py
+          # then points the Qt-linked libraries at the PyQt5-Qt5 package.
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
+            rm -rf /tmp/delocated &&
+            delocate-wheel --require-archs {delocate_archs} --exclude .framework/Versions/5/Qt -w /tmp/delocated -v {wheel} &&
+            python -m pip install wheel &&
+            python ${{ github.workspace }}/tools/relink_qt_wheel.py /tmp/delocated/*.whl -w {dest_dir}
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+            rm -rf /tmp/repaired &&
+            auditwheel repair -w /tmp/repaired {wheel}
+            --exclude libQt5Core.so.5 --exclude libQt5Gui.so.5 --exclude libQt5Widgets.so.5
+            --exclude libQt5OpenGL.so.5 --exclude libQt5PrintSupport.so.5 --exclude libQt5DBus.so.5 &&
+            python -m pip install wheel &&
+            python /project/tools/relink_qt_wheel.py /tmp/repaired/*.whl -w {dest_dir}
+
+          # Runtime libraries PyQt5-Qt5 expects from the system, plus a virtual display.
+          CIBW_BEFORE_TEST_LINUX: >
+            dnf install -y xorg-x11-server-Xvfb mesa-dri-drivers mesa-libGL fontconfig freetype
+            libxkbcommon libxkbcommon-x11 xcb-util-wm xcb-util-image xcb-util-keysyms
+            xcb-util-renderutil dbus-libs
+          CIBW_TEST_COMMAND_MACOS: >
+            python -m pytest {project}/tests -vv --reruns 10 --reruns-delay 30
+            --only-rerun "(?i)http|timeout|connection|socket|resolve" &&
+            python {project}/tools/smoke_viewer.py
+          CIBW_TEST_COMMAND_LINUX: >
+            python -m pytest {project}/tests -vv --reruns 10 --reruns-delay 30
+            --only-rerun "(?i)http|timeout|connection|socket|resolve" &&
+            xvfb-run -a python {project}/tools/smoke_viewer.py
+
+      - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          name: cibw-wheels-${{ matrix.os }}-${{ matrix.arch }}
           path: wheelhouse/*.whl
 
   check-wheels-size:
