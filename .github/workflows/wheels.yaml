@@ -152,7 +152,7 @@ jobs:
         if: runner.os == 'macOS' && steps.cache-geant4.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/Geant4/geant4.git geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}
-          cmake -G Ninja -B geant4-build -S geant4-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ env.Geant4_DIR }} -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MACOSX_DEPLOYMENT_TARGET }} -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DGEANT4_USE_GDML=ON -DGEANT4_USE_QT=ON -DGEANT4_USE_QT3D=OFF -DQt5_DIR=$QT_PREFIX/lib/cmake/Qt5 -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_USE_SYSTEM_EXPAT=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF
+          cmake -G Ninja -B geant4-build -S geant4-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ env.Geant4_DIR }} -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ env.MACOSX_DEPLOYMENT_TARGET }} -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DGEANT4_USE_GDML=ON -DGEANT4_USE_QT=ON -DGEANT4_USE_QT3D=OFF -DCMAKE_PREFIX_PATH=$QT_PREFIX -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_USE_SYSTEM_EXPAT=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF
           cmake --build geant4-build --parallel --config Release --target install
           rm -rf geant4-source geant4-build
 
