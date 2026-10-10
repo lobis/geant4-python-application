@@ -6,6 +6,16 @@
 #include <G4LogicalVolumeStore.hh>
 #include <G4NistManager.hh>
 #include <G4PhysicalVolumeStore.hh>
+#include <G4AutoDelete.hh>
+#include <G4GlobalMagFieldMessenger.hh>
+#include <G4SystemOfUnits.hh>
+#include <G4ElectroMagneticField.hh>
+#include <G4EqMagElectricField.hh>
+#include <G4ClassicalRK4.hh>
+#include <G4MagIntegratorDriver.hh>
+#include <G4ChordFinder.hh>
+#include <G4FieldManager.hh>
+#include <G4TransportationManager.hh>
 
 #include <filesystem>
 #include <random>
@@ -13,6 +23,29 @@
 using namespace std;
 using namespace geant4_app;
 namespace fs = std::filesystem;
+
+namespace {
+// Uniform B (tesla) + E field for G4EqMagElectricField.
+// Field value layout is [Bx,By,Bz,Ex,Ey,Ez] (see G4UniformElectricField).
+class UniformEMField : public G4ElectroMagneticField {
+public:
+    UniformEMField(const G4ThreeVector& b, const G4ThreeVector& e) : bField(b), eField(e) {}
+    void GetFieldValue(const G4double*, G4double* field) const override {
+        field[0] = bField.x();
+        field[1] = bField.y();
+        field[2] = bField.z();
+        field[3] = eField.x();
+        field[4] = eField.y();
+        field[5] = eField.z();
+    }
+    G4bool DoesFieldChangeEnergy() const override { return true; }
+private:
+    G4ThreeVector bField;
+    G4ThreeVector eField;
+};
+} // namespace
+
+G4ThreadLocal G4GlobalMagFieldMessenger* DetectorConstruction::magneticFieldMessenger = nullptr;
 
 DetectorConstruction::DetectorConstruction(const string& gdml) : G4VUserDetectorConstruction() {
     SetGDML(gdml);
@@ -33,6 +66,20 @@ void DetectorConstruction::SetSensitiveVolumes(const set<string>& volumes) {
         throw runtime_error("Sensitive volumes cannot be set after sensitive detector construction");
     }
     sensitiveVolumes = volumes;
+}
+
+void DetectorConstruction::SetMagneticField(const array<double, 3>& fieldTesla) {
+    if (fieldConstructed) {
+        throw runtime_error("Magnetic field cannot be changed after initialization");
+    }
+    magneticFieldTesla = fieldTesla;
+}
+
+void DetectorConstruction::SetElectricField(const array<double, 3>& fieldKVperCM) {
+    if (fieldConstructed) {
+        throw runtime_error("Electric field cannot be changed after initialization");
+    }
+    electricFieldKVperCM = fieldKVperCM;
 }
 
 G4VPhysicalVolume* DetectorConstruction::Construct() {
@@ -89,6 +136,42 @@ void DetectorConstruction::ConstructSDandField() {
         // TODO: Regions
     }
     sensitiveDetectorConstructed = true;
+
+    const bool hasElectric = (electricFieldKVperCM[0] != 0. || electricFieldKVperCM[1] != 0. || electricFieldKVperCM[2] != 0.);
+    if (!hasElectric) {
+        const G4ThreeVector field(
+                magneticFieldTesla[0] * tesla,
+                magneticFieldTesla[1] * tesla,
+                magneticFieldTesla[2] * tesla);
+        magneticFieldMessenger = new G4GlobalMagFieldMessenger(field);
+        magneticFieldMessenger->SetVerboseLevel(0);
+        G4AutoDelete::Register(magneticFieldMessenger);
+    } else {
+        // Combined uniform B (tesla) + E (kV/cm) via custom EM field.
+        // Mirrors extended/field/field02 (G4EqMagElectricField + ClassicalRK4).
+        auto* emField = new UniformEMField(
+                G4ThreeVector(
+                        magneticFieldTesla[0] * tesla,
+                        magneticFieldTesla[1] * tesla,
+                        magneticFieldTesla[2] * tesla),
+                G4ThreeVector(
+                        electricFieldKVperCM[0] * kilovolt / cm,
+                        electricFieldKVperCM[1] * kilovolt / cm,
+                        electricFieldKVperCM[2] * kilovolt / cm));
+        auto* equation = new G4EqMagElectricField(emField);
+        auto* stepper = new G4ClassicalRK4(equation, 8);
+        auto* driver = new G4MagInt_Driver(0.01 * mm, stepper, stepper->GetNumberOfVariables());
+        auto* fieldManager = G4TransportationManager::GetTransportationManager()->GetFieldManager();
+        fieldManager->SetDetectorField(emField);
+        fieldManager->SetFieldChangesEnergy(true);
+        fieldManager->SetChordFinder(new G4ChordFinder(driver));
+        G4AutoDelete::Register(emField);
+        G4AutoDelete::Register(equation);
+        G4AutoDelete::Register(stepper);
+        // ChordFinder owns driver; do not double-register driver.
+        magneticFieldMessenger = nullptr;
+    }
+    fieldConstructed = true;
 }
 
 set<string> DetectorConstruction::GetMaterialNames() {

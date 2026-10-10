@@ -9,13 +9,14 @@
 #include <G4HadronPhysicsFTFP_BERT.hh>
 #include <G4IonPhysics.hh>
 #include <G4NeutronTrackingCut.hh>
+#include <G4OpticalPhysics.hh>
 #include <G4RadioactiveDecayPhysics.hh>
 #include <G4StoppingPhysics.hh>
 #include <G4VModularPhysicsList.hh>
 
 using namespace geant4_app;
 
-PhysicsList::PhysicsList() : G4VModularPhysicsList() {
+PhysicsList::PhysicsList(bool optical) : G4VModularPhysicsList() {
     SetVerboseLevel(1);
 
     // Decay physics
@@ -41,4 +42,8 @@ PhysicsList::PhysicsList() : G4VModularPhysicsList() {
 
     // Neutron tracking cut
     RegisterPhysics(new G4NeutronTrackingCut());
+
+    if (optical) {
+        RegisterPhysics(new G4OpticalPhysics());
+    }
 }

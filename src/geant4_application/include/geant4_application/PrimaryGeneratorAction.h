@@ -30,6 +30,7 @@ public:
     inline static void SetAwkwardPrimaryPositions(const std::vector<std::array<double, 3>>& positions) { awkwardPrimaryPositions = positions; }
     inline static void SetAwkwardPrimaryDirections(const std::vector<std::array<double, 3>>& directions) { awkwardPrimaryDirections = directions; }
     inline static void SetAwkwardPrimaryParticles(const std::vector<std::string>& particles) { awkwardPrimaryParticles = particles; }
+    inline static void SetAwkwardPrimaryEventOffsets(const std::vector<size_t>& offsets) { awkwardPrimaryEventOffsets = offsets; }
     static void ClearAwkwardPrimaries();
 
 private:
@@ -41,6 +42,7 @@ private:
     static std::vector<std::array<double, 3>> awkwardPrimaryPositions;
     static std::vector<std::array<double, 3>> awkwardPrimaryDirections;
     static std::vector<std::string> awkwardPrimaryParticles;
+    static std::vector<size_t> awkwardPrimaryEventOffsets;
 };
 
 }// namespace geant4_app

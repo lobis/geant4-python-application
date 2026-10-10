@@ -17,6 +17,6 @@ namespace geant4_app {
 
 class PhysicsList : public G4VModularPhysicsList {
 public:
-    PhysicsList();
+    explicit PhysicsList(bool optical = false);
 };
 }// namespace geant4_app

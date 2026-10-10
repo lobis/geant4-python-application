@@ -8,6 +8,26 @@
 
 #include <G4RunManager.hh>
 #include <G4RunManagerFactory.hh>
+#include <G4ScoringManager.hh>
+#include <G4PhysListFactory.hh>
+#include <G4OpticalPhysics.hh>
+#include <G4EmExtraPhysics.hh>
+#include <G4EmDNAPhysics.hh>
+#include <G4EmDNAPhysics_option1.hh>
+#include <G4EmDNAPhysics_option2.hh>
+#include <G4EmDNAPhysics_option3.hh>
+#include <G4EmDNAPhysics_option4.hh>
+#include <G4EmDNAPhysics_option5.hh>
+#include <G4EmDNAPhysics_option6.hh>
+#include <G4EmDNAPhysics_option7.hh>
+#include <G4EmDNAPhysics_option8.hh>
+#include <G4EmDNAChemistry.hh>
+#include <G4EmDNAChemistry_option1.hh>
+#include <G4EmDNAChemistry_option2.hh>
+#include <G4EmDNAChemistry_option3.hh>
+#include <G4RadioactiveDecayPhysics.hh>
+#include <G4DecayPhysics.hh>
+#include <G4VModularPhysicsList.hh>
 
 #include <algorithm>
 #include <random>
@@ -48,7 +68,7 @@ void Application::SetupDetector(const string& gdml) {
     runManager->SetUserInitialization(new DetectorConstruction(gdml));
 }
 
-void Application::SetupPhysics() {
+void Application::SetupPhysics(const string& physicsListName, bool optical) {
     if (G4RunManager::GetRunManager() == nullptr) {
         throw runtime_error("The run manager needs to be set up before the physics list");
     }
@@ -58,9 +78,88 @@ void Application::SetupPhysics() {
     }
 
     delete runManager->GetUserPhysicsList();
-    auto physics = new PhysicsList();
+    G4VUserPhysicsList* physics = nullptr;
+    if (physicsListName.empty() || physicsListName == "custom") {
+        physics = new PhysicsList(optical);
+    } else {
+        G4PhysListFactory factory;
+        if (!factory.IsReferencePhysList(physicsListName)) {
+            throw runtime_error("Unknown Geant4 reference physics list: " + physicsListName);
+        }
+        physics = factory.GetReferencePhysList(physicsListName);
+        if (optical) {
+            auto modular = dynamic_cast<G4VModularPhysicsList*>(physics);
+            if (modular == nullptr) {
+                delete physics;
+                throw runtime_error("Optical physics requires a modular physics list");
+            }
+            modular->RegisterPhysics(new G4OpticalPhysics());
+        }
+    }
     physics->SetVerboseLevel(0);
     runManager->SetUserInitialization(physics);
+}
+
+vector<string> Application::GetAvailablePhysicsLists() {
+    G4PhysListFactory factory;
+    const auto available = factory.AvailablePhysLists();
+    vector<string> names = {"custom"};
+    names.reserve(available.size() + 1);
+    for (const auto& name: available) {
+        names.emplace_back(name.c_str());
+    }
+    return names;
+}
+
+static G4VPhysicsConstructor* CreateExtraPhysics(const string& name) {
+    if (name == "G4OpticalPhysics") return new G4OpticalPhysics();
+    if (name == "G4EmExtraPhysics") return new G4EmExtraPhysics();
+    if (name == "G4RadioactiveDecayPhysics") return new G4RadioactiveDecayPhysics();
+    if (name == "G4DecayPhysics") return new G4DecayPhysics();
+    if (name == "G4EmDNAPhysics") return new G4EmDNAPhysics();
+    if (name == "G4EmDNAPhysics_option1") return new G4EmDNAPhysics_option1();
+    if (name == "G4EmDNAPhysics_option2") return new G4EmDNAPhysics_option2();
+    if (name == "G4EmDNAPhysics_option3") return new G4EmDNAPhysics_option3();
+    if (name == "G4EmDNAPhysics_option4") return new G4EmDNAPhysics_option4();
+    if (name == "G4EmDNAPhysics_option5") return new G4EmDNAPhysics_option5();
+    if (name == "G4EmDNAPhysics_option6") return new G4EmDNAPhysics_option6();
+    if (name == "G4EmDNAPhysics_option7") return new G4EmDNAPhysics_option7();
+    if (name == "G4EmDNAPhysics_option8") return new G4EmDNAPhysics_option8();
+    if (name == "G4EmDNAChemistry") return new G4EmDNAChemistry();
+    if (name == "G4EmDNAChemistry_option1") return new G4EmDNAChemistry_option1();
+    if (name == "G4EmDNAChemistry_option2") return new G4EmDNAChemistry_option2();
+    if (name == "G4EmDNAChemistry_option3") return new G4EmDNAChemistry_option3();
+    return nullptr;
+}
+
+vector<string> Application::GetAvailableExtraPhysics() {
+    return {"G4OpticalPhysics", "G4EmExtraPhysics", "G4RadioactiveDecayPhysics", "G4DecayPhysics",
+            "G4EmDNAPhysics", "G4EmDNAPhysics_option1", "G4EmDNAPhysics_option2", "G4EmDNAPhysics_option3",
+            "G4EmDNAPhysics_option4", "G4EmDNAPhysics_option5", "G4EmDNAPhysics_option6",
+            "G4EmDNAPhysics_option7", "G4EmDNAPhysics_option8",
+            "G4EmDNAChemistry", "G4EmDNAChemistry_option1", "G4EmDNAChemistry_option2", "G4EmDNAChemistry_option3"};
+}
+
+void Application::AddExtraPhysics(const string& constructorName) {
+    if (G4RunManager::GetRunManager() == nullptr) {
+        throw runtime_error("The run manager needs to be set up before adding physics");
+    }
+    if (runManager->GetUserPhysicsList() == nullptr) {
+        throw runtime_error("Setup physics before adding extra physics constructors");
+    }
+    if (IsInitialized()) {
+        throw runtime_error("Extra physics cannot be added after initialization");
+    }
+    auto* modular = dynamic_cast<G4VModularPhysicsList*>(const_cast<G4VUserPhysicsList*>(runManager->GetUserPhysicsList()));
+    if (modular == nullptr) {
+        throw runtime_error("Extra physics requires a modular physics list");
+    }
+    G4VPhysicsConstructor* ctor = CreateExtraPhysics(constructorName);
+    if (ctor == nullptr) {
+        throw runtime_error("Unknown extra physics constructor: " + constructorName +
+                            ". See available_extra_physics()");
+    }
+    modular->RegisterPhysics(ctor);
 }
 
 void Application::SetupAction() {
@@ -88,11 +187,30 @@ void Application::SetupManager(unsigned short nThreads) {
     delete G4VSteppingVerbose::GetInstance();
     SteppingVerbose::SetInstance(new SteppingVerbose);
 
+#ifndef G4MULTITHREADED
+    if (nThreads > 0) {
+        throw runtime_error(
+                "This Geant4 installation was built without multithreading support; "
+                "use n_threads=0");
+    }
+#endif
+
     const auto runManagerType = nThreads > 0 ? G4RunManagerType::MTOnly : G4RunManagerType::SerialOnly;
     runManager = unique_ptr<G4RunManager>(G4RunManagerFactory::CreateRunManager(runManagerType));
+    // Instantiate the command-based scoring manager so /score/* UI commands
+    // are available to Python before initialization.
+    G4ScoringManager::GetScoringManager();
     if (nThreads > 0) {
         runManager->SetNumberOfThreads((G4int) nThreads);
     }
+}
+
+bool Application::MultithreadingAvailable() {
+#ifdef G4MULTITHREADED
+    return true;
+#else
+    return false;
+#endif
 }
 
 void Application::Initialize() {
@@ -145,30 +263,42 @@ py::list Application::Run(const py::object& primaries) {
         const auto fields = py::cast<py::set>(primaries.attr("fields"));
         const auto nEvents = py::cast<G4int>(len_func(primaries));
 
-        if (fields.contains("energy")) {
-            std::vector<double> energies = py::cast<std::vector<double>>(primaries.attr("energy"));
+        py::object primaryRecords = primaries;
+        if (fields.contains("primaries")) {
+            primaryRecords = primaries.attr("primaries");
+            auto countsObject = ak.attr("to_list")(ak.attr("num")(primaryRecords, py::arg("axis") = 1));
+            auto counts = py::cast<vector<size_t>>(countsObject);
+            vector<size_t> offsets = {0};
+            for (const auto count: counts) offsets.push_back(offsets.back() + count);
+            PrimaryGeneratorAction::SetAwkwardPrimaryEventOffsets(offsets);
+            primaryRecords = ak.attr("flatten")(primaryRecords, py::arg("axis") = 1);
+        }
+        const auto primaryFields = py::cast<py::set>(primaryRecords.attr("fields"));
+
+        if (primaryFields.contains("energy")) {
+            std::vector<double> energies = py::cast<std::vector<double>>(primaryRecords.attr("energy"));
             PrimaryGeneratorAction::SetAwkwardPrimaryEnergies(energies);
         }
-        if (fields.contains("particle")) {
-            std::vector<std::string> particles = py::cast<std::vector<std::string>>(primaries.attr("particle"));
+        if (primaryFields.contains("particle")) {
+            std::vector<std::string> particles = py::cast<std::vector<std::string>>(primaryRecords.attr("particle"));
             PrimaryGeneratorAction::SetAwkwardPrimaryParticles(particles);
         }
-        if (fields.contains("position")) {
-            std::vector<double> positionX = py::cast<std::vector<double>>(primaries.attr("position")["x"]);
-            std::vector<double> positionY = py::cast<std::vector<double>>(primaries.attr("position")["y"]);
-            std::vector<double> positionZ = py::cast<std::vector<double>>(primaries.attr("position")["z"]);
+        if (primaryFields.contains("position")) {
+            std::vector<double> positionX = py::cast<std::vector<double>>(primaryRecords.attr("position")["x"]);
+            std::vector<double> positionY = py::cast<std::vector<double>>(primaryRecords.attr("position")["y"]);
+            std::vector<double> positionZ = py::cast<std::vector<double>>(primaryRecords.attr("position")["z"]);
             std::vector<std::array<double, 3>> positions;
-            for (size_t i = 0; i < nEvents; i++) {
+            for (size_t i = 0; i < positionX.size(); i++) {
                 positions.push_back({positionX[i], positionY[i], positionZ[i]});
             }
             PrimaryGeneratorAction::SetAwkwardPrimaryPositions(positions);
         }
-        if (fields.contains("direction")) {
-            std::vector<double> directionX = py::cast<std::vector<double>>(primaries.attr("direction")["x"]);
-            std::vector<double> directionY = py::cast<std::vector<double>>(primaries.attr("direction")["y"]);
-            std::vector<double> directionZ = py::cast<std::vector<double>>(primaries.attr("direction")["z"]);
+        if (primaryFields.contains("direction")) {
+            std::vector<double> directionX = py::cast<std::vector<double>>(primaryRecords.attr("direction")["x"]);
+            std::vector<double> directionY = py::cast<std::vector<double>>(primaryRecords.attr("direction")["y"]);
+            std::vector<double> directionZ = py::cast<std::vector<double>>(primaryRecords.attr("direction")["z"]);
             std::vector<std::array<double, 3>> directions;
-            for (size_t i = 0; i < nEvents; i++) {
+            for (size_t i = 0; i < directionX.size(); i++) {
                 directions.push_back({directionX[i], directionY[i], directionZ[i]});
             }
             PrimaryGeneratorAction::SetAwkwardPrimaryDirections(directions);
@@ -178,6 +308,7 @@ py::list Application::Run(const py::object& primaries) {
         return *RunAction::GetContainer();
     }
 }
+
 
 bool Application::IsSetup() const {
     return runManager != nullptr && runManager->GetUserDetectorConstruction() != nullptr &&

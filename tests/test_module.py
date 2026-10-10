@@ -15,3 +15,4 @@ def test_imports():
     assert geant4_python_application
     assert geant4_python_application.Application
     assert geant4_python_application.Detector
+    assert geant4_python_application.Generator
