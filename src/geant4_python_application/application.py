@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import importlib.util
 import multiprocessing
+import os
 import threading
 from collections import namedtuple
+from pathlib import Path
 
 import awkward as ak
 
@@ -33,6 +36,45 @@ _default_event_fields = {
 }
 
 
+_package_dir = Path(__file__).parent
+# Written into wheels whose Qt-linked libraries were repointed at the Qt shipped
+# in the PyQt5-Qt5 package (see tools/relink_qt_wheel.py).
+_PIP_QT_MARKER = _package_dir / "_qt_from_pyqt5_qt5"
+_PIP_QT_DIR = _package_dir.parent / "PyQt5" / "Qt5"
+
+
+def _visualization_problem() -> str | None:
+    """Why the Qt viewer can't be opened, or None if it can. Never loads Qt."""
+    if importlib.util.find_spec("geant4_python_application._geant4_vis") is None:
+        return (
+            "This installation was built without the Qt viewer. Reinstall from "
+            "source with -Ccmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON "
+            "using a Geant4 built with Qt and OpenGL."
+        )
+    if _PIP_QT_MARKER.exists() and not (_PIP_QT_DIR / "lib").is_dir():
+        return (
+            "The Qt viewer needs Qt from the 'gui' extra: "
+            "pip install 'geant4_python_application[gui]'"
+        )
+    return None
+
+
+def _visualize(app, commands: list[str]) -> None:
+    """Runs in the Geant4 child process, which then owns the Qt event loop."""
+    problem = _visualization_problem()
+    if problem is not None:
+        raise RuntimeError(problem)
+    # A platform plugin only loads into the exact Qt build it was compiled for,
+    # so point Qt at the plugins shipped alongside the Qt libraries in use.
+    if _PIP_QT_MARKER.exists():
+        os.environ["QT_PLUGIN_PATH"] = str(_PIP_QT_DIR / "plugins")
+    from geant4_python_application import _geant4_vis
+
+    if not app.is_initialized():
+        app.initialize()
+    _geant4_vis.start_visualization(commands)
+
+
 def _start_application(pipe: multiprocessing.Pipe):
     app = Geant4Application()
     app.set_event_fields(_default_event_fields)
@@ -44,6 +86,12 @@ def _start_application(pipe: multiprocessing.Pipe):
                 break
 
             counter, message = message_with_counter
+            if message.target == "" and message.method == "visualize":
+                # Handled here so the Qt viewer module is only ever imported in
+                # this process, and only when a viewer is actually requested.
+                _visualize(app, *message.args, **message.kwargs)
+                pipe.send((counter, None))
+                continue
             target = app
             target_list = message.target.split(".")
             target_list = [element for element in target_list if element]
@@ -70,7 +118,12 @@ def _start_application(pipe: multiprocessing.Pipe):
 
 class Application:
     def __init__(
-        self, n_threads: int = 0, gdml: str = None, physics=None, seed: int = 0
+        self,
+        n_threads: int = 0,
+        gdml: str = None,
+        physics: str = "custom",
+        optical: bool = False,
+        seed: int = 0,
     ):
         geant4_python_application.install_datasets(show_progress=True)
 
@@ -83,8 +136,11 @@ class Application:
 
         self._seed = seed
         self._detector = geant4_python_application.Detector(self)
+        self._generator = geant4_python_application.Generator(self)
         self._n_threads = n_threads
         self._gdml = gdml
+        self._physics = physics
+        self._optical = optical
 
     def start(self, setup: bool = True, initialize: bool = False) -> Application:
         if self._process.is_alive():
@@ -94,7 +150,7 @@ class Application:
         if setup:
             self.seed = self._seed
             self.setup_manager(self._n_threads)
-            self.setup_physics()
+            self.setup_physics(self._physics, optical=self._optical)
 
             if self._gdml is not None:
                 self.setup_detector(self._gdml)
@@ -149,8 +205,30 @@ class Application:
         self._send_and_recv(Message("", "setup_manager", (n_threads,), {}))
         return self
 
-    def setup_physics(self) -> Application:
-        self._send_and_recv(Message("", "setup_physics", (), {}))
+    def setup_physics(
+        self, physics_list: str = "custom", *, optical: bool = False
+    ) -> Application:
+        self._send_and_recv(
+            Message("", "setup_physics", (physics_list, optical), {})
+        )
+        return self
+
+    @staticmethod
+    def available_physics_lists() -> list[str]:
+        return list(Geant4Application.available_physics_lists())
+
+    @staticmethod
+    def available_extra_physics() -> list[str]:
+        """Extra G4VPhysicsConstructor names usable with add_physics (incl. DNA)."""
+        return list(Geant4Application.available_extra_physics())
+
+    def add_physics(self, constructor_name: str) -> Application:
+        """Register an extra physics constructor (e.g. DNA, optical, EM extra).
+
+        Must be called after setup_physics and before initialize/run.
+        Example: app.add_physics("G4EmDNAPhysics_option2")
+        """
+        self._send_and_recv(Message("", "add_physics", (constructor_name,), {}))
         return self
 
     def setup_detector(self, gdml: str) -> Application:
@@ -253,6 +331,62 @@ class Application:
             events = events[ak.argsort(events.id)]
         return events
 
+    def run_with_callbacks(
+        self,
+        primaries: int | ak.Array,
+        *,
+        on_run=None,
+        on_event=None,
+        on_track=None,
+        on_step=None,
+    ):
+        """Run then invoke Python callbacks over run/event/track/step records.
+
+        Offline (post-run) layer over the awkward event model:
+        on_run(events), on_event(event) per event, on_track(track, event)
+        per track, on_step(step, track, event) per step. Returns events.
+
+        Note: events.track is a struct-of-lists per event (see DataModel),
+        so tracks/steps are reconstructed via ak.zip per event/track.
+        """
+        events = self.run(primaries)
+        if on_run is not None:
+            on_run(events)
+        if on_event is None and on_track is None and on_step is None:
+            return events
+        for ei in range(len(events)):
+            event = events[ei]
+            if on_event is not None:
+                on_event(event)
+            if on_track is None and on_step is None:
+                continue
+            if "track" not in event.fields:
+                continue
+            track_struct = event.track
+            if "id" not in track_struct.fields:
+                continue
+            n_tracks = len(track_struct.id)
+            track_only_fields = [f for f in track_struct.fields if f != "step"]
+            has_steps = "step" in track_struct.fields
+            for ti in range(n_tracks):
+                # Lightweight dict view (scalars/vectors); steps as awkward array.
+                track_view = {f: track_struct[f][ti] for f in track_only_fields}
+                steps_view = None
+                if has_steps:
+                    step_struct = track_struct.step
+                    steps_view = ak.zip(
+                        {f: step_struct[f][ti] for f in step_struct.fields}
+                    )
+                    track_view = dict(track_view)
+                    track_view["step"] = steps_view
+                if on_track is not None:
+                    on_track(track_view, event)
+                if on_step is None or steps_view is None:
+                    continue
+                for step in steps_view:
+                    on_step(step, track_view, event)
+        return events
+
     @property
     def seed(self):
         return self._send_and_recv(Message("", "get_seed", (), {}))
@@ -273,6 +407,37 @@ class Application:
     def list_commands(self, directory="/") -> str:
         return self._send_and_recv(Message("", "list_commands", (directory,), {}))
 
+    @staticmethod
+    def visualization_available() -> bool:
+        """Whether the Qt viewer can be opened. Does not load Qt."""
+        return _visualization_problem() is None
+
+    @staticmethod
+    def multithreading_available() -> bool:
+        """Whether the linked Geant4 runtime supports multithreaded run managers."""
+        return Geant4Application.multithreading_available()
+
+    def visualize(self, commands: list[str] | None = None) -> Application:
+        """Open the interactive Geant4 Qt viewer.
+
+        The call returns after the viewer is closed. Geant4 commands can be
+        entered in the Qt session's command panel while it is open.
+        """
+        if commands is None:
+            commands = [
+                "/vis/open OGL",
+                "/vis/drawVolume",
+                "/vis/viewer/set/autoRefresh true",
+                "/vis/scene/add/trajectories smooth",
+                "/vis/scene/endOfEventAction accumulate",
+            ]
+        self._send_and_recv(Message("", "visualize", (commands,), {}))
+        return self
+
     @property
     def detector(self) -> geant4_python_application.Detector:
         return self._detector
+
+    @property
+    def generator(self) -> geant4_python_application.Generator:
+        return self._generator
