@@ -31,7 +31,10 @@ BUNDLED_QT = re.compile(r"^(libQt5\w*|Qt[A-Z]\w*)([.-]|$)")
 
 
 def run(*args: str) -> str:
-    return subprocess.run(args, check=True, capture_output=True, text=True).stdout
+    result = subprocess.run(args, capture_output=True, text=True)
+    if result.returncode != 0:
+        sys.exit(f"Command failed ({result.returncode}): {' '.join(args)}\n{result.stderr}{result.stdout}")
+    return result.stdout
 
 
 def binaries(root: Path):
