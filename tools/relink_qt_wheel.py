@@ -17,6 +17,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import zipfile
 from pathlib import Path
 
 PACKAGE = "geant4_python_application"
@@ -35,6 +36,17 @@ def run(*args: str) -> str:
     if result.returncode != 0:
         sys.exit(f"Command failed ({result.returncode}): {' '.join(args)}\n{result.stderr}{result.stdout}")
     return result.stdout
+
+
+def unpack(wheel: Path, root: Path) -> None:
+    # Not 'wheel unpack': it rejects RECORD hashes that delocate leaves stale
+    # after retagging WHEEL. 'wheel pack' regenerates RECORD afterwards anyway.
+    with zipfile.ZipFile(wheel) as archive:
+        for info in archive.infolist():
+            path = Path(archive.extract(info, root))
+            mode = (info.external_attr >> 16) & 0o777
+            if mode:
+                path.chmod(mode)
 
 
 def binaries(root: Path):
@@ -87,8 +99,8 @@ def main() -> None:
 
     relink = relink_macos if sys.platform == "darwin" else relink_linux
     with tempfile.TemporaryDirectory() as tmp:
-        run(sys.executable, "-m", "wheel", "unpack", str(args.wheel), "-d", tmp)
-        (root,) = Path(tmp).iterdir()
+        root = Path(tmp) / "wheel"
+        unpack(args.wheel, root)
 
         bundled = [str(p.relative_to(root)) for p in root.rglob("*") if BUNDLED_QT.match(p.name)]
         if bundled:
