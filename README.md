@@ -23,125 +23,41 @@ looking at [geant4_pybind](https://github.com/HaarigerHarald/geant4_pybind).
 - The complete event data is available as an
   [awkward array](https://github.com/scikit-hep/awkward)
 
+New to Geant4 or this package? See the
+[Python developer guide](PYTHON_DEVELOPER_GUIDE.md).
+
+## Platform support
+
+Tested on macOS and Ubuntu; still undergoing broader testing. If you hit a
+bug, please report it via [GitHub Issues](https://github.com/lobis/geant4-python-application/issues)
+or reach out to kavyavadhwa@gmail.com.
+
 ## Installation
 
-The package is pip installable and should work on all major platforms. Geant4 is
-not required to be installed on the system as the PyPI distribution includes a
-statically linked version of Geant4.
-
-However, for the time being, it's recommended to install from the GitHub
-repository to get the latest version, which makes Geant4 a necessary dependency.
-
-Geant4 is available on conda-forge and can be installed with:
+Prebuilt wheels for macOS (Apple Silicon and Intel) and Linux x86_64, Python
+3.8 – 3.13, bundle Geant4 — no separate Geant4 (C++) installation is needed:
 
 ```bash
-conda install -c conda-forge geant4=11.2.2
+pip install "geant4-python-application[gui]"
 ```
 
-This project can then be installed via pip:
+The `gui` extra adds the interactive Qt viewer; leave it out for a
+physics-only install. Until the package is published on PyPI, install the
+wheels from a
+[GitHub release](https://github.com/lobis/geant4-python-application/releases)
+as described in [INSTALLATION.md](INSTALLATION.md).
+
+Geant4's physics data files download automatically on first use, so you can
+run an example straight away:
 
 ```bash
-python -m pip install git+https://github.com/lobis/geant4-python-application
+python examples/geant4-examples/Geant4-11.4.2-examples-python/basic/B1/b1.py --batch -n 10
 ```
 
-You may need additional dependencies to perform the build. I found that these
-are usually enuough:
+`--batch` runs headless; drop it to open the Qt viewer.
 
-```bash
-conda install cmake ninja gxx_linux-64
-```
-
-The provided `Dockerfile` can be used for development purposes and as
-documentation on the required dependencies. To build the image run from the root
-directory:
-
-```bash
-docker build -t geant4-python-application .
-```
-
-Geant4 can be installed using conda:
-
-```bash
-conda install -c conda-forge geant4
-```
-
-For development purposes however, it's recommended to install Geant4 from source
-with a similar configuration to the one used in the CI:
-
-```bash
-git clone https://github.com/Geant4/geant4.git ./geant4-source --depth 1 --branch v11.2.2
-
-cmake -B ./geant4-build -S ./geant4-source -DCMAKE_INSTALL_PREFIX=./geant4-install -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF
-cmake --build ./geant4-build --parallel $(nproc) --config Release --target install
-```
-
-One common installation issue is the dependency `xerces-c`. You may be able to
-install it from your package manager (e.g. `apt-get install libxerces-c-dev) but
-it's also possible to build it from source. In this case make sure the
-installation directory is accessible or just use the default system path.
-
-```bash
-git clone https://github.com/apache/xerces-c.git ./xerces-source
-git -C ./xerces-source checkout tags/v3.2.5
-cmake -B ./xerces-build -S ./xerces-source -DCMAKE_INSTALL_PREFIX=./xerces-install  -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv
-cmake --build ./xerces-build --parallel $(nproc) --config Release --target install
-```
-
-After all dependencies are met, you should be able to install the package by
-running the following command from the root directory:
-
-```bash
-pip install .
-```
-
-### Geant4 data files
-
-Geant4 comes with a large set of data files which are required in order to run.
-The data files are the bulk of the Geant4 installation and can be quite large.
-These data files are not included in the Python wheels for this package due to
-its size.
-
-The python package automatically manages the download of the data files. To
-check the location of the data files, run the following command:
-
-```bash
-python -c "import geant4_python_application; print(geant4_python_application.get_data_path())"
-```
-
-**Uninstalling the package will not remove the data files. The user is
-responsible for removing them manually.**
-
-#### Overriding the default data path
-
-The default data path can be overridden by calling `application_directory`. This
-should be done before the application is initialized.
-
-```python
-from geant4_python_application import application_directory
-
-application_directory("/some/other/path")
-```
-
-Overriding the default data directory is encouraged when submitting batch jobs
-to a cluster in order to avoid downloading the data files multiple times. In
-this case the application directory should point to some shared location.
-
-#### Using a temporary directory
-
-A temporary directory can be used by calling:
-
-```python
-from geant4_python_application import application_directory
-
-application_directory(temp=True)
-```
-
-The operating system should take care of cleaning up the temporary directory.
-
-It is possible that the operating system will delete only some of the files in
-the temporary directory which can lead to a Geant4 runtime error. In this case
-it's recommended to delete the temporary directory manually and let the
-application recreate it again.
+Building from source (other platforms, development), the Qt viewer, and data
+file management are covered in [INSTALLATION.md](INSTALLATION.md).
 
 ## Usage
 
@@ -152,7 +68,101 @@ import geant4_python_application as g4
 g4.application_directory(temp=True)
 
 with g4.Application(gdml=g4.basic_gdml, seed=137) as app:
-    events = app.run(n_events=100)
+    events = app.run(100)
 
 print(events)
+```
+
+A Geant4 reference physics list can be selected by name:
+
+```python
+with g4.Application(gdml=g4.basic_gdml, physics="FTFP_BERT") as app:
+    events = app.run(100)
+
+print(g4.Application.available_physics_lists())
+```
+
+Particle guns and Geant4's General Particle Source have a Python interface:
+
+```python
+with g4.Application(gdml=g4.basic_gdml) as app:
+    app.generator.use_gps().particle("gamma").energy(2, "MeV")
+    app.generator.position(0, 0, -10, "cm").direction(0, 0, 1)
+    events = app.run(100)
+```
+
+Advanced GPS distributions remain accessible through
+`app.generator.commands(["/gps/pos/type Plane", ...])`.
+
+Optical physics and uniform global magnetic/electric fields can be enabled directly:
+
+```python
+with g4.Application(gdml=my_optical_gdml, optical=True) as app:
+    app.detector.magnetic_field = (0.0, 0.0, 1.5)  # tesla
+    app.detector.electric_field = (0.0, 0.0, 0.5)  # kV/cm
+    events = app.run(100)
+```
+
+Optical scintillator GDML + tuning helpers:
+
+```python
+from geant4_python_application import optical as gopt
+
+with g4.Application(gdml=gopt.optical_water_gdml, optical=True) as app:
+    app.commands(gopt.scintillation_commands(yield_factor=1.0))
+    events = app.run(100)  # track.particle contains 'opticalphoton'
+```
+
+Recorded steps can be scored per event or into a Cartesian energy mesh:
+
+```python
+energy_per_event = g4.Scoring.energy_deposit(events, volume="detector")
+mesh, edges = g4.Scoring.energy_mesh(events, bins=(20, 20, 40))
+```
+
+Python run/event/track/step callbacks (offline over awkward arrays):
+
+```python
+with g4.Application(gdml=g4.basic_gdml) as app:
+    events = app.run_with_callbacks(
+        100, on_run=lambda evs: print(len(evs)),
+        on_event=lambda ev: None, on_track=lambda tr, ev: None,
+        on_step=lambda st, tr, ev: None,
+    )
+```
+
+Extra physics constructors incl. DNA, CAD/VTK/ROOT/HepMC, and MPI splitting:
+
+```python
+print(g4.Application.available_extra_physics())
+with g4.Application(gdml=g4.basic_gdml, physics="FTFP_BERT") as app:
+    app.add_physics("G4EmDNAPhysics_option2")  # or G4EmExtraPhysics, G4OpticalPhysics...
+    events = app.run(100)
+
+from geant4_python_application import cad, io as gio, distributed as dist
+
+gdml = cad.mesh_to_gdml(*cad.cube_mesh(100.0))  # or cad.stl_ascii_to_gdml(stl_text)
+gio.mesh_to_vtk(mesh, edges, "mesh.vtk")
+gio.events_to_parquet(events, "events.parquet")
+gio.events_to_root(events, "events.root")  # needs uproot
+primaries = gio.hepmc_to_primaries(open("events.hepmc").read())
+
+rank, size = dist.get_rank_size()
+start, count = dist.split_count(1000, rank, size)  # mpiexec -n 2 python run.py
+```
+
+### Interactive Qt visualization
+
+Install with the `gui` extra (`pip install "geant4-python-application[gui]"`),
+or for source builds see [INSTALLATION.md](INSTALLATION.md). Then open Geant4's
+interactive Qt viewer. The call returns when the window is closed, and commands
+can be entered in the viewer's command panel:
+
+```python
+import geant4_python_application as g4
+
+with g4.Application(gdml=g4.basic_gdml, seed=137) as app:
+    app.command("/gun/particle e-")
+    app.command("/gun/energy 100 MeV")
+    app.visualize()
 ```
