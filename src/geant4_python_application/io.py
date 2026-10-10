@@ -26,7 +26,7 @@ def mesh_to_vtk(mesh: np.ndarray, edges: tuple, filename: str | Path) -> Path:
         raise ValueError(msg)
     origins, spacings = [], []
     dims = []
-    for n, e in zip((nx, ny, nz), edges, strict=True):
+    for n, e in zip((nx, ny, nz), edges):
         e = np.asarray(e, dtype=float)
         if len(e) != n + 1:
             msg = f"edges length {len(e)} inconsistent with mesh dim {n}"
