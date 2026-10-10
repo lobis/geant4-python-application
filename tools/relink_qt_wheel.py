@@ -53,7 +53,11 @@ def relink_macos(root: Path, binary: Path) -> bool:
         if old != f"@rpath/{framework}":
             run("install_name_tool", "-change", old, f"@rpath/{framework}", str(binary))
     rpath = rpath_to_qt(root, binary, "@loader_path")
-    if f"path {rpath} " not in run("otool", "-l", str(binary)):
+    rpaths = re.findall(r"^\s+path (\S+) \(offset", run("otool", "-l", str(binary)), re.M)
+    # Absolute rpaths only point into the build machine (e.g. its Qt or Geant4).
+    for stale in (p for p in rpaths if p.startswith("/")):
+        run("install_name_tool", "-delete_rpath", stale, str(binary))
+    if rpath not in rpaths:
         run("install_name_tool", "-add_rpath", rpath, str(binary))
     # install_name_tool invalidates the ad-hoc signature, and arm64 macOS
     # refuses to load unsigned code.
