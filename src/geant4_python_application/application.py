@@ -122,8 +122,9 @@ class Application:
         n_threads: int = 0,
         gdml: str = None,
         physics: str = "custom",
-        optical: bool = False,
         seed: int = 0,
+        *,
+        optical: bool = False,
     ):
         geant4_python_application.install_datasets(show_progress=True)
 

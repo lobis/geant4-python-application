@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import pathlib
-import sys
 import tempfile
 
 import platformdirs
@@ -15,13 +14,10 @@ _app_author = "lobis"
 
 _dirs = platformdirs.AppDirs(_app_name, _app_author)
 
-# Keep datasets with the active Python environment by default.  This makes a
-# venv/conda installation relocatable as one unit instead of silently sharing
-# data from the user's global Application Support directory.  The environment
-# variable retains an explicit deployment-time override.
+# Shared by every environment of the user, so the ~2 GB of datasets download
+# only once. GEANT4_PYTHON_APPLICATION_DIR overrides it, e.g. on clusters.
 _application_directory = os.environ.get(
-    "GEANT4_PYTHON_APPLICATION_DIR",
-    os.path.join(sys.prefix, "share", _app_name),
+    "GEANT4_PYTHON_APPLICATION_DIR", _dirs.user_data_dir
 )
 
 

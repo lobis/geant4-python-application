@@ -15,6 +15,11 @@ requires a Geant4 installation.
 
 ### From PyPI
 
+> **Not published yet.** The first PyPI release will be 0.1.0. Until then,
+> `pip install geant4-python-application` fails with "No matching distribution
+> found"; use the [CI wheels](#from-a-ci-build-before-the-first-release)
+> instead.
+
 ```bash
 pip install "geant4-python-application[gui]"
 ```
@@ -27,15 +32,35 @@ pip install geant4-python-application
 
 ### From a GitHub release
 
-Until the package is on PyPI, install the wheels attached to a
-[GitHub release](https://github.com/lobis/geant4-python-application/releases).
-pip picks the right wheel for your platform and Python version; replace `<tag>`
-with the release tag:
+Each [GitHub release](https://github.com/lobis/geant4-python-application/releases)
+from 0.1.0 on also has the wheels attached. pip picks the right wheel for your
+platform and Python version; replace `<tag>` with the release tag (e.g.
+`v0.1.0`):
 
 ```bash
 pip install "geant4-python-application[gui]" \
   --find-links https://github.com/lobis/geant4-python-application/releases/expanded_assets/<tag>
 ```
+
+### From a CI build (before the first release)
+
+Every run of the
+[Wheels workflow](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml)
+keeps its wheels as downloadable artifacts for 90 days. Pick a successful run
+and download the artifact for your platform: `cibw-wheels-ubuntu-latest-x86_64`
+(Linux), `cibw-wheels-macos-15-arm64` (Apple Silicon) or
+`cibw-wheels-macos-15-intel-x86_64` (Intel Mac). From the run page this needs a
+GitHub login; with the [GitHub CLI](https://cli.github.com) (`gh auth login`
+first):
+
+```bash
+gh run download <run-id> --repo lobis/geant4-python-application \
+  -n cibw-wheels-ubuntu-latest-x86_64 -D ./g4-wheels
+pip install "geant4-python-application[gui]" --find-links ./g4-wheels
+```
+
+`--find-links` takes the package from the folder and its dependencies
+(including Qt for `[gui]`) from PyPI.
 
 ### What the `gui` extra does
 
@@ -176,8 +201,9 @@ versions, in which case those are used.
 python -c "import geant4_python_application as g4; print(g4.data_directory())"
 ```
 
-- Default location: `$CONDA_PREFIX/share/geant4_python_application` (or the
-  equivalent `sys.prefix` for a venv).
+- Default location, shared by all your Python environments so the data
+  downloads only once: `~/Library/Application Support/geant4_python_application`
+  on macOS, `~/.local/share/geant4_python_application` on Linux.
 - Override the persistent location by setting `GEANT4_PYTHON_APPLICATION_DIR`
   before import, or calling `application_directory(path)` before the
   application initializes.

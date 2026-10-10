@@ -42,10 +42,11 @@ pip install "geant4-python-application[gui]"
 ```
 
 The `gui` extra adds the interactive Qt viewer; leave it out for a
-physics-only install. Until the package is published on PyPI, install the
-wheels from a
-[GitHub release](https://github.com/lobis/geant4-python-application/releases)
-as described in [INSTALLATION.md](INSTALLATION.md).
+physics-only install.
+
+> **Not on PyPI yet:** the first release will be 0.1.0. Until then, install the
+> wheels built by CI as described in
+> [INSTALLATION.md](INSTALLATION.md#from-a-ci-build-before-the-first-release).
 
 Geant4's physics data files download automatically on first use, so you can
 run an example straight away:
