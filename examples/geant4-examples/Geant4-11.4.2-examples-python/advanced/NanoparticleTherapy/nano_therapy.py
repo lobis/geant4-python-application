@@ -21,10 +21,16 @@ import argparse
 import math
 
 import awkward as ak
+
 import geant4_python_application as g4
 
 # Densities (g/cm3) for dose = energy / mass estimates.
-DENSITY = {"Phantom": 1.0, "Tumor": 1.127, "NanoCluster_Au": 19.32, "NanoCluster_tissue": 1.127}
+DENSITY = {
+    "Phantom": 1.0,
+    "Tumor": 1.127,
+    "NanoCluster_Au": 19.32,
+    "NanoCluster_tissue": 1.127,
+}
 KEV_TO_JOULE = 1.602176634e-16
 
 
@@ -56,10 +62,14 @@ def run_case(events_n: int, with_gold: bool) -> dict[str, float]:
     """Run one configuration, return deposited energy (keV) per region."""
     with g4.Application(gdml=geometry(with_gold), seed=137) as app:
         app.set_event_fields({"id", "step_energy", "step_volume"})
-        app.commands([
-            "/gun/particle gamma", "/gun/energy 100 keV",
-            "/gun/position 0 0 -10 cm", "/gun/direction 0 0 1",
-        ])
+        app.commands(
+            [
+                "/gun/particle gamma",
+                "/gun/energy 100 keV",
+                "/gun/position 0 0 -10 cm",
+                "/gun/direction 0 0 1",
+            ]
+        )
         events = app.run(events_n)
 
     energy = events.track.step.energy
@@ -83,35 +93,45 @@ def main() -> None:
 
     if not args.batch:
         with g4.Application(gdml=geometry(with_gold=True), seed=137) as app:
-            app.commands([
-                "/gun/particle gamma", "/gun/energy 100 keV",
-                "/gun/position 0 0 -10 cm", "/gun/direction 0 0 1",
-            ])
-            app.visualize([
-                "/vis/open OGL", "/vis/drawVolume",
-                "/vis/viewer/set/background black",
-                "/vis/viewer/set/style surface",
-                # colour-code by logical volume: phantom=blue, tumour=green, Au=red
-                "/vis/geometry/set/colour World 1 1 1 0",
-                "/vis/geometry/set/colour PhantomLV 0 0.3 1 0.15",
-                "/vis/geometry/set/colour TumorLV 0 1 0 0.35",
-                "/vis/geometry/set/colour NanoClusterLV 1 0 0 1",
-                # colour-code tracks: gamma=yellow, e-=red, rest=white
-                "/vis/modeling/trajectories/create/drawByParticleID",
-                "/vis/modeling/trajectories/drawByParticleID-0/set gamma yellow",
-                "/vis/modeling/trajectories/drawByParticleID-0/set e- red",
-                "/vis/modeling/trajectories/drawByParticleID-0/set e+ blue",
-                "/vis/scene/add/trajectories smooth", "/tracking/storeTrajectory 1",
-                "/vis/scene/endOfEventAction accumulate 100",
-            ])
+            app.commands(
+                [
+                    "/gun/particle gamma",
+                    "/gun/energy 100 keV",
+                    "/gun/position 0 0 -10 cm",
+                    "/gun/direction 0 0 1",
+                ]
+            )
+            app.visualize(
+                [
+                    "/vis/open OGL",
+                    "/vis/drawVolume",
+                    "/vis/viewer/set/background black",
+                    "/vis/viewer/set/style surface",
+                    # colour-code by logical volume: phantom=blue, tumour=green, Au=red
+                    "/vis/geometry/set/colour World 1 1 1 0",
+                    "/vis/geometry/set/colour PhantomLV 0 0.3 1 0.15",
+                    "/vis/geometry/set/colour TumorLV 0 1 0 0.35",
+                    "/vis/geometry/set/colour NanoClusterLV 1 0 0 1",
+                    # colour-code tracks: gamma=yellow, e-=red, rest=white
+                    "/vis/modeling/trajectories/create/drawByParticleID",
+                    "/vis/modeling/trajectories/drawByParticleID-0/set gamma yellow",
+                    "/vis/modeling/trajectories/drawByParticleID-0/set e- red",
+                    "/vis/modeling/trajectories/drawByParticleID-0/set e+ blue",
+                    "/vis/scene/add/trajectories smooth",
+                    "/tracking/storeTrajectory 1",
+                    "/vis/scene/endOfEventAction accumulate 100",
+                ]
+            )
             return
 
     # Volumes/masses: cluster r=5mm, tumour r=15mm, phantom 90mm box.
     v_cluster = 4 / 3 * math.pi * 0.5**3  # cm3
     v_tumor = 4 / 3 * math.pi * 1.5**3 - v_cluster
     v_phantom = 9.0**3 - 4 / 3 * math.pi * 1.5**3
-    masses = {"Phantom": v_phantom * DENSITY["Phantom"],
-              "Tumor": v_tumor * DENSITY["Tumor"]}
+    masses = {
+        "Phantom": v_phantom * DENSITY["Phantom"],
+        "Tumor": v_tumor * DENSITY["Tumor"],
+    }
 
     no_au = run_case(args.events, with_gold=False)
     with_au = run_case(args.events, with_gold=True)
@@ -119,18 +139,29 @@ def main() -> None:
     masses_no = dict(masses, NanoCluster=v_cluster * DENSITY["NanoCluster_tissue"])
 
     print(f"events per case: {args.events}, beam: 100 keV gamma")
-    for label, res, m in (("no-Au ", no_au, masses_no), ("with-Au", with_au, masses_au)):
-        print(f"[{label}] Phantom(healthy): {res['Phantom']:.1f} keV "
-              f"({dose_gy(res['Phantom'], m['Phantom']):.3e} Gy) | "
-              f"Tumor rim: {res['Tumor']:.1f} keV | "
-              f"Cluster: {res['NanoCluster']:.1f} keV | "
-              f"TumorTotal: {res['TumorTotal']:.1f} keV")
+    for label, res, m in (
+        ("no-Au ", no_au, masses_no),
+        ("with-Au", with_au, masses_au),
+    ):
+        print(
+            f"[{label}] Phantom(healthy): {res['Phantom']:.1f} keV "
+            f"({dose_gy(res['Phantom'], m['Phantom']):.3e} Gy) | "
+            f"Tumor rim: {res['Tumor']:.1f} keV | "
+            f"Cluster: {res['NanoCluster']:.1f} keV | "
+            f"TumorTotal: {res['TumorTotal']:.1f} keV"
+        )
 
-    der = with_au["TumorTotal"] / no_au["TumorTotal"] if no_au["TumorTotal"] else float("nan")
+    der = (
+        with_au["TumorTotal"] / no_au["TumorTotal"]
+        if no_au["TumorTotal"]
+        else float("nan")
+    )
     print(f"Dose Enhancement Ratio (TumorTotal Au / no-Au): {der:.3f}")
-    print("Assignment: explain why DER>1 (photoelectric ~ Z^3/E^3 in Au), "
-          "why 100 keV shows it but MV beam would show less, and what the "
-          "Phantom dose says about healthy-tissue sparing.")
+    print(
+        "Assignment: explain why DER>1 (photoelectric ~ Z^3/E^3 in Au), "
+        "why 100 keV shows it but MV beam would show less, and what the "
+        "Phantom dose says about healthy-tissue sparing."
+    )
 
 
 if __name__ == "__main__":

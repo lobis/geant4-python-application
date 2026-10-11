@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+from geant4_python_application import cad as cad
+from geant4_python_application import distributed as distributed
+from geant4_python_application import geometry as geometry
+from geant4_python_application import io as io
+from geant4_python_application import optical as optical
 from geant4_python_application._geant4_application import (
     awkward_version,
     geant4_version,
@@ -12,15 +17,10 @@ from geant4_python_application.files.datasets import (
     application_data_directory as data_directory,
 )
 from geant4_python_application.files.datasets import install_datasets
-from geant4_python_application.generator import Generator
-from geant4_python_application.scoring import NativeScoringMesh, Scoring
 from geant4_python_application.files.directories import application_directory
 from geant4_python_application.gdml import basic_gdml
-from geant4_python_application import optical as optical
-from geant4_python_application import cad as cad
-from geant4_python_application import io as io
-from geant4_python_application import distributed as distributed
-from geant4_python_application import geometry as geometry
+from geant4_python_application.generator import Generator
+from geant4_python_application.scoring import NativeScoringMesh, Scoring
 
 __version__ = version
 __version__tuple__ = version_tuple

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import awkward as ak
-import numpy as np
 
 import geant4_python_application as g4
 from geant4_python_application import cad
@@ -72,7 +71,12 @@ def test_callbacks():
             on_step=lambda st, tr, ev: counts.__setitem__("step", counts["step"] + 1),
         )
         assert len(events) == 2
-    assert counts == {"run": 1, "event": 2, "track": counts["track"], "step": counts["step"]}
+    assert counts == {
+        "run": 1,
+        "event": 2,
+        "track": counts["track"],
+        "step": counts["step"],
+    }
     assert counts["track"] > 0 and counts["step"] > 0
 
 

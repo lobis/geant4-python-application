@@ -20,10 +20,16 @@ import argparse
 import math
 
 import awkward as ak
+
 import geant4_python_application as g4
 
-DENSITY = {"Skull": 1.85, "Brain": 1.03, "Tumor": 1.127,
-           "ClusterAu": 19.32, "ClusterTissue": 1.127}
+DENSITY = {
+    "Skull": 1.85,
+    "Brain": 1.03,
+    "Tumor": 1.127,
+    "ClusterAu": 19.32,
+    "ClusterTissue": 1.127,
+}
 KEV_TO_J = 1.602176634e-16
 TX, TZ = 20.0, 10.0  # tumour centre (mm)
 ALPHA, BETA = 0.3, 0.03  # /Gy, glioma-like LQ params
@@ -60,8 +66,12 @@ def geometry(with_gold: bool = True) -> str:
 </structure><setup name="Default" version="1.0"><world ref="World"/></setup></gdml>'''
 
 
-GUN = ["/gun/particle gamma", "/gun/energy 100 keV",
-       f"/gun/position {TX / 10} 0 -12 cm", "/gun/direction 0 0 1"]
+GUN = [
+    "/gun/particle gamma",
+    "/gun/energy 100 keV",
+    f"/gun/position {TX / 10} 0 -12 cm",
+    "/gun/direction 0 0 1",
+]
 
 
 def run_case(n: int, with_gold: bool) -> dict[str, float]:
@@ -70,7 +80,9 @@ def run_case(n: int, with_gold: bool) -> dict[str, float]:
         app.commands(GUN)
         events = app.run(n)
     e, v = events.track.step.energy, events.track.step.volume
-    out = {r: float(ak.sum(e[v == r])) for r in ("Skull", "Brain", "Tumor", "NanoCluster")}
+    out = {
+        r: float(ak.sum(e[v == r])) for r in ("Skull", "Brain", "Tumor", "NanoCluster")
+    }
     out["TumorTotal"] = out["Tumor"] + out["NanoCluster"]
     return out
 
@@ -92,30 +104,37 @@ def main() -> None:
     if not args.batch:
         with g4.Application(gdml=geometry(True), seed=137) as app:
             app.commands(GUN)
-            app.visualize([
-                "/vis/open OGL", "/vis/drawVolume",
-                "/vis/viewer/set/background black",
-                "/vis/viewer/set/style surface",
-                "/vis/geometry/set/colour World 1 1 1 0",
-                "/vis/geometry/set/colour SkullLV 0.9 0.8 0.5 0.12",
-                "/vis/geometry/set/colour BrainLV 1 0.5 0.7 0.18",
-                "/vis/geometry/set/colour TumorLV 0 1 0 0.5",
-                "/vis/geometry/set/colour NanoClusterLV 1 0 0 1",
-                "/vis/modeling/trajectories/create/drawByParticleID",
-                "/vis/modeling/trajectories/drawByParticleID-0/set gamma yellow",
-                "/vis/modeling/trajectories/drawByParticleID-0/set e- red",
-                "/vis/modeling/trajectories/drawByParticleID-0/set e+ blue",
-                "/vis/scene/add/trajectories smooth", "/tracking/storeTrajectory 1",
-                "/vis/scene/endOfEventAction accumulate 100",
-            ])
+            app.visualize(
+                [
+                    "/vis/open OGL",
+                    "/vis/drawVolume",
+                    "/vis/viewer/set/background black",
+                    "/vis/viewer/set/style surface",
+                    "/vis/geometry/set/colour World 1 1 1 0",
+                    "/vis/geometry/set/colour SkullLV 0.9 0.8 0.5 0.12",
+                    "/vis/geometry/set/colour BrainLV 1 0.5 0.7 0.18",
+                    "/vis/geometry/set/colour TumorLV 0 1 0 0.5",
+                    "/vis/geometry/set/colour NanoClusterLV 1 0 0 1",
+                    "/vis/modeling/trajectories/create/drawByParticleID",
+                    "/vis/modeling/trajectories/drawByParticleID-0/set gamma yellow",
+                    "/vis/modeling/trajectories/drawByParticleID-0/set e- red",
+                    "/vis/modeling/trajectories/drawByParticleID-0/set e+ blue",
+                    "/vis/scene/add/trajectories smooth",
+                    "/tracking/storeTrajectory 1",
+                    "/vis/scene/endOfEventAction accumulate 100",
+                ]
+            )
             return
 
     v_cl = 4 / 3 * math.pi * 0.4**3
     v_tu = 4 / 3 * math.pi * 1.2**3 - v_cl
     v_br = 4 / 3 * math.pi * 7.8**3 - 4 / 3 * math.pi * 1.2**3
     v_sk = 4 / 3 * math.pi * 8.5**3 - 4 / 3 * math.pi * 7.8**3
-    m = {"Brain": v_br * DENSITY["Brain"], "Tumor": v_tu * DENSITY["Tumor"],
-         "Skull": v_sk * DENSITY["Skull"]}
+    m = {
+        "Brain": v_br * DENSITY["Brain"],
+        "Tumor": v_tu * DENSITY["Tumor"],
+        "Skull": v_sk * DENSITY["Skull"],
+    }
 
     no, yes = run_case(args.events, False), run_case(args.events, True)
     der = yes["TumorTotal"] / no["TumorTotal"] if no["TumorTotal"] else float("nan")
@@ -123,14 +142,24 @@ def main() -> None:
     # Scale: give no-Au tumour a clinical 2 Gy fraction; same fluence with Au gives 2*DER.
     s_no, s_au = survival(2.0), survival(2.0 * der)
     print(f"events: {args.events}, beam 100 keV -> tumour at ({TX},0,{TZ}) mm")
-    print(f"[no-Au ] TumorTotal {no['TumorTotal']:.1f} keV | Brain {no['Brain']:.1f} keV | Skull {no['Skull']:.1f} keV")
-    print(f"[with-Au] TumorTotal {yes['TumorTotal']:.1f} keV | Brain {yes['Brain']:.1f} keV | Skull {yes['Skull']:.1f} keV")
+    print(
+        f"[no-Au ] TumorTotal {no['TumorTotal']:.1f} keV | Brain {no['Brain']:.1f} keV | Skull {no['Skull']:.1f} keV"
+    )
+    print(
+        f"[with-Au] TumorTotal {yes['TumorTotal']:.1f} keV | Brain {yes['Brain']:.1f} keV | Skull {yes['Skull']:.1f} keV"
+    )
     print(f"DER (tumour Au/no-Au): {der:.2f}")
-    print(f"At 2 Gy to tumour without Au: survival {s_no:.3f} (reduction {(1 - s_no) * 100:.1f}%)")
-    print(f"Same fluence with Au -> {2 * der:.1f} Gy: survival {s_au:.3e} (reduction {(1 - s_au) * 100:.2f}%)")
-    print("Report: Geant4 proves DOSE boost (photoelectric in Au Z=79); "
-          "reduction % comes from LQ model, not from cells dying in code. "
-          "Solid AuSphere exaggerates (real DER 1.1-2); skull/brain doses show sparing.")
+    print(
+        f"At 2 Gy to tumour without Au: survival {s_no:.3f} (reduction {(1 - s_no) * 100:.1f}%)"
+    )
+    print(
+        f"Same fluence with Au -> {2 * der:.1f} Gy: survival {s_au:.3e} (reduction {(1 - s_au) * 100:.2f}%)"
+    )
+    print(
+        "Report: Geant4 proves DOSE boost (photoelectric in Au Z=79); "
+        "reduction % comes from LQ model, not from cells dying in code. "
+        "Solid AuSphere exaggerates (real DER 1.1-2); skull/brain doses show sparing."
+    )
 
 
 if __name__ == "__main__":

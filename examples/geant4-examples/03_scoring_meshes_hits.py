@@ -4,6 +4,7 @@ Shows offline scoring over recorded steps: per-event energy deposit,
 Cartesian energy mesh (numpy histogramdd), and hit filtering.
 Run: python 03_scoring_meshes_hits.py
 """
+
 from __future__ import annotations
 
 

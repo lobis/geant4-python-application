@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 
 import awkward as ak
+
 import geant4_python_application as g4
 
 
@@ -19,7 +20,9 @@ def main() -> None:
     parser.add_argument("--batch", action="store_true")
     args = parser.parse_args()
 
-    with g4.Application(gdml=g4.optical.lxe_scintillator_gdml, optical=True, seed=137) as app:
+    with g4.Application(
+        gdml=g4.optical.lxe_scintillator_gdml, optical=True, seed=137
+    ) as app:
         app.commands(g4.optical.scintillation_commands(max_cerenkov=100))
         app.commands(
             [

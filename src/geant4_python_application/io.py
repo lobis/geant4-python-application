@@ -63,7 +63,9 @@ def events_from_parquet(filename: str | Path) -> ak.Array:
     return ak.from_parquet(Path(filename))
 
 
-def events_to_root(events: ak.Array, filename: str | Path, treename: str = "events") -> Path:
+def events_to_root(
+    events: ak.Array, filename: str | Path, treename: str = "events"
+) -> Path:
     """Write flat per-event summary + hits to ROOT via uproot (requires uproot)."""
     try:
         import uproot
@@ -76,7 +78,11 @@ def events_to_root(events: ak.Array, filename: str | Path, treename: str = "even
     import geant4_python_application as g4
 
     edep = np.asarray(g4.Scoring.energy_deposit(events), dtype=np.float64)
-    ids = np.asarray(events.id, dtype=np.int64) if "id" in events.fields else np.arange(len(events))
+    ids = (
+        np.asarray(events.id, dtype=np.int64)
+        if "id" in events.fields
+        else np.arange(len(events))
+    )
     with uproot.recreate(out) as f:
         f[treename] = {"id": ids, "edep_keV": edep}
     return out
@@ -93,10 +99,22 @@ def events_from_root(filename: str | Path, treename: str = "events") -> dict:
 
 
 _PDG_TO_G4 = {
-    11: "e-", -11: "e+", 22: "gamma", 13: "mu-", -13: "mu+",
-    2112: "neutron", 2212: "proton", 211: "pi+", -211: "pi-",
-    111: "pi0", 321: "kaon+", -321: "kaon-", 12: "nu_e",
-    -12: "anti_nu_e", 14: "nu_mu", -14: "anti_nu_mu",
+    11: "e-",
+    -11: "e+",
+    22: "gamma",
+    13: "mu-",
+    -13: "mu+",
+    2112: "neutron",
+    2212: "proton",
+    211: "pi+",
+    -211: "pi-",
+    111: "pi0",
+    321: "kaon+",
+    -321: "kaon-",
+    12: "nu_e",
+    -12: "anti_nu_e",
+    14: "nu_mu",
+    -14: "anti_nu_mu",
 }
 
 

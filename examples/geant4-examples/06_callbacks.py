@@ -4,6 +4,7 @@ Shows Application.run_with_callbacks() - an offline callback layer over
 the awkward event model (on_run / on_event / on_track / on_step).
 Run: python 06_callbacks.py
 """
+
 from __future__ import annotations
 
 

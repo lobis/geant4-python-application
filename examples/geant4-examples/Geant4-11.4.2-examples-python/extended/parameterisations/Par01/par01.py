@@ -21,7 +21,13 @@ def main() -> None:
     gdml = g4.geometry.linear_array_gdml(args.cells, spacing_mm=15, box_size_mm=5)
 
     with g4.Application(gdml=gdml, seed=137) as app:
-        app.commands(["/gun/particle geantino", "/gun/position -120 0 0 mm", "/gun/direction 1 0 0"])
+        app.commands(
+            [
+                "/gun/particle geantino",
+                "/gun/position -120 0 0 mm",
+                "/gun/direction 1 0 0",
+            ]
+        )
         if not args.batch:
             app.visualize()
             return

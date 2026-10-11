@@ -14,7 +14,9 @@ from pathlib import Path
 
 
 def official_inventory(root: Path) -> dict:
-    targets = sorted(p.parent.relative_to(root).as_posix() for p in root.rglob("CMakeLists.txt"))
+    targets = sorted(
+        p.parent.relative_to(root).as_posix() for p in root.rglob("CMakeLists.txt")
+    )
     gdml = sorted(root.rglob("*.gdml"))
     standalone: list[str] = []
     fragments: list[str] = []
@@ -48,7 +50,9 @@ def python_ports(root: Path, events: int, timeout: int) -> list[dict]:
     results: list[dict] = []
     for path in sorted(root.rglob("*.py")):
         if path.name == "run_gdml.py":
-            results.append({"path": path.relative_to(root).as_posix(), "status": "utility"})
+            results.append(
+                {"path": path.relative_to(root).as_posix(), "status": "utility"}
+            )
             continue
         text = path.read_text(errors="replace")
         if "--batch" not in text:
@@ -111,7 +115,9 @@ def markdown(report: dict) -> str:
         "|---|---:|---:|",
     ]
     for item in results:
-        lines.append(f"| `{item['path']}` | {item['status']} | {item.get('seconds', '')} |")
+        lines.append(
+            f"| `{item['path']}` | {item['status']} | {item.get('seconds', '')} |"
+        )
     lines.append("")
     lines.append("Only entries marked `passed` are validated as runnable Python ports.")
     return "\n".join(lines) + "\n"
@@ -139,7 +145,9 @@ def main() -> int:
         args.markdown.parent.mkdir(parents=True, exist_ok=True)
         args.markdown.write_text(rendered)
     print(rendered, end="")
-    failed = any(item["status"] in {"failed", "timeout"} for item in report["python_ports"])
+    failed = any(
+        item["status"] in {"failed", "timeout"} for item in report["python_ports"]
+    )
     return 1 if failed else 0
 
 

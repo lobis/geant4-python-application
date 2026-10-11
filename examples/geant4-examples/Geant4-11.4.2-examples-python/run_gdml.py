@@ -27,13 +27,16 @@ def main() -> None:
         if args.batch:
             print(f"events simulated: {len(app.run(args.events))}")
         else:
-            app.visualize([
-                "/vis/open OGL", "/vis/drawVolume",
-                "/vis/viewer/set/style wireframe",
-                "/vis/scene/add/trajectories smooth",
-                "/tracking/storeTrajectory 1",
-                "/vis/scene/endOfEventAction accumulate 100",
-            ])
+            app.visualize(
+                [
+                    "/vis/open OGL",
+                    "/vis/drawVolume",
+                    "/vis/viewer/set/style wireframe",
+                    "/vis/scene/add/trajectories smooth",
+                    "/tracking/storeTrajectory 1",
+                    "/vis/scene/endOfEventAction accumulate 100",
+                ]
+            )
 
 
 if __name__ == "__main__":

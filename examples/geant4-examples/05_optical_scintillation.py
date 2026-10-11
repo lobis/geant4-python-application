@@ -4,6 +4,7 @@ Uses GDML-defined RINDEX/ABSLENGTH/SCINTILLATION + skinsurface (see
 Geant4 OpNovice) with G4OpticalPhysics. Verifies opticalphoton production.
 Run: python 05_optical_scintillation.py
 """
+
 from __future__ import annotations
 
 

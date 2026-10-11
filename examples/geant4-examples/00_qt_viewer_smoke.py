@@ -9,6 +9,7 @@ Then run this script. A Qt window opens; enter Geant4 commands in its
 command panel. Close the window to return (app.visualize blocks).
 Run: python 00_qt_viewer_smoke.py
 """
+
 from __future__ import annotations
 
 

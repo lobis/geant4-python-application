@@ -7,8 +7,7 @@ import numpy as np
 import pytest
 import requests
 
-from geant4_python_application import Application
-from geant4_python_application import Scoring
+from geant4_python_application import Application, Scoring
 
 complexGdml = requests.get(
     "https://raw.githubusercontent.com/rest-for-physics/restG4/dc3a8f42cea4978206a13325261fa85ec1b26261/examples/13.IAXO/geometry/setup.gdml"

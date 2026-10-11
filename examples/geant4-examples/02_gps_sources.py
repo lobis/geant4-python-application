@@ -4,6 +4,7 @@ Shows particle gun vs General Particle Source (GPS), plus advanced GPS
 commands and awkward-array primaries.
 Run: python 02_gps_sources.py
 """
+
 from __future__ import annotations
 
 

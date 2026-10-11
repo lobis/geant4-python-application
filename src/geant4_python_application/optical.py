@@ -189,7 +189,9 @@ optical_tuning_commands = [
 ]
 
 
-def scintillation_commands(stack_photons: bool = True, max_cerenkov: int = 100) -> list[str]:
+def scintillation_commands(
+    stack_photons: bool = True, max_cerenkov: int = 100
+) -> list[str]:
     """Return UI commands tuning scintillation/Cerenkov at run time (Geant4 11.2)."""
     return [
         f"/process/optical/scintillation/setStackPhotons {'true' if stack_photons else 'false'}",

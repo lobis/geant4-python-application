@@ -16,7 +16,9 @@ class Generator:
 
     @property
     def type(self) -> str:
-        return self._application._send_and_recv(Message("generator", "get_type", (), {}))
+        return self._application._send_and_recv(
+            Message("generator", "get_type", (), {})
+        )
 
     @type.setter
     def type(self, generator_type: str):
@@ -42,9 +44,7 @@ class Generator:
         self._application.command(f"{command} {value} {unit}")
         return self
 
-    def position(
-        self, x: float, y: float, z: float, unit: str = "cm"
-    ) -> Generator:
+    def position(self, x: float, y: float, z: float, unit: str = "cm") -> Generator:
         if self.type == "gps":
             self._application.command("/gps/pos/type Point")
             self._application.command(f"/gps/pos/centre {x} {y} {z} {unit}")

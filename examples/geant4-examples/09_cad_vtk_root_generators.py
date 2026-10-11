@@ -4,6 +4,7 @@ Shows: CAD mesh -> GDML (tessellated), energy mesh -> VTK, events ->
 parquet/ROOT, HepMC-ASCII -> primaries. Writes to /tmp.
 Run: python 09_cad_vtk_root_generators.py
 """
+
 from __future__ import annotations
 
 

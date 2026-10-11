@@ -54,10 +54,12 @@ def test_multiple_primary_vertices_per_event():
         "direction": {"x": 0.0, "y": 0.0, "z": 1.0},
         "position": {"x": x, "y": 0.0, "z": 0.0},
     }
-    source = ak.Array([
-        {"primaries": [particle("gamma", -1.0), particle("e-", 1.0)]},
-        {"primaries": [particle("gamma", 0.0)]},
-    ])
+    source = ak.Array(
+        [
+            {"primaries": [particle("gamma", -1.0), particle("e-", 1.0)]},
+            {"primaries": [particle("gamma", 0.0)]},
+        ]
+    )
     with Application(gdml=basic_gdml) as app:
         events = app.run(source)
     assert ak.to_list(ak.num(events.primaries)) == [2, 1]

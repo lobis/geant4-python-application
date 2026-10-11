@@ -5,10 +5,9 @@ shows how to build small simulations in Python. It is intentionally practical:
 the Python package provides a high-level application, while the Geant4 kernel
 does the particle transport in native C++.
 
-It is not a complete replacement for the official Geant4 Application
-Developer Guide. Use that guide for detailed physics, geometry, and toolkit
-reference. Use this guide for the Python interface and this repository's
-supported workflow.
+It is not a complete replacement for the official Geant4 Application Developer
+Guide. Use that guide for detailed physics, geometry, and toolkit reference. Use
+this guide for the Python interface and this repository's supported workflow.
 
 ## 1. The simulation idea
 
@@ -21,9 +20,9 @@ A Geant4 simulation normally has these pieces:
 4. **Run and event actions**: code that runs at run/event boundaries.
 5. **Scoring**: the quantities extracted from steps, tracks, or volumes.
 
-In this Python package, geometry is supplied as GDML, physics and generators
-are configured through `Application`, and the built-in native actions record
-events, tracks, and steps into an Awkward Array.
+In this Python package, geometry is supplied as GDML, physics and generators are
+configured through `Application`, and the built-in native actions record events,
+tracks, and steps into an Awkward Array.
 
 The normal lifecycle is:
 
@@ -77,8 +76,8 @@ different number of tracks, steps, and primary particles.
 
 ## 4. Choosing the physics list
 
-A physics list selects the electromagnetic, decay, hadronic, optical, and
-other processes used during transport:
+A physics list selects the electromagnetic, decay, hadronic, optical, and other
+processes used during transport:
 
 ```python
 import geant4_python_application as g4
@@ -116,12 +115,14 @@ The command interface exposes ordinary Geant4 UI commands:
 
 ```python
 with g4.Application(gdml=g4.basic_gdml) as app:
-    app.commands([
-        "/gun/particle e-",
-        "/gun/energy 10 MeV",
-        "/gun/position 0 0 -10 cm",
-        "/gun/direction 0 0 1",
-    ])
+    app.commands(
+        [
+            "/gun/particle e-",
+            "/gun/energy 10 MeV",
+            "/gun/position 0 0 -10 cm",
+            "/gun/direction 0 0 1",
+        ]
+    )
     events = app.run(100)
 ```
 
@@ -131,8 +132,8 @@ For advanced GPS distributions, use `/gps/...` commands through
 ## 6. Geometry with GDML
 
 This package does not expose arbitrary Python subclasses of
-`G4VUserDetectorConstruction`. Instead, provide a GDML string or file. A
-minimal GDML detector has:
+`G4VUserDetectorConstruction`. Instead, provide a GDML string or file. A minimal
+GDML detector has:
 
 - `<define>` constants
 - `<materials>` or references to Geant4 NIST materials
@@ -170,8 +171,8 @@ with g4.Application(gdml=gdml) as app:
     app.detector.check_overlaps()
 ```
 
-The exact names used for scoring and sensitive volumes are the GDML physical
-or logical names, so inspect them rather than guessing.
+The exact names used for scoring and sensitive volumes are the GDML physical or
+logical names, so inspect them rather than guessing.
 
 ## 7. Fields and sensitive volumes
 
@@ -336,10 +337,10 @@ with g4.Application(gdml=g4.basic_gdml, seed=1234) as app:
     events = app.run(1000)
 ```
 
-Results can still vary with different Geant4 versions, physics lists,
-thread counts, platforms, and random-engine behavior. Validate a simulation by
-checking geometry overlaps, inspecting particle/energy distributions, and
-running enough events for the statistical uncertainty to be meaningful.
+Results can still vary with different Geant4 versions, physics lists, thread
+counts, platforms, and random-engine behavior. Validate a simulation by checking
+geometry overlaps, inspecting particle/energy distributions, and running enough
+events for the statistical uncertainty to be meaningful.
 
 ## 14. What this interface does not currently expose
 
@@ -372,20 +373,20 @@ these topics and are useful as runnable companion exercises.
 ## 16. The application state machine
 
 The Python `Application` is a thin controller around a native Geant4
-application. It starts a child process, sends configuration calls to the
-native application, and returns data to the parent Python process. This design
-keeps the Geant4 kernel isolated and means that configuration must happen in
-the order expected by Geant4.
+application. It starts a child process, sends configuration calls to the native
+application, and returns data to the parent Python process. This design keeps
+the Geant4 kernel isolated and means that configuration must happen in the order
+expected by Geant4.
 
 The useful states are:
 
-| State | What you can do |
-| --- | --- |
-| Created | Set Python constructor options such as GDML, physics, seed, and thread count. |
-| Started | Configure the manager, physics, detector, and generator. |
-| Initialized | Inspect the initialized detector and run events. |
-| Running | Geant4 transports events and records native actions. |
-| Finished | Analyze or persist the returned Awkward Array in Python. |
+| State       | What you can do                                                               |
+| ----------- | ----------------------------------------------------------------------------- |
+| Created     | Set Python constructor options such as GDML, physics, seed, and thread count. |
+| Started     | Configure the manager, physics, detector, and generator.                      |
+| Initialized | Inspect the initialized detector and run events.                              |
+| Running     | Geant4 transports events and records native actions.                          |
+| Finished    | Analyze or persist the returned Awkward Array in Python.                      |
 
 Most configuration must occur before the first call to `run`. For example,
 physics constructors cannot be added after initialization:
@@ -421,10 +422,17 @@ def main():
         seed=2025,
         n_threads=4,
     ) as app:
-        app.set_event_fields({
-            "run", "id", "track_id", "track_particle",
-            "step_energy", "step_volume", "step_position",
-        })
+        app.set_event_fields(
+            {
+                "run",
+                "id",
+                "track_id",
+                "track_particle",
+                "step_energy",
+                "step_volume",
+                "step_position",
+            }
+        )
         app.generator.particle("gamma").energy(2, "MeV")
         app.generator.position(0, 0, -10, "cm").direction(0, 0, 1)
         app.detector.sensitive_volumes = {"box"}
@@ -481,9 +489,9 @@ The hierarchy is:
 solid -> logical volume -> physical volume -> world
 ```
 
-A solid describes shape and dimensions. A logical volume combines a solid and
-a material. A physical volume places a logical volume inside its mother. The
-world is the top-level physical geometry used by the setup.
+A solid describes shape and dimensions. A logical volume combines a solid and a
+material. A physical volume places a logical volume inside its mother. The world
+is the top-level physical geometry used by the setup.
 
 ### 19.2 A small custom detector
 
@@ -543,10 +551,10 @@ volume, and units first.
 
 ## 20. Materials and optical properties
 
-The repository's GDML examples use Geant4 NIST material names such as
-`G4_AIR`, `G4_WATER`, and `G4_Si`. This is the simplest way to begin. For a
-custom material, define its density and composition in GDML according to the
-Geant4 GDML schema.
+The repository's GDML examples use Geant4 NIST material names such as `G4_AIR`,
+`G4_WATER`, and `G4_Si`. This is the simplest way to begin. For a custom
+material, define its density and composition in GDML according to the Geant4
+GDML schema.
 
 Optical transport needs both optical physics and optical material properties.
 For example, a material that should transmit photons needs a refractive index
@@ -585,14 +593,16 @@ Use GPS commands for distributions in position, angle, or energy:
 ```python
 with g4.Application(gdml=g4.basic_gdml) as app:
     app.generator.use_gps()
-    app.generator.commands([
-        "/gps/particle gamma",
-        "/gps/ene/type Mono",
-        "/gps/ene/mono 1 MeV",
-        "/gps/pos/type Point",
-        "/gps/pos/centre 0 0 -10 cm",
-        "/gps/direction 0 0 1",
-    ])
+    app.generator.commands(
+        [
+            "/gps/particle gamma",
+            "/gps/ene/type Mono",
+            "/gps/ene/mono 1 MeV",
+            "/gps/pos/type Point",
+            "/gps/pos/centre 0 0 -10 cm",
+            "/gps/direction 0 0 1",
+        ]
+    )
     events = app.run(100)
 ```
 
@@ -604,12 +614,14 @@ is useful when the source comes from a file or another simulation:
 ```python
 import awkward as ak
 
-primaries = ak.Array({
-    "particle": ["gamma", "gamma", "e-"],
-    "energy": [1.0, 2.0, 5.0],
-    "position": {"x": [0, 0, 0], "y": [0, 0, 0], "z": [-10, -10, -10]},
-    "direction": {"x": [0, 0, 0], "y": [0, 0, 0], "z": [1, 1, 1]},
-})
+primaries = ak.Array(
+    {
+        "particle": ["gamma", "gamma", "e-"],
+        "energy": [1.0, 2.0, 5.0],
+        "position": {"x": [0, 0, 0], "y": [0, 0, 0], "z": [-10, -10, -10]},
+        "direction": {"x": [0, 0, 0], "y": [0, 0, 0], "z": [1, 1, 1]},
+    }
+)
 
 with g4.Application(gdml=g4.basic_gdml) as app:
     events = app.run(primaries)
@@ -621,8 +633,8 @@ documents limitations for this input path in multithreaded runs.
 ## 22. Physics choices and statistical thinking
 
 A simulation result is determined by geometry, materials, source, physics list,
-production cuts, random seed, and event count. Changing any of these changes
-the result or its interpretation.
+production cuts, random seed, and event count. Changing any of these changes the
+result or its interpretation.
 
 Use a small run for functional validation, then a larger run for physics:
 
@@ -730,8 +742,8 @@ with g4.Application(gdml=g4.basic_gdml, n_threads=8) as app:
 ```
 
 The linked Geant4 library must have been compiled with multithreading. More
-threads are not always faster: geometry initialization, memory pressure,
-output construction, and CPU oversubscription can reduce the gain.
+threads are not always faster: geometry initialization, memory pressure, output
+construction, and CPU oversubscription can reduce the gain.
 
 Benchmark with the same event count and seed policy. Validate event counts and
 aggregate quantities, but do not require event ordering to be identical across
@@ -807,8 +819,8 @@ def test_smoke():
 and verify the environment used by Python is the same environment used to
 install Geant4.
 
-**`n_threads` fails.** Check `g4.Application.multithreading_available()` and
-use `n_threads=0` with a serial Geant4 build.
+**`n_threads` fails.** Check `g4.Application.multithreading_available()` and use
+`n_threads=0` with a serial Geant4 build.
 
 **A volume cannot be found.** Print `app.detector.logical_volumes` and
 `app.detector.physical_volumes`; GDML names are case-sensitive.
@@ -821,37 +833,37 @@ physical volume name.
 mother volume dimensions, placement coordinates, and units.
 
 **The run is unexpectedly slow.** Reduce fields, disable verbose output, use a
-smaller diagnostic run, and benchmark thread counts. Optical photon tracking
-can be substantially more expensive than the primary transport.
+smaller diagnostic run, and benchmark thread counts. Optical photon tracking can
+be substantially more expensive than the primary transport.
 
 ## 33. Mapping native Geant4 concepts to this Python interface
 
-| Native Geant4 concept | Python-interface equivalent |
-| --- | --- |
-| `G4RunManager` | `Application` and its native manager setup |
-| `G4VUserDetectorConstruction` | GDML supplied to `Application` |
-| `G4VUserPhysicsList` | `physics="..."` and curated `add_physics(...)` |
-| `G4VUserPrimaryGeneratorAction` | `app.generator` or `/gun` and `/gps` commands |
-| `G4RunManager::BeamOn` | `app.run(n_events)` |
+| Native Geant4 concept                            | Python-interface equivalent                             |
+| ------------------------------------------------ | ------------------------------------------------------- |
+| `G4RunManager`                                   | `Application` and its native manager setup              |
+| `G4VUserDetectorConstruction`                    | GDML supplied to `Application`                          |
+| `G4VUserPhysicsList`                             | `physics="..."` and curated `add_physics(...)`          |
+| `G4VUserPrimaryGeneratorAction`                  | `app.generator` or `/gun` and `/gps` commands           |
+| `G4RunManager::BeamOn`                           | `app.run(n_events)`                                     |
 | `G4UserRunAction` / event / track / step actions | Built-in native recording plus offline Python callbacks |
-| Sensitive detector / hits | Recorded steps, `events.hits()`, and Python scoring |
-| Command-based scoring | `NativeScoringMesh` |
-| Geant4 visualization manager | `app.visualize()` with Qt/OpenGL build support |
-| Geant4 MT run manager | `n_threads=N` |
-| MPI job splitting | `distributed.get_rank_size()` and `split_count()` |
+| Sensitive detector / hits                        | Recorded steps, `events.hits()`, and Python scoring     |
+| Command-based scoring                            | `NativeScoringMesh`                                     |
+| Geant4 visualization manager                     | `app.visualize()` with Qt/OpenGL build support          |
+| Geant4 MT run manager                            | `n_threads=N`                                           |
+| MPI job splitting                                | `distributed.get_rank_size()` and `split_count()`       |
 
 ## 34. Scope boundary
 
 This guide is deliberately detailed about the supported interface, but the
 interface is not a one-to-one Python binding of the entire Geant4 class library.
 If your project requires custom C++ user actions, arbitrary physics processes,
-custom field equations, native digitizers, parallel worlds, advanced biasing,
-or CUDA transport, you will need native Geant4 C++ or a lower-level binding.
+custom field equations, native digitizers, parallel worlds, advanced biasing, or
+CUDA transport, you will need native Geant4 C++ or a lower-level binding.
 
 That boundary is useful: use this package when a GDML detector, configured
 physics list, standard generator, native transport, and Python analysis are a
-good fit. Move to native C++ when transport-time customization is central to
-the experiment.
+good fit. Move to native C++ when transport-time customization is central to the
+experiment.
 
 ## 35. Suggested projects
 
@@ -874,9 +886,9 @@ field, scoring definition, event count, seed policy, and validation checks.
 ## 36. How to read this book
 
 This book is organized as a progression rather than a catalogue of APIs. Read
-the first five chapters in order. After that, choose a project and return to
-the relevant chapters while implementing it. Every serious simulation should
-be understandable in four layers:
+the first five chapters in order. After that, choose a project and return to the
+relevant chapters while implementing it. Every serious simulation should be
+understandable in four layers:
 
 1. **Physical question** - what quantity are you trying to estimate?
 2. **Monte Carlo model** - what particles, materials, processes, and geometry
@@ -887,8 +899,8 @@ be understandable in four layers:
 
 Do not begin by copying a large detector. Begin with a small experiment for
 which you can predict the direction of the answer. A simulation becomes useful
-when it is falsifiable: you should know what result would convince you that
-the geometry, physics, or source is wrong.
+when it is falsifiable: you should know what result would convince you that the
+geometry, physics, or source is wrong.
 
 ## 37. Monte Carlo foundations
 
@@ -944,16 +956,25 @@ import geant4_python_application as g4
 
 def run_experiment(n_events=1000):
     with g4.Application(gdml=g4.basic_gdml, seed=42) as app:
-        app.set_event_fields({
-            "run", "id", "track_particle", "track_id",
-            "step_energy", "step_volume", "step_position",
-        })
-        app.commands([
-            "/gun/particle e-",
-            "/gun/energy 1 MeV",
-            "/gun/position 0 0 -300 mm",
-            "/gun/direction 0 0 1",
-        ])
+        app.set_event_fields(
+            {
+                "run",
+                "id",
+                "track_particle",
+                "track_id",
+                "step_energy",
+                "step_volume",
+                "step_position",
+            }
+        )
+        app.commands(
+            [
+                "/gun/particle e-",
+                "/gun/energy 1 MeV",
+                "/gun/position 0 0 -300 mm",
+                "/gun/direction 0 0 1",
+            ]
+        )
         return app.run(n_events)
 
 
@@ -1031,22 +1052,22 @@ For each custom material, document:
 - the version of the data used.
 
 Do not extrapolate optical tables silently beyond their defined domain. If a
-simulation depends on a material parameter, include a validation plot or a
-small numerical check in the project repository.
+simulation depends on a material parameter, include a validation plot or a small
+numerical check in the project repository.
 
 ## 41. Selecting a physics list responsibly
 
-A reference physics list is a coherent collection of models and processes. It
-is usually safer than assembling individual processes without understanding
-their interactions. Select a list based on particle types, energy range,
-target materials, and required precision.
+A reference physics list is a coherent collection of models and processes. It is
+usually safer than assembling individual processes without understanding their
+interactions. Select a list based on particle types, energy range, target
+materials, and required precision.
 
 Use this decision process:
 
 1. Identify all primary and likely secondary particle species.
 2. Identify the lowest and highest relevant energies.
-3. Identify whether electromagnetic, hadronic, decay, optical, or DNA physics
-   is required.
+3. Identify whether electromagnetic, hadronic, decay, optical, or DNA physics is
+   required.
 4. Choose a documented reference list that covers the domain.
 5. Run a small sensitivity comparison against another plausible list.
 6. Record the choice and rationale.
@@ -1137,21 +1158,21 @@ Validation has three distinct meanings:
 
 1. **Software validation**: does the program run and produce structurally valid
    output?
-2. **Physics verification**: does the implementation reproduce a known result
-   or limiting case?
+2. **Physics verification**: does the implementation reproduce a known result or
+   limiting case?
 3. **Experimental validation**: does the simulation agree with measured data
    within the combined uncertainty?
 
 For every new detector, create a validation table:
 
-| Test | Expected behavior | Result | Status |
-| --- | --- | --- | --- |
-| Geometry load | All named volumes exist | ... | pass/fail |
-| Overlap check | No overlaps in target region | ... | pass/fail |
-| Empty field | Straight neutral-particle path | ... | pass/fail |
-| Energy conservation | Balance within tolerance | ... | pass/fail |
-| Physics comparison | Agreement with reference | ... | pass/fail |
-| Thread comparison | Aggregate agreement | ... | pass/fail |
+| Test                | Expected behavior              | Result | Status    |
+| ------------------- | ------------------------------ | ------ | --------- |
+| Geometry load       | All named volumes exist        | ...    | pass/fail |
+| Overlap check       | No overlaps in target region   | ...    | pass/fail |
+| Empty field         | Straight neutral-particle path | ...    | pass/fail |
+| Energy conservation | Balance within tolerance       | ...    | pass/fail |
+| Physics comparison  | Agreement with reference       | ...    | pass/fail |
+| Thread comparison   | Aggregate agreement            | ...    | pass/fail |
 
 Keep failed tests visible. A simulation project becomes trustworthy when its
 failures are discoverable rather than hidden.
@@ -1202,12 +1223,14 @@ def run_energy(energy_mev, n_events, seed):
     gdml = Path("detector.gdml").read_text()
     with g4.Application(gdml=gdml, physics="FTFP_BERT", seed=seed) as app:
         app.set_event_fields({"id", "step_energy", "step_volume"})
-        app.commands([
-            "/gun/particle gamma",
-            f"/gun/energy {energy_mev} MeV",
-            "/gun/position 0 0 -300 mm",
-            "/gun/direction 0 0 1",
-        ])
+        app.commands(
+            [
+                "/gun/particle gamma",
+                f"/gun/energy {energy_mev} MeV",
+                "/gun/position 0 0 -300 mm",
+                "/gun/direction 0 0 1",
+            ]
+        )
         events = app.run(n_events)
     g4.io.events_to_parquet(events, f"results/events_{energy_mev}MeV.parquet")
     return g4.Scoring.energy_deposit(events, volume="target")
@@ -1450,13 +1473,13 @@ python run_simulation.py --events 100000 --energy 5 --threads 8
 python run_simulation.py --gdml detector.gdml --output results/run.parquet
 ```
 
-Command-line arguments turn a script into a reproducible experiment: the
-command itself records the most important choices.
+Command-line arguments turn a script into a reproducible experiment: the command
+itself records the most important choices.
 
 ## 55. Write the analysis program separately
 
-Do not rerun Geant4 just to change a plot or a summary statistic. Save the
-event data and write a separate analysis program:
+Do not rerun Geant4 just to change a plot or a summary statistic. Save the event
+data and write a separate analysis program:
 
 ```python
 from pathlib import Path
@@ -1507,8 +1530,8 @@ def load_detector(config: DetectorConfig) -> str:
     return text
 ```
 
-Validate the configuration before starting a long run. Fail early when a file
-is missing, a volume name is wrong, or the event count is negative.
+Validate the configuration before starting a long run. Fail early when a file is
+missing, a volume name is wrong, or the event count is negative.
 
 ## 57. Write tests before scaling up
 
@@ -1560,10 +1583,17 @@ def build_parser():
 
 
 def configure(app):
-    app.set_event_fields({
-        "run", "id", "primaries", "track_particle",
-        "track_creator_process", "step_energy", "step_volume",
-    })
+    app.set_event_fields(
+        {
+            "run",
+            "id",
+            "primaries",
+            "track_particle",
+            "track_creator_process",
+            "step_energy",
+            "step_volume",
+        }
+    )
     app.generator.use_gps()
     app.generator.particle("gamma").energy(2, "MeV")
     app.generator.position(0, 0, -10, "cm").direction(0, 0, 1)

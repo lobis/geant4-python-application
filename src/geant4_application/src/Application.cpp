@@ -6,12 +6,11 @@
 #include "geant4_application/RunAction.h"
 #include "geant4_application/SteppingVerbose.h"
 
-#include <G4RunManager.hh>
-#include <G4RunManagerFactory.hh>
-#include <G4ScoringManager.hh>
-#include <G4PhysListFactory.hh>
-#include <G4OpticalPhysics.hh>
-#include <G4EmExtraPhysics.hh>
+#include <G4DecayPhysics.hh>
+#include <G4EmDNAChemistry.hh>
+#include <G4EmDNAChemistry_option1.hh>
+#include <G4EmDNAChemistry_option2.hh>
+#include <G4EmDNAChemistry_option3.hh>
 #include <G4EmDNAPhysics.hh>
 #include <G4EmDNAPhysics_option1.hh>
 #include <G4EmDNAPhysics_option2.hh>
@@ -21,12 +20,13 @@
 #include <G4EmDNAPhysics_option6.hh>
 #include <G4EmDNAPhysics_option7.hh>
 #include <G4EmDNAPhysics_option8.hh>
-#include <G4EmDNAChemistry.hh>
-#include <G4EmDNAChemistry_option1.hh>
-#include <G4EmDNAChemistry_option2.hh>
-#include <G4EmDNAChemistry_option3.hh>
+#include <G4EmExtraPhysics.hh>
+#include <G4OpticalPhysics.hh>
+#include <G4PhysListFactory.hh>
 #include <G4RadioactiveDecayPhysics.hh>
-#include <G4DecayPhysics.hh>
+#include <G4RunManager.hh>
+#include <G4RunManagerFactory.hh>
+#include <G4ScoringManager.hh>
 #include <G4VModularPhysicsList.hh>
 
 #include <algorithm>

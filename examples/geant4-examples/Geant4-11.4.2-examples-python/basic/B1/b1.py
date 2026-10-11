@@ -5,10 +5,10 @@ from __future__ import annotations
 import argparse
 
 import awkward as ak
+
 import geant4_python_application as g4
 
-
-GDML = R'''<?xml version="1.0" encoding="utf-8"?>
+GDML = R"""<?xml version="1.0" encoding="utf-8"?>
 <gdml>
   <solids>
     <box name="WorldSolid" x="240" y="240" z="360" lunit="mm"/>
@@ -29,7 +29,7 @@ GDML = R'''<?xml version="1.0" encoding="utf-8"?>
     </volume>
   </structure>
   <setup name="Default" version="1.0"><world ref="World"/></setup>
-</gdml>'''
+</gdml>"""
 
 
 def main() -> None:
@@ -40,16 +40,25 @@ def main() -> None:
 
     with g4.Application(gdml=GDML, seed=137) as app:
         app.set_event_fields({"id", "track_id", "step_energy", "step_volume"})
-        app.commands([
-            "/gun/particle e-", "/gun/energy 10 MeV",
-            "/gun/position 0 0 -20 cm", "/gun/direction 0 0 1",
-        ])
+        app.commands(
+            [
+                "/gun/particle e-",
+                "/gun/energy 10 MeV",
+                "/gun/position 0 0 -20 cm",
+                "/gun/direction 0 0 1",
+            ]
+        )
         if not args.batch:
-            app.visualize([
-                "/vis/open OGL", "/vis/drawVolume", "/vis/viewer/set/style wireframe",
-                "/vis/scene/add/trajectories smooth", "/tracking/storeTrajectory 1",
-                "/vis/scene/endOfEventAction accumulate 100",
-            ])
+            app.visualize(
+                [
+                    "/vis/open OGL",
+                    "/vis/drawVolume",
+                    "/vis/viewer/set/style wireframe",
+                    "/vis/scene/add/trajectories smooth",
+                    "/tracking/storeTrajectory 1",
+                    "/vis/scene/endOfEventAction accumulate 100",
+                ]
+            )
             return
         events = app.run(args.events)
 

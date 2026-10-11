@@ -17,8 +17,10 @@ project(${SKBUILD_PROJECT_NAME} LANGUAGES CXX)
 
 set(PYTHON_MODULE_NAME _geant4_application)
 set(VIS_MODULE_NAME _geant4_vis)
-option(GEANT4_PYTHON_APPLICATION_VISUALIZATION
-       "Build the interactive Geant4 Qt viewer as a separate, lazily imported module" OFF)
+option(
+    GEANT4_PYTHON_APPLICATION_VISUALIZATION
+    "Build the interactive Geant4 Qt viewer as a separate, lazily imported module"
+    OFF)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -31,12 +33,12 @@ find_package(
 if (GEANT4_PYTHON_APPLICATION_VISUALIZATION)
     # The viewer module and the physics module must share one Geant4 (its
     # managers are singletons), which only works with shared libraries.
-    find_package(
-        Geant4 11.2.2 CONFIG REQUIRED
-        COMPONENTS gdml ui_all vis_all)
+    find_package(Geant4 11.2.2 CONFIG REQUIRED COMPONENTS gdml ui_all vis_all)
     if (NOT Geant4_shared_FOUND)
-        message(FATAL_ERROR
-                "GEANT4_PYTHON_APPLICATION_VISUALIZATION requires Geant4 built with shared libraries")
+        message(
+            FATAL_ERROR
+                "GEANT4_PYTHON_APPLICATION_VISUALIZATION requires Geant4 built with shared libraries"
+        )
     endif ()
 else ()
     # "static" is optional: Geant4Config fails if it is required but only shared
@@ -80,11 +82,23 @@ endif ()
 # visualization drivers, UI sessions and vis manager). The physics module must
 # not link any of them, so that importing the package never loads Qt.
 set(GEANT4_QT_LIBRARIES
-    G4OpenGL G4ToolsSG G4interfaces G4visQt3D G4vis_management G4FR G4GMocren
-    G4RayTracer G4Tree G4VRML G4visHepRep G4OpenInventor G4visVtk)
+    G4OpenGL
+    G4ToolsSG
+    G4interfaces
+    G4visQt3D
+    G4vis_management
+    G4FR
+    G4GMocren
+    G4RayTracer
+    G4Tree
+    G4VRML
+    G4visHepRep
+    G4OpenInventor
+    G4visVtk)
 set(GEANT4_PHYSICS_LIBRARIES ${Geant4_LIBRARIES})
 foreach (lib IN LISTS GEANT4_QT_LIBRARIES)
-    list(REMOVE_ITEM GEANT4_PHYSICS_LIBRARIES Geant4::${lib} Geant4::${lib}-static)
+    list(REMOVE_ITEM GEANT4_PHYSICS_LIBRARIES Geant4::${lib}
+         Geant4::${lib}-static)
 endforeach ()
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
@@ -125,7 +139,8 @@ if (GEANT4_PYTHON_APPLICATION_VISUALIZATION)
     # The OpenGL Qt viewer (/vis/open OGL) is unaffected.
     set(GEANT4_VIS_LIBRARIES ${Geant4_LIBRARIES})
     list(REMOVE_ITEM GEANT4_VIS_LIBRARIES Geant4::G4visQt3D)
-    target_include_directories(${VIS_MODULE_NAME} PRIVATE ${Geant4_INCLUDE_DIRS})
+    target_include_directories(${VIS_MODULE_NAME}
+                               PRIVATE ${Geant4_INCLUDE_DIRS})
     target_link_libraries(${VIS_MODULE_NAME} PRIVATE ${GEANT4_VIS_LIBRARIES}
                                                      pybind11::headers)
     # Homebrew may expose Qt 6 from its global include directory while this
@@ -133,16 +148,16 @@ if (GEANT4_PYTHON_APPLICATION_VISUALIZATION)
     # first so framework headers do not accidentally include their Qt 6 peers.
     if (APPLE AND DEFINED Qt5Core_DIR)
         get_filename_component(QT5_PREFIX "${Qt5Core_DIR}/../../.." ABSOLUTE)
-        target_include_directories(${VIS_MODULE_NAME} SYSTEM BEFORE PRIVATE
-                                   "${QT5_PREFIX}/include")
+        target_include_directories(${VIS_MODULE_NAME} SYSTEM BEFORE
+                                   PRIVATE "${QT5_PREFIX}/include")
     endif ()
     list(APPEND EXTENSION_MODULES ${VIS_MODULE_NAME})
 endif ()
 
 # Wheel repair tools (delocate/auditwheel) replace these with the bundled
-# library locations; source installs keep finding Geant4 where it was built.
-# Qt frameworks linked by @rpath (as when building against PyQt5-Qt5's Qt)
-# also need their directory listed for delocate to resolve them.
+# library locations; source installs keep finding Geant4 where it was built. Qt
+# frameworks linked by @rpath (as when building against PyQt5-Qt5's Qt) also
+# need their directory listed for delocate to resolve them.
 set(EXTENSION_RPATH "${GEANT4_PREFIX}/lib")
 if (APPLE AND DEFINED QT5_PREFIX)
     list(APPEND EXTENSION_RPATH "${QT5_PREFIX}/lib")
@@ -156,7 +171,8 @@ foreach (module IN LISTS EXTENSION_MODULES)
     endif ()
     set_target_properties(
         ${module}
-        PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${PROJECT_NAME}
+        PROPERTIES LIBRARY_OUTPUT_DIRECTORY
+                   ${PROJECT_BINARY_DIR}/${PROJECT_NAME}
                    CXX_VISIBILITY_PRESET "hidden"
                    CUDA_VISIBILITY_PRESET "hidden"
                    BUILD_RPATH "${EXTENSION_RPATH}"

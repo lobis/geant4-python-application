@@ -28,24 +28,25 @@ New to Geant4 or this package? See the
 
 ## Platform support
 
-Tested on macOS and Ubuntu; still undergoing broader testing. If you hit a
-bug, please report it via [GitHub Issues](https://github.com/lobis/geant4-python-application/issues)
-or reach out to kavyavadhwa@gmail.com.
+Tested on macOS and Ubuntu; still undergoing broader testing. If you hit a bug,
+please report it via
+[GitHub Issues](https://github.com/lobis/geant4-python-application/issues) or
+reach out to kavyavadhwa@gmail.com.
 
 ## Installation
 
-Prebuilt wheels for macOS (Apple Silicon and Intel) and Linux x86_64, Python
-3.8 – 3.13, bundle Geant4 — no separate Geant4 (C++) installation is needed:
+Prebuilt wheels for macOS (Apple Silicon and Intel) and Linux x86_64, Python 3.8
+– 3.13, bundle Geant4 — no separate Geant4 (C++) installation is needed:
 
 ```bash
 pip install "geant4-python-application[gui]"
 ```
 
-The `gui` extra adds the interactive Qt viewer; leave it out for a
-physics-only install.
+The `gui` extra adds the interactive Qt viewer; leave it out for a physics-only
+install.
 
-Geant4's physics data files download automatically on first use, so you can
-run an example straight away:
+Geant4's physics data files download automatically on first use, so you can run
+an example straight away:
 
 ```bash
 python examples/geant4-examples/Geant4-11.4.2-examples-python/basic/B1/b1.py --batch -n 10
@@ -91,7 +92,8 @@ with g4.Application(gdml=g4.basic_gdml) as app:
 Advanced GPS distributions remain accessible through
 `app.generator.commands(["/gps/pos/type Plane", ...])`.
 
-Optical physics and uniform global magnetic/electric fields can be enabled directly:
+Optical physics and uniform global magnetic/electric fields can be enabled
+directly:
 
 ```python
 with g4.Application(gdml=my_optical_gdml, optical=True) as app:
@@ -122,8 +124,10 @@ Python run/event/track/step callbacks (offline over awkward arrays):
 ```python
 with g4.Application(gdml=g4.basic_gdml) as app:
     events = app.run_with_callbacks(
-        100, on_run=lambda evs: print(len(evs)),
-        on_event=lambda ev: None, on_track=lambda tr, ev: None,
+        100,
+        on_run=lambda evs: print(len(evs)),
+        on_event=lambda ev: None,
+        on_track=lambda tr, ev: None,
         on_step=lambda st, tr, ev: None,
     )
 ```
@@ -133,7 +137,9 @@ Extra physics constructors incl. DNA, CAD/VTK/ROOT/HepMC, and MPI splitting:
 ```python
 print(g4.Application.available_extra_physics())
 with g4.Application(gdml=g4.basic_gdml, physics="FTFP_BERT") as app:
-    app.add_physics("G4EmDNAPhysics_option2")  # or G4EmExtraPhysics, G4OpticalPhysics...
+    app.add_physics(
+        "G4EmDNAPhysics_option2"
+    )  # or G4EmExtraPhysics, G4OpticalPhysics...
     events = app.run(100)
 
 from geant4_python_application import cad, io as gio, distributed as dist

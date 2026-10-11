@@ -4,7 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to stamp on test builds (e.g. 0.1.0rc1); empty uses git"
+        description:
+          "Version to stamp on test builds (e.g. 0.1.0rc1); empty uses git"
         required: false
         default: ""
 
@@ -146,7 +147,8 @@ jobs:
             matrix.arch }}-macos${{ env.MACOSX_DEPLOYMENT_TARGET }}
 
       - name: Build and Install Xerces-C
-        if: runner.os == 'macOS' && steps.cache-xerces.outputs.cache-hit != 'true'
+        if:
+          runner.os == 'macOS' && steps.cache-xerces.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/apache/xerces-c.git xerces-source
           git -C xerces-source checkout tags/v${{ env.XERCES_VERSION }}
@@ -154,7 +156,8 @@ jobs:
           cmake --build xerces-build --parallel --config Release --target install
 
       - name: Save Xerces-C Installation
-        if: runner.os == 'macOS' && steps.cache-xerces.outputs.cache-hit != 'true'
+        if:
+          runner.os == 'macOS' && steps.cache-xerces.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: ${{ github.workspace }}/xerces
@@ -167,12 +170,13 @@ jobs:
         with:
           path: ${{ env.Geant4_DIR }}
           key:
-            geant4-v${{ env.GEANT4_VERSION }}-shared-qt${{ env.QT_VERSION }}-pyqt5-qt5-${{
-            env.PYQT5_QT5_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{ matrix.arch
-            }}-macos${{ env.MACOSX_DEPLOYMENT_TARGET }}
+            geant4-v${{ env.GEANT4_VERSION }}-shared-qt${{ env.QT_VERSION
+            }}-pyqt5-qt5-${{ env.PYQT5_QT5_VERSION }}-cpp${{ env.CPP_STANDARD
+            }}-${{ matrix.arch }}-macos${{ env.MACOSX_DEPLOYMENT_TARGET }}
 
       - name: Build and Install Geant4 (shared, Qt viewer, without datasets)
-        if: runner.os == 'macOS' && steps.cache-geant4.outputs.cache-hit != 'true'
+        if:
+          runner.os == 'macOS' && steps.cache-geant4.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/Geant4/geant4.git geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}
           # Typo in Geant4 11.2.2's g4tools (fixed in later releases) that Xcode 16.3+ clang rejects.
@@ -182,7 +186,8 @@ jobs:
           rm -rf geant4-source geant4-build
 
       - name: Save Geant4 Installation
-        if: runner.os == 'macOS' && steps.cache-geant4.outputs.cache-hit != 'true'
+        if:
+          runner.os == 'macOS' && steps.cache-geant4.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: ${{ env.Geant4_DIR }}
@@ -215,13 +220,14 @@ jobs:
 
           CIBW_ENVIRONMENT_MACOS: >
             MACOSX_DEPLOYMENT_TARGET=${{ env.MACOSX_DEPLOYMENT_TARGET }}
-            Geant4_DIR=${{ env.Geant4_DIR }}
-            CMAKE_PREFIX_PATH=${{ env.QT_PREFIX }}
-            GEANT4_PYTHON_APPLICATION_DIR=${{ runner.temp }}/geant4-data
-            ${{ inputs.version && format('SETUPTOOLS_SCM_PRETEND_VERSION={0}', inputs.version) || '' }}
+            Geant4_DIR=${{ env.Geant4_DIR }} CMAKE_PREFIX_PATH=${{ env.QT_PREFIX
+            }} GEANT4_PYTHON_APPLICATION_DIR=${{ runner.temp }}/geant4-data ${{
+            inputs.version && format('SETUPTOOLS_SCM_PRETEND_VERSION={0}',
+            inputs.version) || '' }}
           CIBW_ENVIRONMENT_LINUX: >
-            GEANT4_PYTHON_APPLICATION_DIR=/tmp/geant4-data
-            ${{ inputs.version && format('SETUPTOOLS_SCM_PRETEND_VERSION={0}', inputs.version) || '' }}
+            GEANT4_PYTHON_APPLICATION_DIR=/tmp/geant4-data ${{ inputs.version &&
+            format('SETUPTOOLS_SCM_PRETEND_VERSION={0}', inputs.version) || ''
+            }}
 
           CIBW_BEFORE_ALL_LINUX: |
             set -ex
@@ -242,27 +248,28 @@ jobs:
           # Bundle Geant4 into the wheel but leave Qt out; tools/relink_qt_wheel.py
           # then points the Qt-linked libraries at the PyQt5-Qt5 package.
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-            rm -rf /tmp/delocated &&
-            delocate-wheel --require-archs {delocate_archs} --exclude .framework/Versions/5/Qt -w /tmp/delocated -v {wheel} &&
-            python -m pip install wheel &&
-            python ${{ github.workspace }}/tools/relink_qt_wheel.py /tmp/delocated/*.whl -w {dest_dir}
+            rm -rf /tmp/delocated && delocate-wheel --require-archs
+            {delocate_archs} --exclude .framework/Versions/5/Qt -w
+            /tmp/delocated -v {wheel} && python -m pip install wheel && python
+            ${{ github.workspace }}/tools/relink_qt_wheel.py
+            /tmp/delocated/*.whl -w {dest_dir}
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            rm -rf /tmp/repaired &&
-            auditwheel repair -w /tmp/repaired {wheel}
-            --exclude libQt5Core.so.5 --exclude libQt5Gui.so.5 --exclude libQt5Widgets.so.5
-            --exclude libQt5OpenGL.so.5 --exclude libQt5PrintSupport.so.5 --exclude libQt5DBus.so.5 &&
-            python -m pip install wheel &&
-            python /project/tools/relink_qt_wheel.py /tmp/repaired/*.whl -w {dest_dir}
+            rm -rf /tmp/repaired && auditwheel repair -w /tmp/repaired {wheel}
+            --exclude libQt5Core.so.5 --exclude libQt5Gui.so.5 --exclude
+            libQt5Widgets.so.5 --exclude libQt5OpenGL.so.5 --exclude
+            libQt5PrintSupport.so.5 --exclude libQt5DBus.so.5 && python -m pip
+            install wheel && python /project/tools/relink_qt_wheel.py
+            /tmp/repaired/*.whl -w {dest_dir}
 
           # Runtime libraries PyQt5-Qt5 expects from the system, plus a virtual display.
           CIBW_BEFORE_TEST_LINUX: >
-            dnf install -y xorg-x11-server-Xvfb mesa-dri-drivers mesa-libGL fontconfig freetype
-            libxkbcommon libxkbcommon-x11 xcb-util-wm xcb-util-image xcb-util-keysyms
-            xcb-util-renderutil dbus-libs
+            dnf install -y xorg-x11-server-Xvfb mesa-dri-drivers mesa-libGL
+            fontconfig freetype libxkbcommon libxkbcommon-x11 xcb-util-wm
+            xcb-util-image xcb-util-keysyms xcb-util-renderutil dbus-libs
           CIBW_TEST_COMMAND_MACOS: >
             python -m pytest {project}/tests -vv --reruns 10 --reruns-delay 30
-            --only-rerun "(?i)http|timeout|connection|socket|resolve" &&
-            python {project}/tools/smoke_viewer.py
+            --only-rerun "(?i)http|timeout|connection|socket|resolve" && python
+            {project}/tools/smoke_viewer.py
           CIBW_TEST_COMMAND_LINUX: >
             python -m pytest {project}/tests -vv --reruns 10 --reruns-delay 30
             --only-rerun "(?i)http|timeout|connection|socket|resolve" &&
@@ -329,8 +336,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: >
-          gh release upload "${{ github.event.release.tag_name }}" dist/*
-          --repo "${{ github.repository }}" --clobber
+          gh release upload "${{ github.event.release.tag_name }}" dist/* --repo
+          "${{ github.repository }}" --clobber
 
   publish-docker:
     name: Publish Docker image

@@ -6,6 +6,7 @@ awkward.concatenate or ROOT/parquet.
 Run serial: python 10_mpi_distributed.py
 Run MPI: mpiexec -n 2 python 10_mpi_distributed.py
 """
+
 from __future__ import annotations
 
 

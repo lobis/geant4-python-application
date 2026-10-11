@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 
 import awkward as ak
+
 import geant4_python_application as g4
 
 
@@ -28,7 +29,10 @@ def main() -> None:
     parser.add_argument("--batch", action="store_true")
     args = parser.parse_args()
     source = ak.Array(
-        [{"primaries": [primary("gamma", -10.0), primary("e-", 10.0)]} for _ in range(args.events)]
+        [
+            {"primaries": [primary("gamma", -10.0), primary("e-", 10.0)]}
+            for _ in range(args.events)
+        ]
     )
 
     with g4.Application(gdml=g4.basic_gdml, seed=137) as app:

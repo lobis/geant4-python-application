@@ -209,9 +209,7 @@ class Application:
     def setup_physics(
         self, physics_list: str = "custom", *, optical: bool = False
     ) -> Application:
-        self._send_and_recv(
-            Message("", "setup_physics", (physics_list, optical), {})
-        )
+        self._send_and_recv(Message("", "setup_physics", (physics_list, optical), {}))
         return self
 
     @staticmethod

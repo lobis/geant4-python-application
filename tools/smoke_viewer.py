@@ -16,7 +16,9 @@ import geant4_python_application as g4
 VIEWER_SECONDS = 45
 
 if not g4.Application.visualization_available():
-    sys.exit("Qt viewer unavailable: viewer module missing or the [gui] extra not installed")
+    sys.exit(
+        "Qt viewer unavailable: viewer module missing or the [gui] extra not installed"
+    )
 
 # The viewer module must resolve every Qt library it links against.
 subprocess.run(

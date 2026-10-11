@@ -3,18 +3,18 @@
 #include "geant4_application/Application.h"
 #include "geant4_application/SensitiveDetector.h"
 
-#include <G4LogicalVolumeStore.hh>
-#include <G4NistManager.hh>
-#include <G4PhysicalVolumeStore.hh>
 #include <G4AutoDelete.hh>
-#include <G4GlobalMagFieldMessenger.hh>
-#include <G4SystemOfUnits.hh>
+#include <G4ChordFinder.hh>
+#include <G4ClassicalRK4.hh>
 #include <G4ElectroMagneticField.hh>
 #include <G4EqMagElectricField.hh>
-#include <G4ClassicalRK4.hh>
-#include <G4MagIntegratorDriver.hh>
-#include <G4ChordFinder.hh>
 #include <G4FieldManager.hh>
+#include <G4GlobalMagFieldMessenger.hh>
+#include <G4LogicalVolumeStore.hh>
+#include <G4MagIntegratorDriver.hh>
+#include <G4NistManager.hh>
+#include <G4PhysicalVolumeStore.hh>
+#include <G4SystemOfUnits.hh>
 #include <G4TransportationManager.hh>
 
 #include <filesystem>
@@ -39,11 +39,12 @@ public:
         field[5] = eField.z();
     }
     G4bool DoesFieldChangeEnergy() const override { return true; }
+
 private:
     G4ThreeVector bField;
     G4ThreeVector eField;
 };
-} // namespace
+}// namespace
 
 G4ThreadLocal G4GlobalMagFieldMessenger* DetectorConstruction::magneticFieldMessenger = nullptr;
 

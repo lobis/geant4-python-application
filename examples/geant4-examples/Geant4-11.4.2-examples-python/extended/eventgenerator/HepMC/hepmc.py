@@ -20,7 +20,13 @@ P 2 11 0.1 0 0.5 0.6 0.000511 1
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", nargs="?", type=Path)
-    parser.add_argument("-n", "--events", type=int, default=1, help="accepted for the common audit interface")
+    parser.add_argument(
+        "-n",
+        "--events",
+        type=int,
+        default=1,
+        help="accepted for the common audit interface",
+    )
     parser.add_argument("--batch", action="store_true")
     args = parser.parse_args()
     text = args.input.read_text() if args.input else SAMPLE

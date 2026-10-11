@@ -8,8 +8,8 @@
 #include <G4PhysicalVolumeStore.hh>
 #include <G4VUserDetectorConstruction.hh>
 #include <G4VisAttributes.hh>
-#include <globals.hh>
 #include <array>
+#include <globals.hh>
 
 class G4GlobalMagFieldMessenger;
 

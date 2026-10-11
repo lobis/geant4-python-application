@@ -4,6 +4,7 @@ Shows setting a uniform global B field (tesla) and E field (kV/cm).
 E uses G4EqMagElectricField + ClassicalRK4; B-only uses G4GlobalMagFieldMessenger.
 Run: python 04_magnetic_electric_fields.py
 """
+
 from __future__ import annotations
 
 

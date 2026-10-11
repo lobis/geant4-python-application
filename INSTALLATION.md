@@ -4,12 +4,12 @@ Prebuilt wheels bundle a compiled Geant4 11.2.2, so on supported platforms you
 **do not need to install Geant4 (C++) yourself**. Building from source still
 requires a Geant4 installation.
 
-| Platform              | Python      | Prebuilt wheel | Qt viewer (`[gui]`) |
-| --------------------- | ----------- | -------------- | ------------------- |
-| macOS, Apple Silicon  | 3.8 – 3.13  | yes            | yes                 |
-| macOS, Intel          | 3.8 – 3.13  | yes            | yes                 |
-| Linux x86_64          | 3.8 – 3.13  | yes            | yes (needs a desktop with OpenGL) |
-| Linux aarch64, Windows | —          | no             | build from source   |
+| Platform               | Python     | Prebuilt wheel | Qt viewer (`[gui]`)               |
+| ---------------------- | ---------- | -------------- | --------------------------------- |
+| macOS, Apple Silicon   | 3.8 – 3.13 | yes            | yes                               |
+| macOS, Intel           | 3.8 – 3.13 | yes            | yes                               |
+| Linux x86_64           | 3.8 – 3.13 | yes            | yes (needs a desktop with OpenGL) |
+| Linux aarch64, Windows | —          | no             | build from source                 |
 
 ## Install a prebuilt wheel
 
@@ -27,7 +27,8 @@ pip install geant4-python-application
 
 ### From a GitHub release
 
-Each [GitHub release](https://github.com/lobis/geant4-python-application/releases)
+Each
+[GitHub release](https://github.com/lobis/geant4-python-application/releases)
 from 0.1.0 on also has the wheels attached. pip picks the right wheel for your
 platform and Python version; replace `<tag>` with the release tag (e.g.
 `v0.1.0`):
@@ -41,8 +42,9 @@ pip install "geant4-python-application[gui]" \
 
 To try changes that are not released yet, use the wheels that each run of the
 [Wheels workflow](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml)
-keeps as downloadable artifacts for 90 days. Pick a successful run and download the artifact for your platform: `cibw-wheels-ubuntu-latest-x86_64`
-(Linux), `cibw-wheels-macos-15-arm64` (Apple Silicon) or
+keeps as downloadable artifacts for 90 days. Pick a successful run and download
+the artifact for your platform: `cibw-wheels-ubuntu-latest-x86_64` (Linux),
+`cibw-wheels-macos-15-arm64` (Apple Silicon) or
 `cibw-wheels-macos-15-intel-x86_64` (Intel Mac). From the run page this needs a
 GitHub login; with the [GitHub CLI](https://cli.github.com) (`gh auth login`
 first):
@@ -53,14 +55,14 @@ gh run download <run-id> --repo lobis/geant4-python-application \
 pip install "geant4-python-application[gui]" --find-links ./g4-wheels
 ```
 
-`--find-links` takes the package from the folder and its dependencies
-(including Qt for `[gui]`) from PyPI.
+`--find-links` takes the package from the folder and its dependencies (including
+Qt for `[gui]`) from PyPI.
 
 ### What the `gui` extra does
 
 The interactive viewer is a separate module that only `Application.visualize()`
-loads. Importing the package and running simulations never loads Qt, so
-headless machines, containers and clusters need neither Qt nor OpenGL.
+loads. Importing the package and running simulations never loads Qt, so headless
+machines, containers and clusters need neither Qt nor OpenGL.
 
 The `gui` extra installs Qt from the `PyQt5-Qt5` package; no Homebrew, conda or
 system Qt is needed. On Linux, Qt still relies on the system's OpenGL and X11
@@ -170,8 +172,8 @@ pip install . -Ccmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON
 
 ### Building a relocatable macOS wheel yourself
 
-Bundles Geant4, Xerces-C, Expat and other non-system libraries into a wheel
-that takes Qt from `PyQt5-Qt5`, like the published wheels:
+Bundles Geant4, Xerces-C, Expat and other non-system libraries into a wheel that
+takes Qt from `PyQt5-Qt5`, like the published wheels:
 
 ```bash
 PYTHON="$CONDA_PREFIX/bin/python" \
@@ -180,8 +182,8 @@ tools/build_macos_self_contained.sh
 pip install "$(ls dist/self-contained/*.whl)[gui]"
 ```
 
-The wheel only installs on the macOS version (and newer) that the bundled
-Geant4 was built for. The published wheels are built by
+The wheel only installs on the macOS version (and newer) that the bundled Geant4
+was built for. The published wheels are built by
 `.github/workflows/wheels.yaml`, targeting macOS 11 and manylinux_2_28.
 
 ## Data files
@@ -195,18 +197,18 @@ versions, in which case those are used.
 python -c "import geant4_python_application as g4; print(g4.data_directory())"
 ```
 
-- Default location, shared by all your Python environments so the data
-  downloads only once: `~/Library/Application Support/geant4_python_application`
-  on macOS, `~/.local/share/geant4_python_application` on Linux.
+- Default location, shared by all your Python environments so the data downloads
+  only once: `~/Library/Application Support/geant4_python_application` on macOS,
+  `~/.local/share/geant4_python_application` on Linux.
 - Override the persistent location by setting `GEANT4_PYTHON_APPLICATION_DIR`
-  before import, or calling `application_directory(path)` before the
-  application initializes.
-- Use a temporary directory instead: `application_directory(temp=True)`. If
-  the OS partially cleans it up mid-run, delete it manually and let the
-  application recreate it.
+  before import, or calling `application_directory(path)` before the application
+  initializes.
+- Use a temporary directory instead: `application_directory(temp=True)`. If the
+  OS partially cleans it up mid-run, delete it manually and let the application
+  recreate it.
 - Interrupted downloads resume, failed downloads raise an error, and each
   archive's MD5 checksum is verified before it is extracted.
 - Uninstalling the package does **not** remove downloaded data files — remove
   them manually.
-- For cluster batch jobs, point `application_directory` at a shared location
-  to avoid redundant downloads across jobs.
+- For cluster batch jobs, point `application_directory` at a shared location to
+  avoid redundant downloads across jobs.

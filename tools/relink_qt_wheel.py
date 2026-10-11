@@ -32,9 +32,11 @@ BUNDLED_QT = re.compile(r"^(libQt5\w*|Qt[A-Z]\w*)([.-]|$)")
 
 
 def run(*args: str) -> str:
-    result = subprocess.run(args, capture_output=True, text=True)
+    result = subprocess.run(args, check=False, capture_output=True, text=True)
     if result.returncode != 0:
-        sys.exit(f"Command failed ({result.returncode}): {' '.join(args)}\n{result.stderr}{result.stdout}")
+        sys.exit(
+            f"Command failed ({result.returncode}): {' '.join(args)}\n{result.stderr}{result.stdout}"
+        )
     return result.stdout
 
 
@@ -61,14 +63,18 @@ def rpath_to_qt(root: Path, binary: Path, origin: str) -> str:
 
 def relink_macos(root: Path, binary: Path) -> bool:
     load_commands = run("otool", "-L", str(binary)).splitlines()[1:]
-    references = [m.groups() for line in load_commands if (m := MACOS_QT_FRAMEWORK.match(line))]
+    references = [
+        m.groups() for line in load_commands if (m := MACOS_QT_FRAMEWORK.match(line))
+    ]
     if not references:
         return False
     for old, framework in references:
         if old != f"@rpath/{framework}":
             run("install_name_tool", "-change", old, f"@rpath/{framework}", str(binary))
     rpath = rpath_to_qt(root, binary, "@loader_path")
-    rpaths = re.findall(r"^\s+path (\S+) \(offset", run("otool", "-l", str(binary)), re.M)
+    rpaths = re.findall(
+        r"^\s+path (\S+) \(offset", run("otool", "-l", str(binary)), re.M
+    )
     # Absolute rpaths only point into the build machine (e.g. its Qt or Geant4).
     for stale in (p for p in rpaths if p.startswith("/")):
         run("install_name_tool", "-delete_rpath", stale, str(binary))
@@ -84,7 +90,9 @@ def relink_linux(root: Path, binary: Path) -> bool:
     needed = run("patchelf", "--print-needed", str(binary)).split()
     if not any(LINUX_QT_LIBRARY.match(name) for name in needed):
         return False
-    entries = [e for e in run("patchelf", "--print-rpath", str(binary)).strip().split(":") if e]
+    entries = [
+        e for e in run("patchelf", "--print-rpath", str(binary)).strip().split(":") if e
+    ]
     rpath = rpath_to_qt(root, binary, "$ORIGIN")
     if rpath not in entries:
         run("patchelf", "--set-rpath", ":".join([*entries, rpath]), str(binary))
@@ -93,8 +101,12 @@ def relink_linux(root: Path, binary: Path) -> bool:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("wheel", type=Path, help="wheel already repaired by delocate/auditwheel")
-    parser.add_argument("-w", "--wheel-dir", type=Path, required=True, help="output directory")
+    parser.add_argument(
+        "wheel", type=Path, help="wheel already repaired by delocate/auditwheel"
+    )
+    parser.add_argument(
+        "-w", "--wheel-dir", type=Path, required=True, help="output directory"
+    )
     args = parser.parse_args()
 
     relink = relink_macos if sys.platform == "darwin" else relink_linux
@@ -102,13 +114,21 @@ def main() -> None:
         root = Path(tmp) / "wheel"
         unpack(args.wheel, root)
 
-        bundled = [str(p.relative_to(root)) for p in root.rglob("*") if BUNDLED_QT.match(p.name)]
+        bundled = [
+            str(p.relative_to(root))
+            for p in root.rglob("*")
+            if BUNDLED_QT.match(p.name)
+        ]
         if bundled:
-            sys.exit(f"Qt was bundled into the wheel; exclude it during repair: {bundled}")
+            sys.exit(
+                f"Qt was bundled into the wheel; exclude it during repair: {bundled}"
+            )
 
         relinked = [b for b in binaries(root) if relink(root, b)]
         if not relinked:
-            sys.exit("No bundled binary links Qt; was the wheel built with the viewer enabled?")
+            sys.exit(
+                "No bundled binary links Qt; was the wheel built with the viewer enabled?"
+            )
 
         (root / MARKER).write_text("PyQt5-Qt5\n")
         args.wheel_dir.mkdir(parents=True, exist_ok=True)

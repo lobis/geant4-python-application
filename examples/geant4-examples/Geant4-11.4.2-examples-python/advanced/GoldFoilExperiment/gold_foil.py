@@ -97,8 +97,12 @@ def main() -> None:
         # /gun/ commands: energy in MeV, position in cm (PrimaryGeneratorAction.cpp)
         app._send_and_recv(Message("generator", "set_particle", ("alpha",), {}))
         app._send_and_recv(Message("generator", "set_energy", (5.5,), {}))
-        app._send_and_recv(Message("generator", "set_position", ([0.0, 0.0, -5.0],), {}))
-        app._send_and_recv(Message("generator", "set_direction", ([0.0, 0.0, 1.0],), {}))
+        app._send_and_recv(
+            Message("generator", "set_position", ([0.0, 0.0, -5.0],), {})
+        )
+        app._send_and_recv(
+            Message("generator", "set_direction", ([0.0, 0.0, 1.0],), {})
+        )
 
         if not args.batch:
             if not app.visualization_available():
