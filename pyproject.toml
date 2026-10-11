@@ -4,7 +4,12 @@ requires = ["scikit-build-core>=0.3.3", "pybind11"]
 
 [project]
 authors = [
-    { name = "Luis Antonio Obis Aparicio", email = "luis.antonio.obis@gmail.com" }
+    { name = "Luis Antonio Obis Aparicio", email = "luis.antonio.obis@gmail.com" },
+    { name = "Kavya Wadhwa", email = "kavyavadhwa@gmail.com" },
+]
+maintainers = [
+    { name = "Luis Antonio Obis Aparicio", email = "luis.antonio.obis@gmail.com" },
+    { name = "Kavya Wadhwa", email = "kavyavadhwa@gmail.com" },
 ]
 classifiers = [
     "Intended Audience :: Developers",
