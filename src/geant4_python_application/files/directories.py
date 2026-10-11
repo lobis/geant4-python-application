@@ -14,7 +14,11 @@ _app_author = "lobis"
 
 _dirs = platformdirs.AppDirs(_app_name, _app_author)
 
-_application_directory = _dirs.user_data_dir
+# Shared by every environment of the user, so the ~2 GB of datasets download
+# only once. GEANT4_PYTHON_APPLICATION_DIR overrides it, e.g. on clusters.
+_application_directory = os.environ.get(
+    "GEANT4_PYTHON_APPLICATION_DIR", _dirs.user_data_dir
+)
 
 
 def application_directory(path: str | None = None, *, temp: bool = False) -> str:

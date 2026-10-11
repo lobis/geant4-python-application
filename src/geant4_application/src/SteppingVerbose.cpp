@@ -12,8 +12,11 @@ SteppingVerbose::SteppingVerbose() : G4SteppingVerbose() {}
 
 void SteppingVerbose::TrackingStarted() {
     CopyState();
+    // Optical stacking (scintillation/Cerenkov) can invoke TrackingStarted
+    // with CurrentStepNumber != 0 for resumed tracks; skip duplicate init
+    // record instead of aborting the run.
     if (fStep->GetTrack()->GetCurrentStepNumber() != 0) {
-        throw runtime_error("SteppingVerbose::TrackingStarted: fStep->GetTrack()->GetCurrentStepNumber() != 0");
+        return;
     }
     data::InsertStep(fStep, RunAction::GetBuilder());
 }

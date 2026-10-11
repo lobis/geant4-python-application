@@ -1,0 +1,21 @@
+geant4-python-application
+Copyright (c) 2023, Luis Antonio Obis Aparicio and contributors.
+Licensed under the BSD 3-Clause License; see LICENSE.
+
+The prebuilt wheels bundle the following third-party libraries. Their licence
+texts are in the licenses/ directory (installed in the wheel's .dist-info).
+
+- Geant4 11.2.2 (https://geant4.web.cern.ch): Geant4 Software License,
+  licenses/Geant4-LICENSE.
+- CLHEP, as shipped inside Geant4 (G4clhep): GNU LGPL v3,
+  licenses/CLHEP-COPYING.LESSER and licenses/CLHEP-COPYING. It is bundled as a
+  separate shared library that can be replaced.
+- Expat, as shipped inside Geant4 (G4expat): MIT, licenses/Expat-COPYING.
+- PTL, as shipped inside Geant4 (G4ptl): MIT, licenses/PTL-LICENSE.
+- zlib, as shipped inside Geant4 (G4zlib, Linux wheels): zlib License,
+  licenses/zlib-LICENSE.
+- Apache Xerces-C++ 3.2.5 (https://xerces.apache.org): Apache License 2.0,
+  licenses/Xerces-C-LICENSE and licenses/Xerces-C-NOTICE.
+
+Qt is not bundled. The optional [gui] extra installs it from the PyQt5-Qt5
+package, which carries its own licence (LGPL v3).

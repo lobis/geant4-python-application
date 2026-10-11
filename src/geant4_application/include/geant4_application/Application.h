@@ -44,8 +44,12 @@ public:
 
     void SetRandomSeed(long seed);
     void SetupManager(unsigned short nThreads);
+    static bool MultithreadingAvailable();
     void SetupDetector(const std::string& gdml);
-    void SetupPhysics();
+    void SetupPhysics(const std::string& physicsListName = "custom", bool optical = false);
+    static std::vector<std::string> GetAvailablePhysicsLists();
+    void AddExtraPhysics(const std::string& constructorName);
+    static std::vector<std::string> GetAvailableExtraPhysics();
     void SetupAction();
 
     void Initialize();
