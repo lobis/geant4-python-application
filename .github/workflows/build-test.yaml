@@ -102,7 +102,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/xerces
-          key: xerces-v${{ env.XERCES_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{ runner.os }}-${{ runner.arch }}
+          key:
+            xerces-v${{ env.XERCES_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{
+            runner.os }}-${{ runner.arch }}
 
       - name: Build and Install Xerces-C
         if: steps.cache-xerces.outputs.cache-hit != 'true'
@@ -117,7 +119,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.Geant4_DIR }}
-          key: geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{ runner.os }}-${{ runner.arch }}
+          key:
+            geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{
+            runner.os }}-${{ runner.arch }}
 
       - name: Build and Install Geant4 (without datasets)
         if: steps.cache-geant4.outputs.cache-hit != 'true'
@@ -145,7 +149,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.Geant4_DIR }}
-          key: geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{ runner.os }}-${{ runner.arch }}
+          key:
+            geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{
+            runner.os }}-${{ runner.arch }}
           fail-on-cache-miss: true
 
       - name: Cache Geant4 Datasets
@@ -200,7 +206,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/xerces
-          key: xerces-v${{ env.XERCES_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{ runner.os }}-${{ runner.arch }}
+          key:
+            xerces-v${{ env.XERCES_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{
+            runner.os }}-${{ runner.arch }}
           fail-on-cache-miss: true
 
       - name: Cache Geant4 Installation
@@ -208,7 +216,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.Geant4_DIR }}
-          key: geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{ runner.os }}-${{ runner.arch }}
+          key:
+            geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{
+            runner.os }}-${{ runner.arch }}
           fail-on-cache-miss: true
 
       - name: pip install the package

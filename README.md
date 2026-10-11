@@ -57,8 +57,9 @@ pip install "geant4-python-application[gui]"
   `~/.local/share/geant4_python_application` (Linux). Set
   `GEANT4_PYTHON_APPLICATION_DIR` to use another location.
 - Windows, Linux aarch64, building from source and data file management are
-  covered in [INSTALLATION.md](https://github.com/lobis/geant4-python-application/blob/main/INSTALLATION.md). On Windows, WSL works with
-  the Linux wheels.
+  covered in
+  [INSTALLATION.md](https://github.com/lobis/geant4-python-application/blob/main/INSTALLATION.md).
+  On Windows, WSL works with the Linux wheels.
 
 The examples are not part of the package; run them from a clone of the
 repository:
@@ -168,9 +169,10 @@ start, count = dist.split_count(1000, rank, size)  # mpiexec -n 2 python run.py
 ### Interactive Qt visualization
 
 Install with the `gui` extra (`pip install "geant4-python-application[gui]"`),
-or for source builds see [INSTALLATION.md](https://github.com/lobis/geant4-python-application/blob/main/INSTALLATION.md). Then open Geant4's
-interactive Qt viewer. The call returns when the window is closed, and commands
-can be entered in the viewer's command panel:
+or for source builds see
+[INSTALLATION.md](https://github.com/lobis/geant4-python-application/blob/main/INSTALLATION.md).
+Then open Geant4's interactive Qt viewer. The call returns when the window is
+closed, and commands can be entered in the viewer's command panel:
 
 ```python
 import geant4_python_application as g4
