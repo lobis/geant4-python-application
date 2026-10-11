@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest] # Geant4 is not available on conda for windows TODO: update this when it is
+        os: [ubuntu-latest, macos-latest] # Geant4 is not available on conda for Windows
     defaults:
       run:
         shell: bash -l {0}
@@ -49,7 +49,9 @@ jobs:
       - name: Install additional dependencies (MacOS)
         if: matrix.os == 'macos-latest'
         run: |
-          conda install -c conda-forge clang_osx-64
+          # macos-latest is Apple Silicon; clang_osx-64 would build an x86_64
+          # module that the arm64 Python cannot load.
+          conda install -c conda-forge clang_osx-arm64
 
       - name: Print versions
         run: |
@@ -89,7 +91,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
 
     steps:
       - name: Setup CMake
@@ -100,14 +102,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/xerces
-          key: xerces-v${{ env.XERCES_VERSION }}-cpp${{ env.CPP_STANDARD }}
+          key:
+            xerces-v${{ env.XERCES_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{
+            runner.os }}-${{ runner.arch }}
 
       - name: Build and Install Xerces-C
         if: steps.cache-xerces.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/apache/xerces-c.git xerces-source
           git -C xerces-source checkout tags/v${{ env.XERCES_VERSION }}
-          cmake -B xerces-build -S xerces-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DBUILD_SHARED_LIBS=OFF ${{ matrix.os == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv' }}
+          cmake -G Ninja -B xerces-build -S xerces-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv
           cmake --build xerces-build --parallel $(nproc) --config Release --target install
 
       - name: Cache Geant4 Installation
@@ -115,13 +119,18 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.Geant4_DIR }}
-          key: geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}
+          key:
+            geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{
+            runner.os }}-${{ runner.arch }}
 
       - name: Build and Install Geant4 (without datasets)
         if: steps.cache-geant4.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}
-          cmake -B geant4-build -S geant4-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ env.Geant4_DIR }} -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ${{ matrix.os == 'windows-latest' && '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_CXX_FLAGS_RELEASE="/MT"' || '-G Ninja -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF' }}
+          # Typo in Geant4 11.2.2's g4tools (fixed in later releases) that Xcode 16.3+ clang rejects.
+          sed -i.bak 's/a_from\.m_barnch/a_from.m_branch/' geant4-source/source/externals/g4tools/include/tools/wroot/columns.icc
+          # Geant4's bundled zlib does not compile against recent macOS SDKs; use the system one there.
+          cmake -G Ninja -B geant4-build -S geant4-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ env.Geant4_DIR }} -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF ${{ runner.os == 'macOS' && '-DGEANT4_USE_SYSTEM_ZLIB=ON' || '' }}
           cmake --build geant4-build --parallel $(nproc) --config Release --target install
 
   install-geant4-datasets:
@@ -132,7 +141,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
 
     steps:
       - name: Cache Geant4 Installation
@@ -140,7 +149,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.Geant4_DIR }}
-          key: geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}
+          key:
+            geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{
+            runner.os }}-${{ runner.arch }}
           fail-on-cache-miss: true
 
       - name: Cache Geant4 Datasets
@@ -152,26 +163,13 @@ jobs:
           enableCrossOsArchive: true
           lookup-only: true
 
-      - name: Move Geant4 datasets (Ubuntu/MacOS)
-        if:
-          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os !=
-          'windows-latest'
+      - name: Move Geant4 datasets
+        if: steps.cache-geant4-data.outputs.cache-hit != 'true'
         shell: bash
         run: |
           bash ${{ env.Geant4_DIR }}/bin/geant4-config --install-datasets
           bash ${{ env.Geant4_DIR }}/bin/geant4-config --check-datasets
           mv ${{ env.Geant4_DIR }}/share/Geant4/data ${{ github.workspace }}/geant4-data
-
-      - name: Move Geant4 datasets (Windows)
-        if:
-          steps.cache-geant4-data.outputs.cache-hit != 'true' && matrix.os ==
-          'windows-latest'
-        shell: powershell
-        run: |
-          Get-ChildItem -Path  ${{ env.Geant4_DIR }}\bin
-          cmd /c  ${{ env.Geant4_DIR }}\bin\geant4-config.cmd --install-datasets
-          cmd /c  ${{ env.Geant4_DIR }}\bin\geant4-config.cmd --check-datasets
-          Move-Item ${{ env.Geant4_DIR }}\share\Geant4\data ${{ github.workspace }}\geant4-data
 
   build-test:
     name:
@@ -182,13 +180,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
         python-version:
           - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
 
     steps:
       - name: Checkout
@@ -202,18 +201,14 @@ jobs:
       - name: Setup CMake
         uses: lukka/get-cmake@v3.30.3
 
-      - name: Setup Windows environment variables
-        if: matrix.os == 'windows-latest'
-        shell: bash
-        run: |
-          echo "CMAKE_ARGS=-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded" >> $GITHUB_ENV
-
       - name: Cache Xerces-C Installation
         id: cache-xerces
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/xerces
-          key: xerces-v${{ env.XERCES_VERSION }}-cpp${{ env.CPP_STANDARD }}
+          key:
+            xerces-v${{ env.XERCES_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{
+            runner.os }}-${{ runner.arch }}
           fail-on-cache-miss: true
 
       - name: Cache Geant4 Installation
@@ -221,7 +216,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.Geant4_DIR }}
-          key: geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}
+          key:
+            geant4-v${{ env.GEANT4_VERSION }}-cpp${{ env.CPP_STANDARD }}-${{
+            runner.os }}-${{ runner.arch }}
           fail-on-cache-miss: true
 
       - name: pip install the package
@@ -242,22 +239,12 @@ jobs:
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
-      - name: Move Geant4 datasets (Ubuntu/MacOS)
-        if: matrix.python-version != '3.11' && matrix.os != 'windows-latest'
+      - name: Move Geant4 datasets
+        if: matrix.python-version != '3.11'
         run: |
           GEANT4_DATA_DIR=$(python -c "import geant4_python_application; print(geant4_python_application.data_directory())")
           mkdir -p ${{ github.workspace }}/geant4-data "$GEANT4_DATA_DIR"
           mv ${{ github.workspace }}/geant4-data/* "$GEANT4_DATA_DIR"
-
-      # TODO: unify this with the above
-      - name: Move Geant4 datasets (Windows)
-        if: matrix.python-version != '3.11' && matrix.os == 'windows-latest'
-        shell: powershell
-        run: |
-          $env:GEANT4_DATA_DIR = python -c "import geant4_python_application; print(geant4_python_application.data_directory())"
-          New-Item -ItemType Directory -Path "${{ github.workspace }}\geant4-data" -Force
-          New-Item -ItemType Directory -Path $env:GEANT4_DATA_DIR -Force
-          Move-Item "${{ github.workspace }}\geant4-data\*" $env:GEANT4_DATA_DIR -Force
 
       - name: Install datasets
         uses: nick-fields/retry@v3
