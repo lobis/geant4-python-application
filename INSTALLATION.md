@@ -15,11 +15,6 @@ requires a Geant4 installation.
 
 ### From PyPI
 
-> **Not published yet.** The first PyPI release will be 0.1.0. Until then,
-> `pip install geant4-python-application` fails with "No matching distribution
-> found"; use the [CI wheels](#from-a-ci-build-before-the-first-release)
-> instead.
-
 ```bash
 pip install "geant4-python-application[gui]"
 ```
@@ -42,12 +37,11 @@ pip install "geant4-python-application[gui]" \
   --find-links https://github.com/lobis/geant4-python-application/releases/expanded_assets/<tag>
 ```
 
-### From a CI build (before the first release)
+### From a CI build (unreleased changes)
 
-Every run of the
+To try changes that are not released yet, use the wheels that each run of the
 [Wheels workflow](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml)
-keeps its wheels as downloadable artifacts for 90 days. Pick a successful run
-and download the artifact for your platform: `cibw-wheels-ubuntu-latest-x86_64`
+keeps as downloadable artifacts for 90 days. Pick a successful run and download the artifact for your platform: `cibw-wheels-ubuntu-latest-x86_64`
 (Linux), `cibw-wheels-macos-15-arm64` (Apple Silicon) or
 `cibw-wheels-macos-15-intel-x86_64` (Intel Mac). From the run page this needs a
 GitHub login; with the [GitHub CLI](https://cli.github.com) (`gh auth login`

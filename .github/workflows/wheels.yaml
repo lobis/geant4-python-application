@@ -305,6 +305,8 @@ jobs:
     needs: [sdist, wheels, check-wheels-size]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
+    permissions:
+      contents: write
 
     steps:
       - name: Setup Python
@@ -322,6 +324,13 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.10.2
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Attach wheels to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release upload "${{ github.event.release.tag_name }}" dist/*
+          --repo "${{ github.repository }}" --clobber
 
   publish-docker:
     name: Publish Docker image
