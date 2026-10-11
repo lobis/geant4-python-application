@@ -3,8 +3,10 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lobis/geant4-python-application/HEAD?labpath=attenuation.ipynb)
 [![Binder](https://binderhub.ssl-hep.org/badge_logo.svg)](https://binderhub.ssl-hep.org/v2/gh/lobis/geant4-python-application/HEAD?labpath=attenuation.ipynb)
 
+[![PyPI](https://img.shields.io/pypi/v/geant4-python-application)](https://pypi.org/project/geant4-python-application/)
+[![Python](https://img.shields.io/pypi/pyversions/geant4-python-application)](https://pypi.org/project/geant4-python-application/)
 [![Wheels](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml)
-[![Build and Test](https://github.com/lobis/geant4-python-application/actions/workflows/build-test.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/test.yaml)
+[![Build and Test](https://github.com/lobis/geant4-python-application/actions/workflows/build-test.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/build-test.yaml)
 
 This is an experiment at providing a pythonic interface to Geant4.
 
@@ -24,7 +26,7 @@ looking at [geant4_pybind](https://github.com/HaarigerHarald/geant4_pybind).
   [awkward array](https://github.com/scikit-hep/awkward)
 
 New to Geant4 or this package? See the
-[Python developer guide](PYTHON_DEVELOPER_GUIDE.md).
+[Python developer guide](https://github.com/lobis/geant4-python-application/blob/main/PYTHON_DEVELOPER_GUIDE.md).
 
 ## Platform support
 
@@ -35,35 +37,44 @@ reach out to kavyavadhwa@gmail.com.
 
 ## Installation
 
-Prebuilt wheels for macOS (Apple Silicon and Intel) and Linux x86_64, Python 3.8
-– 3.13, bundle Geant4 — no separate Geant4 (C++) installation is needed:
-
 ```bash
 pip install "geant4-python-application[gui]"
 ```
 
-The `gui` extra adds the interactive Qt viewer; leave it out for a physics-only
-install.
+- Prebuilt wheels for macOS (Apple Silicon and Intel) and Linux x86_64, Python
+  3.8–3.13. Geant4 is bundled, so no separate Geant4 (C++) installation is
+  needed.
+- `[gui]` adds the interactive Qt viewer (`app.visualize()`); leave it out for a
+  physics-only install.
+- Check the installation:
 
-Geant4's physics data files download automatically on first use, so you can run
-an example straight away:
+  ```bash
+  python -c "import geant4_python_application as g4; print(g4.__version__)"
+  ```
+
+- The first simulation downloads Geant4's data files (~2 GB) once per user, to
+  `~/Library/Application Support/geant4_python_application` (macOS) or
+  `~/.local/share/geant4_python_application` (Linux). Set
+  `GEANT4_PYTHON_APPLICATION_DIR` to use another location.
+- Windows, Linux aarch64, building from source and data file management are
+  covered in [INSTALLATION.md](https://github.com/lobis/geant4-python-application/blob/main/INSTALLATION.md). On Windows, WSL works with
+  the Linux wheels.
+
+The examples are not part of the package; run them from a clone of the
+repository:
 
 ```bash
+git clone https://github.com/lobis/geant4-python-application
+cd geant4-python-application
 python examples/geant4-examples/Geant4-11.4.2-examples-python/basic/B1/b1.py --batch -n 10
 ```
 
 `--batch` runs headless; drop it to open the Qt viewer.
 
-Building from source (other platforms, development), the Qt viewer, and data
-file management are covered in [INSTALLATION.md](INSTALLATION.md).
-
 ## Usage
 
 ```python
 import geant4_python_application as g4
-
-# Use a temporary directory for the Geant4 data files (remove this line to use the default location)
-g4.application_directory(temp=True)
 
 with g4.Application(gdml=g4.basic_gdml, seed=137) as app:
     events = app.run(100)
@@ -157,7 +168,7 @@ start, count = dist.split_count(1000, rank, size)  # mpiexec -n 2 python run.py
 ### Interactive Qt visualization
 
 Install with the `gui` extra (`pip install "geant4-python-application[gui]"`),
-or for source builds see [INSTALLATION.md](INSTALLATION.md). Then open Geant4's
+or for source builds see [INSTALLATION.md](https://github.com/lobis/geant4-python-application/blob/main/INSTALLATION.md). Then open Geant4's
 interactive Qt viewer. The call returns when the window is closed, and commands
 can be entered in the viewer's command panel:
 
