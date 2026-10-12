@@ -1,7 +1,7 @@
 # Geant4 Python Application
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lobis/geant4-python-application/HEAD?labpath=attenuation.ipynb)
-[![Binder](https://binderhub.ssl-hep.org/badge_logo.svg)](https://binderhub.ssl-hep.org/v2/gh/lobis/geant4-python-application/HEAD?labpath=attenuation.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lobis/geant4-python-application/HEAD?labpath=examples%2Fattenuation.ipynb)
+[![Binder](https://binderhub.ssl-hep.org/badge_logo.svg)](https://binderhub.ssl-hep.org/v2/gh/lobis/geant4-python-application/HEAD?labpath=examples%2Fattenuation.ipynb)
 
 [![PyPI](https://img.shields.io/pypi/v/geant4-python-application)](https://pypi.org/project/geant4-python-application/)
 [![Python](https://img.shields.io/pypi/pyversions/geant4-python-application)](https://pypi.org/project/geant4-python-application/)
