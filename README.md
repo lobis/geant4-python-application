@@ -38,11 +38,28 @@ reach out to kavyavadhwa@gmail.com.
 ## Installation
 
 The package is published on
-[PyPI](https://pypi.org/project/geant4-python-application/):
+[PyPI](https://pypi.org/project/geant4-python-application/). Install it into a
+fresh virtual environment: mixing it with packages already in your system or
+base conda Python (other Qt/PyQt, numpy or Geant4 builds) is the most common
+cause of library mismatch errors.
 
 ```bash
+python3 -m venv g4-env
+source g4-env/bin/activate
+python -m pip install --upgrade pip
 pip install "geant4-python-application[gui]"
 ```
+
+With conda, create a new environment instead of using `base`:
+
+```bash
+conda create -n g4 python=3.12 -y
+conda activate g4
+pip install "geant4-python-application[gui]"
+```
+
+Activate the environment again (`source g4-env/bin/activate` or
+`conda activate g4`) in every new terminal before using the package.
 
 - Prebuilt wheels for macOS (Apple Silicon and Intel) and Linux x86_64, Python
   3.8–3.13. Geant4 is bundled, so no separate Geant4 (C++) installation is

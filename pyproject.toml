@@ -3,13 +3,14 @@ build-backend = "scikit_build_core.build"
 requires = ["scikit-build-core>=0.3.3", "pybind11"]
 
 [project]
+# Names only: PyPI shows just the first person when authors carry emails.
 authors = [
-    { name = "Luis Antonio Obis Aparicio", email = "luis.antonio.obis@gmail.com" },
-    { name = "Kavya Wadhwa", email = "kavyavadhwa@gmail.com" },
+    { name = "Luis Antonio Obis Aparicio" },
+    { name = "Kavya Wadhwa" },
 ]
 maintainers = [
-    { name = "Luis Antonio Obis Aparicio", email = "luis.antonio.obis@gmail.com" },
-    { name = "Kavya Wadhwa", email = "kavyavadhwa@gmail.com" },
+    { name = "Luis Antonio Obis Aparicio" },
+    { name = "Kavya Wadhwa" },
 ]
 classifiers = [
     "Intended Audience :: Developers",
