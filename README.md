@@ -37,6 +37,9 @@ reach out to kavyavadhwa@gmail.com.
 
 ## Installation
 
+The package is published on
+[PyPI](https://pypi.org/project/geant4-python-application/):
+
 ```bash
 pip install "geant4-python-application[gui]"
 ```
