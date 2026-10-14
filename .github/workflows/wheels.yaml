@@ -242,9 +242,11 @@ jobs:
           # Apple's linker occasionally segfaults on the runners; retry the link.
           CIBW_CONFIG_SETTINGS_MACOS: >
             cmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON
-            cmake.define.FETCHCONTENT_SOURCE_DIR_AWKWARD-HEADERS=${{ github.workspace }}/ci-deps/awkward-headers
-            cmake.define.FETCHCONTENT_SOURCE_DIR_PYBIND11=${{ github.workspace }}/ci-deps/pybind11
-            cmake.define.CMAKE_CXX_LINKER_LAUNCHER=${{ github.workspace }}/tools/ci/retry_link.sh
+            cmake.define.FETCHCONTENT_SOURCE_DIR_AWKWARD-HEADERS=${{
+            github.workspace }}/ci-deps/awkward-headers
+            cmake.define.FETCHCONTENT_SOURCE_DIR_PYBIND11=${{ github.workspace
+            }}/ci-deps/pybind11 cmake.define.CMAKE_CXX_LINKER_LAUNCHER=${{
+            github.workspace }}/tools/ci/retry_link.sh
           CIBW_CONFIG_SETTINGS_LINUX: >
             cmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON
             cmake.define.FETCHCONTENT_SOURCE_DIR_AWKWARD-HEADERS=/project/ci-deps/awkward-headers
@@ -285,22 +287,24 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
             rm -rf /tmp/delocated && delocate-wheel --require-archs
             {delocate_archs} --exclude .framework/Versions/5/Qt -w
-            /tmp/delocated -v {wheel} && ${{ github.workspace }}/tools/ci/retry.sh python -m pip install wheel && python
-            ${{ github.workspace }}/tools/relink_qt_wheel.py
-            /tmp/delocated/*.whl -w {dest_dir}
+            /tmp/delocated -v {wheel} && ${{ github.workspace
+            }}/tools/ci/retry.sh python -m pip install wheel && python ${{
+            github.workspace }}/tools/relink_qt_wheel.py /tmp/delocated/*.whl -w
+            {dest_dir}
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             rm -rf /tmp/repaired && auditwheel repair -w /tmp/repaired {wheel}
             --exclude libQt5Core.so.5 --exclude libQt5Gui.so.5 --exclude
             libQt5Widgets.so.5 --exclude libQt5OpenGL.so.5 --exclude
-            libQt5PrintSupport.so.5 --exclude libQt5DBus.so.5 && /project/tools/ci/retry.sh python -m pip
-            install wheel && python /project/tools/relink_qt_wheel.py
-            /tmp/repaired/*.whl -w {dest_dir}
+            libQt5PrintSupport.so.5 --exclude libQt5DBus.so.5 &&
+            /project/tools/ci/retry.sh python -m pip install wheel && python
+            /project/tools/relink_qt_wheel.py /tmp/repaired/*.whl -w {dest_dir}
 
           # Runtime libraries PyQt5-Qt5 expects from the system, plus a virtual display.
           CIBW_BEFORE_TEST_LINUX: >
-            /project/tools/ci/retry.sh dnf install -y xorg-x11-server-Xvfb mesa-dri-drivers mesa-libGL
-            fontconfig freetype libxkbcommon libxkbcommon-x11 xcb-util-wm
-            xcb-util-image xcb-util-keysyms xcb-util-renderutil dbus-libs
+            /project/tools/ci/retry.sh dnf install -y xorg-x11-server-Xvfb
+            mesa-dri-drivers mesa-libGL fontconfig freetype libxkbcommon
+            libxkbcommon-x11 xcb-util-wm xcb-util-image xcb-util-keysyms
+            xcb-util-renderutil dbus-libs
           CIBW_TEST_COMMAND_MACOS: >
             python -m pytest {project}/tests -vv --reruns 10 --reruns-delay 30
             --only-rerun "(?i)http|timeout|connection|socket|resolve" && python
