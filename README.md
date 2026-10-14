@@ -5,6 +5,9 @@
 
 [![PyPI](https://img.shields.io/pypi/v/geant4-python-application)](https://pypi.org/project/geant4-python-application/)
 [![Python](https://img.shields.io/pypi/pyversions/geant4-python-application)](https://pypi.org/project/geant4-python-application/)
+[![Downloads](https://static.pepy.tech/badge/geant4-python-application)](https://pepy.tech/projects/geant4-python-application)
+[![Downloads/month](https://static.pepy.tech/badge/geant4-python-application/month)](https://pepy.tech/projects/geant4-python-application)
+[![Views](https://hits.sh/github.com/lobis/geant4-python-application.svg?label=views)](https://hits.sh/github.com/lobis/geant4-python-application/)
 [![Wheels](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml)
 [![Build and Test](https://github.com/lobis/geant4-python-application/actions/workflows/build-test.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/build-test.yaml)
 
@@ -38,11 +41,28 @@ reach out to kavyavadhwa@gmail.com.
 ## Installation
 
 The package is published on
-[PyPI](https://pypi.org/project/geant4-python-application/):
+[PyPI](https://pypi.org/project/geant4-python-application/). Install it into a
+fresh virtual environment: mixing it with packages already in your system or
+base conda Python (other Qt/PyQt, numpy or Geant4 builds) is the most common
+cause of library mismatch errors.
 
 ```bash
+python3 -m venv g4-env
+source g4-env/bin/activate
+python -m pip install --upgrade pip
 pip install "geant4-python-application[gui]"
 ```
+
+With conda, create a new environment instead of using `base`:
+
+```bash
+conda create -n g4 python=3.12 -y
+conda activate g4
+pip install "geant4-python-application[gui]"
+```
+
+Activate the environment again (`source g4-env/bin/activate` or
+`conda activate g4`) in every new terminal before using the package.
 
 - Prebuilt wheels for macOS (Apple Silicon and Intel) and Linux x86_64, Python
   3.8–3.13. Geant4 is bundled, so no separate Geant4 (C++) installation is

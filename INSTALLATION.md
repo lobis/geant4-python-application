@@ -13,6 +13,30 @@ requires a Geant4 installation.
 
 ## Install a prebuilt wheel
 
+### Create a virtual environment first
+
+Always install into a fresh virtual environment. Installing into the system
+Python or conda's `base` environment mixes this package with whatever is already
+there (other Qt/PyQt, numpy or Geant4 builds), which is the most common cause of
+library mismatch errors. On recent Ubuntu/Debian, `pip install` outside a
+virtual environment is refused with `externally-managed-environment`.
+
+```bash
+python3 -m venv g4-env
+source g4-env/bin/activate
+python -m pip install --upgrade pip
+```
+
+or with conda:
+
+```bash
+conda create -n g4 python=3.12 -y
+conda activate g4
+```
+
+Activate the environment again in every new terminal. All commands below assume
+it is active.
+
 ### From PyPI
 
 ```bash
