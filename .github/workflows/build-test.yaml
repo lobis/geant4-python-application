@@ -31,6 +31,9 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup conda
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -39,19 +42,19 @@ jobs:
 
       - name: Install Geant4 and cmake using conda
         run: |
-          conda install -c conda-forge cmake ninja geant4=${{ env.GEANT4_VERSION }}
+          ./tools/ci/retry.sh conda install -y -c conda-forge cmake ninja geant4=${{ env.GEANT4_VERSION }}
 
       - name: Install additional dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          conda install -c conda-forge gxx_linux-64
+          ./tools/ci/retry.sh conda install -y -c conda-forge gxx_linux-64
 
       - name: Install additional dependencies (MacOS)
         if: matrix.os == 'macos-latest'
         run: |
           # macos-latest is Apple Silicon; clang_osx-64 would build an x86_64
           # module that the arm64 Python cannot load.
-          conda install -c conda-forge clang_osx-arm64
+          ./tools/ci/retry.sh conda install -y -c conda-forge clang_osx-arm64
 
       - name: Print versions
         run: |
@@ -65,15 +68,12 @@ jobs:
 
       - name: Install datasets if missing # Shouldn't they be available after the conda install?
         run: |
-          geant4-config --install-datasets
+          ./tools/ci/retry.sh geant4-config --install-datasets
           geant4-config --check-datasets
-
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: pip install the package from source
         run: |
-          python -m pip install .[test]
+          ./tools/ci/retry.sh python -m pip install .[test]
           python -c "import geant4_python_application; print(geant4_python_application.version)"
 
       - name: Check datasets are accessible # Datasets should have been installed by the conda package, and should be accessible
@@ -94,6 +94,9 @@ jobs:
         os: [ubuntu-latest, macos-latest]
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup CMake
         uses: lukka/get-cmake@v3.30.3
 
@@ -109,7 +112,7 @@ jobs:
       - name: Build and Install Xerces-C
         if: steps.cache-xerces.outputs.cache-hit != 'true'
         run: |
-          git clone https://github.com/apache/xerces-c.git xerces-source
+          ./tools/ci/retry.sh sh -c 'rm -rf xerces-source && git clone https://github.com/apache/xerces-c.git xerces-source'
           git -C xerces-source checkout tags/v${{ env.XERCES_VERSION }}
           cmake -G Ninja -B xerces-build -S xerces-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv
           cmake --build xerces-build --parallel $(nproc) --config Release --target install
@@ -126,7 +129,7 @@ jobs:
       - name: Build and Install Geant4 (without datasets)
         if: steps.cache-geant4.outputs.cache-hit != 'true'
         run: |
-          git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}
+          ./tools/ci/retry.sh sh -c 'rm -rf geant4-source && git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}'
           # Typo in Geant4 11.2.2's g4tools (fixed in later releases) that Xcode 16.3+ clang rejects.
           sed -i.bak 's/a_from\.m_barnch/a_from.m_branch/' geant4-source/source/externals/g4tools/include/tools/wroot/columns.icc
           # Geant4's bundled zlib does not compile against recent macOS SDKs; use the system one there.
@@ -144,6 +147,9 @@ jobs:
         os: [ubuntu-latest, macos-latest]
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Cache Geant4 Installation
         id: cache-geant4
         uses: actions/cache@v4
@@ -167,7 +173,7 @@ jobs:
         if: steps.cache-geant4-data.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          bash ${{ env.Geant4_DIR }}/bin/geant4-config --install-datasets
+          ./tools/ci/retry.sh bash ${{ env.Geant4_DIR }}/bin/geant4-config --install-datasets
           bash ${{ env.Geant4_DIR }}/bin/geant4-config --check-datasets
           mv ${{ env.Geant4_DIR }}/share/Geant4/data ${{ github.workspace }}/geant4-data
 
@@ -223,8 +229,8 @@ jobs:
 
       - name: pip install the package
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install .[test]
+          ./tools/ci/retry.sh python -m pip install --upgrade pip
+          ./tools/ci/retry.sh python -m pip install .[test]
           git tag
           python -c "import geant4_python_application; print(geant4_python_application.version)"
 
@@ -264,7 +270,7 @@ jobs:
       - name: Run example notebooks
         if: matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
         run: |
-          python -m pip install jupyter nbconvert matplotlib
+          ./tools/ci/retry.sh python -m pip install jupyter nbconvert matplotlib
           for notebook in $(find examples -name '*.ipynb'); do
             jupyter nbconvert --to notebook --execute --inplace $notebook
           done
