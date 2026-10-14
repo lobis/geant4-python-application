@@ -5,6 +5,9 @@
 
 [![PyPI](https://img.shields.io/pypi/v/geant4-python-application)](https://pypi.org/project/geant4-python-application/)
 [![Python](https://img.shields.io/pypi/pyversions/geant4-python-application)](https://pypi.org/project/geant4-python-application/)
+[![Downloads](https://static.pepy.tech/badge/geant4-python-application)](https://pepy.tech/projects/geant4-python-application)
+[![Downloads/month](https://static.pepy.tech/badge/geant4-python-application/month)](https://pepy.tech/projects/geant4-python-application)
+[![Views](https://hits.sh/github.com/lobis/geant4-python-application.svg?label=views)](https://hits.sh/github.com/lobis/geant4-python-application/)
 [![Wheels](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml)
 [![Build and Test](https://github.com/lobis/geant4-python-application/actions/workflows/build-test.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/build-test.yaml)
 
