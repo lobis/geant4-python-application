@@ -39,7 +39,7 @@ jobs:
 
       - name: Install Geant4 and cmake using conda
         run: |
-          conda install -c conda-forge cmake ninja geant4=${{ env.GEANT4_VERSION }}
+          conda install -y -c conda-forge cmake ninja geant4=11.4.3
 
       - name: Install additional dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
