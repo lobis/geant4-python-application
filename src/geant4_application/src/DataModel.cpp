@@ -341,7 +341,7 @@ void InsertStep(const G4Step* step, Builders& builder) {
     const auto process = stepPost->GetProcessDefinedStep();
     G4String processName = "InitStep";
     G4String processTypeName = "InitStep";
-    if (track->GetCurrentStepNumber() != 0) {
+    if (track->GetCurrentStepNumber() != 0 && process != nullptr) {
         // 0 = Init step (G4SteppingVerbose) process is not defined for this step
         processName = process->GetProcessName();
         processTypeName = G4VProcess::GetProcessTypeName(process->GetProcessType());
@@ -366,10 +366,16 @@ void InsertStep(const G4Step* step, Builders& builder) {
         builder.step_process.content().content().append(processName);
     }
     if (builder.fields.find("step_process_type") != builder.fields.end()) {
-        builder.step_process_type.content().content().append(processName);
+        builder.step_process_type.content().content().append(processTypeName);
     }
     if (builder.fields.find("step_volume") != builder.fields.end()) {
-        const auto& volumeName = stepPre->GetPhysicalVolume()->GetName();
+        // Geant4 11.4 can start a step with no volume, e.g. for a primary
+        // generated exactly on the world boundary.
+        string volumeName = "OutOfWorld";
+        const auto volume = stepPre->GetPhysicalVolume();
+        if (volume != nullptr) {
+            volumeName = volume->GetName();
+        }
         builder.step_volume.content().content().append(volumeName);
     }
     if (builder.fields.find("step_volume_post") != builder.fields.end()) {

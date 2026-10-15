@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GEANT4_VERSION: 11.2.2
+  GEANT4_VERSION: 11.4.3
   XERCES_VERSION: 3.2.5
   CPP_STANDARD: 17
   Geant4_DIR: ${{ github.workspace }}/geant4
@@ -42,7 +42,7 @@ jobs:
 
       - name: Install Geant4 and cmake using conda
         run: |
-          ./tools/ci/retry.sh conda install -y -c conda-forge cmake ninja geant4=${{ env.GEANT4_VERSION }}
+          ./tools/ci/retry.sh conda install -y -c conda-forge cmake ninja freetype geant4=${{ env.GEANT4_VERSION }}
 
       - name: Install additional dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
@@ -73,6 +73,9 @@ jobs:
 
       - name: pip install the package from source
         run: |
+          # conda-forge's Geant4 11.4 needs CMake to find its dependencies (e.g.
+          # FreeType) in the conda environment
+          export CMAKE_PREFIX_PATH="$CONDA_PREFIX"
           ./tools/ci/retry.sh python -m pip install .[test]
           python -c "import geant4_python_application; print(geant4_python_application.version)"
 
@@ -130,8 +133,6 @@ jobs:
         if: steps.cache-geant4.outputs.cache-hit != 'true'
         run: |
           ./tools/ci/retry.sh sh -c 'rm -rf geant4-source && git clone https://github.com/Geant4/geant4.git ${{ github.workspace }}/geant4-source --depth 1 --branch v${{ env.GEANT4_VERSION }}'
-          # Typo in Geant4 11.2.2's g4tools (fixed in later releases) that Xcode 16.3+ clang rejects.
-          sed -i.bak 's/a_from\.m_barnch/a_from.m_branch/' geant4-source/source/externals/g4tools/include/tools/wroot/columns.icc
           # Geant4's bundled zlib does not compile against recent macOS SDKs; use the system one there.
           cmake -G Ninja -B geant4-build -S geant4-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ env.Geant4_DIR }} -DXERCESC_ROOT_DIR=${{ github.workspace }}/xerces -DCMAKE_CXX_STANDARD=${{ env.CPP_STANDARD }} -DGEANT4_USE_GDML=ON -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF ${{ runner.os == 'macOS' && '-DGEANT4_USE_SYSTEM_ZLIB=ON' || '' }}
           cmake --build geant4-build --parallel $(nproc) --config Release --target install
@@ -228,6 +229,9 @@ jobs:
           fail-on-cache-miss: true
 
       - name: pip install the package
+        env:
+          # Geant4 11.4's Geant4Config.cmake looks for Xerces-C again here.
+          CMAKE_PREFIX_PATH: ${{ github.workspace }}/xerces
         run: |
           ./tools/ci/retry.sh python -m pip install --upgrade pip
           ./tools/ci/retry.sh python -m pip install .[test]
@@ -266,6 +270,11 @@ jobs:
       - name: Run tests
         run: |
           python -m pytest -vv --reruns 3 --reruns-delay 30 --only-rerun "(?i)http|timeout|connection|socket|resolve"
+
+      - name: Run the ported Geant4 examples
+        if: matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
+        run: |
+          python tools/run_example_ports.py --events 10
 
       - name: Run example notebooks
         if: matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'

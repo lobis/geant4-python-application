@@ -5,7 +5,7 @@ Licensed under the BSD 3-Clause License; see LICENSE.
 The prebuilt wheels bundle the following third-party libraries. Their licence
 texts are in the licenses/ directory (installed in the wheel's .dist-info).
 
-- Geant4 11.2.2 (https://geant4.web.cern.ch): Geant4 Software License,
+- Geant4 11.4.3 (https://geant4.web.cern.ch): Geant4 Software License,
   licenses/Geant4-LICENSE.
 - CLHEP, as shipped inside Geant4 (G4clhep): GNU LGPL v3,
   licenses/CLHEP-COPYING.LESSER and licenses/CLHEP-COPYING. It is bundled as a

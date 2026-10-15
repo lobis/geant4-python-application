@@ -50,8 +50,54 @@ def geant4_data_directory() -> str:
         return ""
 
 
+def installation_datasets() -> dict[str, str]:
+    """Datasets of an installed Geant4 (e.g. conda-forge) as {env var: path}.
+
+    Uses the dataset environment variables if they are already set (conda sets
+    them on activation), otherwise asks ``geant4-config --check-datasets`` where
+    each one is installed. Directory names are not guessed: Geant4 11.4 installs
+    e.g. ``NDL4.7.1`` rather than ``G4NDL4.7.1``. Empty unless that Geant4 is the
+    version this package was built against and every dataset it needs exists.
+    """
+    try:
+        version = subprocess.run(
+            ["geant4-config", "--version"], capture_output=True, text=True, check=False
+        ).stdout.strip()
+    except OSError:
+        version = ""
+    if version != geant4_python_application.geant4_version:
+        return {}
+
+    from_environment = {
+        dataset.env: os.environ[dataset.env]
+        for dataset in datasets
+        if os.path.isdir(os.environ.get(dataset.env, ""))
+    }
+    if len(from_environment) == len(datasets):
+        return from_environment
+
+    try:
+        listing = subprocess.run(
+            ["geant4-config", "--check-datasets"],
+            capture_output=True,
+            text=True,
+            check=False,
+        ).stdout
+    except OSError:
+        return {}
+    installed = {}
+    for line in listing.splitlines():
+        fields = line.split(maxsplit=2)
+        if len(fields) == 3 and fields[1] == "INSTALLED" and os.path.isdir(fields[2]):
+            installed[fields[0]] = fields[2]
+    if not all(dataset.name in installed for dataset in datasets):
+        return {}
+    return {dataset.env: installed[dataset.name] for dataset in datasets}
+
+
 # the datasets versions should be updated with each Geant4 version (remember to update the checksum too!)
-# https://geant4.web.cern.ch/download/11.2.2.html#datasets
+# https://geant4.web.cern.ch/download/11.4.3.html#datasets
+# (cmake/Modules/G4DatasetDefinitions.cmake; the optional TENDL, NuDEXLib and URRPT are left out)
 Dataset = namedtuple("Dataset", ["name", "version", "filename", "env", "md5sum"])
 
 datasets = (
@@ -64,31 +110,31 @@ datasets = (
     ),
     Dataset(
         name="G4EMLOW",
-        version="8.5",
+        version="8.8",
         filename="G4EMLOW",
         env="G4LEDATA",
-        md5sum="146d0625d8d39f294056e1618271bc46",
+        md5sum="328330009df633f7e9b3a9f445745298",
     ),
     Dataset(
         name="PhotonEvaporation",
-        version="5.7",
+        version="6.1.2",
         filename="G4PhotonEvaporation",
         env="G4LEVELGAMMADATA",
-        md5sum="81ff27deb23af4aa225423e6b3a06b39",
+        md5sum="d80ba9bdefcf9e23487a26adfa273304",
     ),
     Dataset(
         name="RadioactiveDecay",
-        version="5.6",
+        version="6.1.2",
         filename="G4RadioactiveDecay",
         env="G4RADIOACTIVEDATA",
-        md5sum="acc1dbeb87b6b708b2874ced729a3a8f",
+        md5sum="20d494f73d4bddabd7fab5c06a58895c",
     ),
     Dataset(
         name="G4PARTICLEXS",
-        version="4.0",
+        version="4.2",
         filename="G4PARTICLEXS",
         env="G4PARTICLEXSDATA",
-        md5sum="d82a4d171d50f55864e28b6cd6f433c0",
+        md5sum="b63341cc97a472b04ff607b094493174",
     ),
     Dataset(
         name="G4PII",
@@ -120,17 +166,24 @@ datasets = (
     ),
     Dataset(
         name="G4INCL",
-        version="1.2",
+        version="1.3",
         filename="G4INCL",
         env="G4INCLDATA",
-        md5sum="0a76df936839bb557dae7254117eb58e",
+        md5sum="72c3ff5f7f1e6f727f2ebf3b11ce784f",
     ),
     Dataset(
         name="G4ENSDFSTATE",
-        version="2.3",
+        version="3.0",
         filename="G4ENSDFSTATE",
         env="G4ENSDFSTATEDATA",
-        md5sum="6f18fce8f217e7aaeaa3711be9b2c7bf",
+        md5sum="c500728534ce3e9fb2fefa0112eb3a74",
+    ),
+    Dataset(
+        name="G4CHANNELING",
+        version="2.0",
+        filename="G4CHANNELING",
+        env="G4CHANNELINGDATA",
+        md5sum="e853fbcba1e8640f7c3a437253955482",
     ),
 )
 
@@ -212,12 +265,58 @@ def missing_datasets(directory: str) -> list[Dataset]:
     return datasets_to_download
 
 
+def _reuse_from_other_versions(datasets_to_download: list[Dataset]) -> list[Dataset]:
+    """Link datasets already downloaded for another Geant4 version instead of
+    downloading them again (a dataset's name and version identify its content).
+
+    Files are hard-linked, so the copy takes no extra disk space; if that is not
+    possible (e.g. another filesystem) they are copied. Returns what is still missing.
+    """
+    target = application_data_directory()
+    versions_directory = os.path.dirname(os.path.dirname(target))
+    try:
+        others = [
+            os.path.join(versions_directory, version, "data")
+            for version in os.listdir(versions_directory)
+            if version != geant4_python_application.geant4_version
+        ]
+    except FileNotFoundError:
+        return datasets_to_download
+
+    def link_or_copy(src, dst):
+        try:
+            os.link(src, dst)
+        except OSError:
+            shutil.copy2(src, dst)
+
+    still_missing = []
+    for dataset in datasets_to_download:
+        name = dataset.name + dataset.version
+        source = next(
+            (
+                os.path.join(other, name)
+                for other in others
+                if os.path.isdir(os.path.join(other, name))
+            ),
+            None,
+        )
+        if source is None:
+            still_missing.append(dataset)
+            continue
+        # copy into a temporary name first so an interrupted copy is never mistaken
+        # for a complete dataset
+        partial = os.path.join(target, name + ".partial")
+        shutil.rmtree(partial, ignore_errors=True)
+        shutil.copytree(source, partial, copy_function=link_or_copy)
+        os.rename(partial, os.path.join(target, name))
+    return still_missing
+
+
 def check_datasets(throw: bool = False) -> bool:
     datasets_to_download = missing_datasets(directory=application_data_directory())
-    if datasets_to_download:
-        # if not found in the application data directory, try to find them in the Geant4 installation data directory
-        if geant4_data_directory():
-            datasets_to_download = missing_datasets(directory=geant4_data_directory())
+    if datasets_to_download and installation_datasets():
+        # provided by the Geant4 installation (e.g. conda-forge) instead
+        datasets_to_download = []
 
     if datasets_to_download:
         if throw:
@@ -236,17 +335,20 @@ def install_datasets(show_progress: bool = True):
         os.environ["GEANT4_DATA_DIR"] = application_data_directory()
         return
 
-    if geant4_data_directory():
-        datasets_to_download = missing_datasets(directory=geant4_data_directory())
-        if not datasets_to_download:
-            # datasets are installed in Geant4 data directory, no need to install them in the application data directory
-            os.environ["GEANT4_DATA_DIR"] = geant4_data_directory()
-            return
+    installed = installation_datasets()
+    if installed:
+        # the Geant4 installation provides them; point Geant4 at each one
+        os.environ.update(installed)
+        return
 
     # download and extract the datasets to the application data directory
     os.environ["GEANT4_DATA_DIR"] = application_data_directory()
 
     os.makedirs(application_data_directory(), exist_ok=True)
+    datasets_to_download = missing_datasets(directory=application_data_directory())
+    datasets_to_download = _reuse_from_other_versions(datasets_to_download)
+    if not datasets_to_download:
+        return
     if show_progress:
         print(
             f"""

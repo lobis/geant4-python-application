@@ -18,7 +18,7 @@ def primary(particle: str, x: float) -> dict:
     return {
         "particle": particle,
         "energy": 1000.0,
-        "position": {"x": x, "y": 0.0, "z": -300.0},
+        "position": {"x": x, "y": 0.0, "z": -45.0},
         "direction": {"x": 0.0, "y": 0.0, "z": 1.0},
     }
 
