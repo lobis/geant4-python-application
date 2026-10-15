@@ -33,7 +33,7 @@ find_package(
 if (GEANT4_PYTHON_APPLICATION_VISUALIZATION)
     # The viewer module and the physics module must share one Geant4 (its
     # managers are singletons), which only works with shared libraries.
-    find_package(Geant4 11.2.2 CONFIG REQUIRED COMPONENTS gdml ui_all vis_all)
+    find_package(Geant4 11.4.3 CONFIG REQUIRED COMPONENTS gdml ui_all vis_all)
     if (NOT Geant4_shared_FOUND)
         message(
             FATAL_ERROR
@@ -45,7 +45,7 @@ else ()
     # libraries are installed, while as an optional component it still selects
     # the static libraries whenever they exist.
     find_package(
-        Geant4 11.2.2 CONFIG REQUIRED
+        Geant4 11.4.3 CONFIG REQUIRED
         COMPONENTS gdml
         OPTIONAL_COMPONENTS static)
 endif ()

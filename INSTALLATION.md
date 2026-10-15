@@ -1,6 +1,6 @@
 # Installation
 
-Prebuilt wheels bundle a compiled Geant4 11.2.2, so on supported platforms you
+Prebuilt wheels bundle a compiled Geant4 11.4.3, so on supported platforms you
 **do not need to install Geant4 (C++) yourself**. Building from source still
 requires a Geant4 installation.
 
@@ -116,7 +116,7 @@ Geant4 installation.
 Via conda:
 
 ```bash
-conda install -c conda-forge geant4=11.2.2
+conda install -c conda-forge geant4=11.4.3
 ```
 
 You may also need build tools, e.g. `conda install cmake ninja` (plus
@@ -125,7 +125,7 @@ You may also need build tools, e.g. `conda install cmake ninja` (plus
 Or from source, matching the CI configuration:
 
 ```bash
-git clone https://github.com/Geant4/geant4.git ./geant4-source --depth 1 --branch v11.2.2
+git clone https://github.com/Geant4/geant4.git ./geant4-source --depth 1 --branch v11.4.3
 
 cmake -B ./geant4-build -S ./geant4-source \
   -DCMAKE_INSTALL_PREFIX=./geant4-install \

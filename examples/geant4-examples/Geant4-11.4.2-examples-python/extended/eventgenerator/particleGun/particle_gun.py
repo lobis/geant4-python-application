@@ -62,7 +62,7 @@ def primaries(count: int, mode: int, seed: int) -> ak.Array:
                 math.sin(alpha) * math.sin(phi),
                 math.cos(alpha),
             )
-            position, energy = (0.0, 0.0, -100.0), 1000.0
+            position, energy = (0.0, 0.0, -45.0), 1000.0
         records.append(_particle(position, direction, energy))
     return ak.Array(records)
 

@@ -8,6 +8,8 @@
 #include <G4ParticleGun.hh>
 #include <G4VUserPrimaryGeneratorAction.hh>
 
+#include <mutex>
+
 namespace py = pybind11;
 
 namespace geant4_app {
@@ -32,8 +34,13 @@ public:
     inline static void SetAwkwardPrimaryParticles(const std::vector<std::string>& particles) { awkwardPrimaryParticles = particles; }
     inline static void SetAwkwardPrimaryEventOffsets(const std::vector<size_t>& offsets) { awkwardPrimaryEventOffsets = offsets; }
     static void ClearAwkwardPrimaries();
+    // Throws (and clears) the error recorded when a primary vertex was outside the world.
+    static void ThrowPendingError();
 
 private:
+    static bool RejectOutsideWorld(const G4ThreeVector& position);
+    static std::string pendingError;
+    static std::mutex pendingErrorMutex;
     G4ParticleGun gun;
     G4GeneralParticleSource gps;
     static std::string generatorType;

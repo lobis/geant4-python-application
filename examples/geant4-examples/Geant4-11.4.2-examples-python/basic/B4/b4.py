@@ -43,7 +43,7 @@ def main() -> None:
             [
                 "/gun/particle e-",
                 "/gun/energy 1 GeV",
-                "/gun/position 0 0 -10 cm",
+                "/gun/position 0 0 -8.9 cm",
                 "/gun/direction 0 0 1",
             ]
         )

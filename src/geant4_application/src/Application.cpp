@@ -250,6 +250,7 @@ py::list Application::Run(const py::object& primaries) {
             throw runtime_error("Number of events cannot be negative");
         }
         runManager->BeamOn(nEvents);
+        PrimaryGeneratorAction::ThrowPendingError();
         return *RunAction::GetContainer();
     }
     // check if it is an awkward array
@@ -305,6 +306,7 @@ py::list Application::Run(const py::object& primaries) {
         }
 
         runManager->BeamOn(nEvents);
+        PrimaryGeneratorAction::ThrowPendingError();
         return *RunAction::GetContainer();
     }
 }

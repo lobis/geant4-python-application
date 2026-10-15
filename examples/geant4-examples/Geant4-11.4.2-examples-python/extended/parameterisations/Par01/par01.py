@@ -24,7 +24,7 @@ def main() -> None:
         app.commands(
             [
                 "/gun/particle geantino",
-                "/gun/position -120 0 0 mm",
+                "/gun/position -110 0 0 mm",
                 "/gun/direction 1 0 0",
             ]
         )

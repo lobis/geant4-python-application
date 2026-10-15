@@ -9,7 +9,7 @@ RUN git clone https://github.com/apache/xerces-c.git xerces-source && \
     cmake -B xerces-build -S xerces-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/xerces -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -Dnetwork-accessor=socket -Dtranscoder=iconv && \
     cmake --build xerces-build --parallel $(nproc) --config Release --target install
 
-RUN git clone https://github.com/Geant4/geant4.git /geant4-source --depth 1 --branch v11.2.2 && \
+RUN git clone https://github.com/Geant4/geant4.git /geant4-source --depth 1 --branch v11.4.3 && \
     cmake -B geant4-build -S geant4-source -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${Geant4_DIR} -DCMAKE_CXX_STANDARD=17 -DGEANT4_USE_GDML=ON  \
     -DGEANT4_INSTALL_EXAMPLES=OFF -DGEANT4_INSTALL_DATA=OFF -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF \
     -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC -DGEANT4_USE_SYSTEM_EXPAT=OFF -DXERCESC_ROOT_DIR=/xerces && \
