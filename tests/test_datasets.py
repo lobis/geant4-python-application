@@ -78,7 +78,9 @@ def test_installation_datasets_from_environment(tmp_path, monkeypatch):
         path.mkdir(parents=True)
         monkeypatch.setenv(dataset.env, str(path))
     found = ds.installation_datasets()
-    assert found == {dataset.env: str(tmp_path / "env" / dataset.env) for dataset in ds.datasets}
+    assert found == {
+        dataset.env: str(tmp_path / "env" / dataset.env) for dataset in ds.datasets
+    }
 
 
 def test_installation_datasets_ignored_when_incomplete_or_other_version(
