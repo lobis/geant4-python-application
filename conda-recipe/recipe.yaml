@@ -51,6 +51,7 @@ requirements:
     - freetype
     - xerces-c
     - expat
+    - zlib
   run:
     - python
     # datasets are matched to this exact Geant4 version
