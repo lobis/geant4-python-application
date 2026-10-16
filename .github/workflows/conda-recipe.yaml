@@ -1,0 +1,59 @@
+name: Conda recipe
+
+# Builds and tests conda-recipe/recipe.yaml the way conda-forge would, before
+# the recipe is submitted to conda-forge/staged-recipes.
+on:
+  workflow_dispatch:
+  push:
+    branches: [conda-forge-recipe]
+    paths: [conda-recipe/**, .github/workflows/conda-recipe.yaml]
+
+jobs:
+  build:
+    name: rattler-build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15, macos-15-intel]
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          activate-environment: build
+
+      - name: Install rattler-build
+        run: ./tools/ci/retry.sh conda install -y -c conda-forge rattler-build
+
+      # A small subset of conda-forge's global pinning: one Python, and the
+      # compilers and C library baseline conda-forge uses.
+      - name: Write variant config
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            printf 'c_compiler: [gcc]\ncxx_compiler: [gxx]\nc_compiler_version: ["14"]\ncxx_compiler_version: ["14"]\nc_stdlib: [sysroot]\nc_stdlib_version: ["2.17"]\n' > variants.yaml
+          else
+            printf 'c_compiler: [clang]\ncxx_compiler: [clangxx]\nc_compiler_version: ["19"]\ncxx_compiler_version: ["19"]\nc_stdlib: [macosx_deployment_target]\nc_stdlib_version: ["11.0"]\nMACOSX_SDK_VERSION: ["11.0"]\n' > variants.yaml
+          fi
+          printf 'python: ["3.12.* *_cpython"]\n' >> variants.yaml
+          cat variants.yaml
+
+      - name: Build and test the recipe
+        run: >
+          ./tools/ci/retry.sh rattler-build build
+          --recipe conda-recipe/recipe.yaml
+          --variant-config variants.yaml
+          -c conda-forge
+          --output-dir output
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: conda-${{ matrix.os }}
+          path: output/**/*.conda
+          if-no-files-found: ignore
