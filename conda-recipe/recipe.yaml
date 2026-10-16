@@ -20,6 +20,11 @@ source:
   - url: https://github.com/pybind/pybind11/archive/refs/tags/v${{ pybind11_version }}.tar.gz
     sha256: e08cb87f4773da97fa7b5f035de8763abc656d87d5773e62f6da0587d1f0ec20
     target_directory: deps/pybind11
+  # the header-only awkward release does not include its licence
+  - url: https://raw.githubusercontent.com/scikit-hep/awkward/v${{ awkward_version }}/LICENSE
+    sha256: f05e4e003fcfa5901be0d398805a8653aa1e95210433e00e89a4c5528491b4e6
+    file_name: LICENSE
+    target_directory: deps/awkward-license
 
 build:
   number: 0
@@ -88,7 +93,11 @@ about:
 
     Authors: Luis Antonio Obis Aparicio and Kavya Wadhwa.
   license: BSD-3-Clause
-  license_file: LICENSE
+  license_file:
+    - LICENSE
+    # compiled in from their sources
+    - deps/awkward-license/LICENSE
+    - deps/pybind11/LICENSE
   homepage: https://github.com/lobis/geant4-python-application
   repository: https://github.com/lobis/geant4-python-application
   documentation: https://github.com/lobis/geant4-python-application/blob/main/INSTALLATION.md
