@@ -84,6 +84,8 @@ about:
   description: |
     A high-level Python interface to a generic, highly configurable Geant4
     application. Event data is returned as awkward arrays.
+
+    Authors: Luis Antonio Obis Aparicio and Kavya Wadhwa.
   license: BSD-3-Clause
   license_file: LICENSE
   homepage: https://github.com/lobis/geant4-python-application
