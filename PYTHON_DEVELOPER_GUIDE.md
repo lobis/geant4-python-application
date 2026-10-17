@@ -23,6 +23,9 @@ How the guide is organised:
 - **Part X** is for contributors to the package itself: building, testing, CI,
   Geant4 upgrades, the conda recipe, and releases.
 
+A typeset PDF of this guide is in
+[`docs/geant4-python-developer-guide.pdf`](docs/geant4-python-developer-guide.pdf).
+
 # Part I - Getting started
 
 ## 1. The simulation idea
@@ -3209,6 +3212,7 @@ Geant4 upgrades, wheels, the conda recipe, and releases are produced.
 | `.github/workflows/`                   | `build-test.yaml`, `wheels.yaml`, `conda-recipe.yaml`         |
 | `INSTALLATION.md`                      | The full installation reference for users                     |
 | `docs/FEATURE_SUPPORT.md`              | Which Geant4 features are native, partial, or Python adapters |
+| `docs/geant4-python-developer-guide.pdf` | This guide as a PDF, built by `tools/build_guide_pdf.py`    |
 
 `examples/geant4-examples/Geant4-11.4.2-examples-python/` holds Python ports of
 the official Geant4 examples (B1 to B5, GoldFoilExperiment, exgps, particleGun,
@@ -3417,3 +3421,21 @@ shows just the first person when authors carry email addresses, and its
 Changelog links. Installation instructions in the README, `INSTALLATION.md`,
 release notes and this guide always start by creating a fresh virtual
 environment.
+
+## 86. Updating the PDF of this guide
+
+`PYTHON_DEVELOPER_GUIDE.md` is the source; `docs/geant4-python-developer-guide.pdf`
+is generated from it and committed so that readers can download it from GitHub.
+After changing the guide, rebuild the PDF and commit both files together:
+
+```bash
+python tools/build_guide_pdf.py
+```
+
+The script converts the Markdown to LaTeX (headings, lists, tables, code,
+figures and `$...$` math) and typesets it with
+[tectonic](https://tectonic-typesetting.github.io), a self-contained XeLaTeX
+engine that downloads the packages it needs on first use (`brew install
+tectonic` on macOS, or `conda install -c conda-forge tectonic`). The figures of
+Part VII are in `docs/images/`; regenerate them by running the tutorial scripts
+if their results change.
