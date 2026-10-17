@@ -11,15 +11,15 @@ this guide for the Python interface and this repository's supported workflow.
 
 How the guide is organised:
 
-- **Parts I–V** teach the concepts and how to write a simulation program, from
-  a ten-event first run to a production campaign.
+- **Parts I–V** teach the concepts and how to write a simulation program, from a
+  ten-event first run to a production campaign.
 - **Part VI** explains how the package works inside: the worker process, the
   application lifecycle, and the event data model.
 - **Part VII** has five complete detector simulations, each run and checked
-  against reference physics: Rutherford's gold foil, a sampling calorimeter,
-  a proton-therapy Bragg peak, a magnetic spectrometer, and gamma radiography.
-- **Part VIII** catalogues the repository's examples, and **Part IX** is the
-  API reference.
+  against reference physics: Rutherford's gold foil, a sampling calorimeter, a
+  proton-therapy Bragg peak, a magnetic spectrometer, and gamma radiography.
+- **Part VIII** catalogues the repository's examples, and **Part IX** is the API
+  reference.
 - **Part X** is for contributors to the package itself: building, testing, CI,
   Geant4 upgrades, the conda recipe, and releases.
 
@@ -289,8 +289,8 @@ with g4.Application(gdml=gdml) as app:
 
 Two kinds of names are used, so inspect them rather than guessing:
 
-- **physical volume names** (`<physvol name="...">`) appear in the event data
-  as `step.volume` and are what `Scoring.energy_deposit(events, volume=...)`
+- **physical volume names** (`<physvol name="...">`) appear in the event data as
+  `step.volume` and are what `Scoring.energy_deposit(events, volume=...)`
   filters on;
 - **logical volume names** (`<volume name="...">`) are what
   `detector.sensitive_volumes` takes.
@@ -841,10 +841,10 @@ with g4.Application(gdml=g4.basic_gdml) as app:
     events = app.run(primaries)
 ```
 
-Energies are in keV and positions in cm here (section 73.1). Add a
-`primaries` field holding a list per event to put several primaries in one
-event. Test array-driven primaries in serial mode first. The repository currently
-documents limitations for this input path in multithreaded runs.
+Energies are in keV and positions in cm here (section 73.1). Add a `primaries`
+field holding a list per event to put several primaries in one event. Test
+array-driven primaries in serial mode first. The repository currently documents
+limitations for this input path in multithreaded runs.
 
 ## 22. Physics choices and statistical thinking
 
@@ -964,9 +964,9 @@ The linked Geant4 library must have been compiled with multithreading.
 worker thread its own primary generator and none to the master thread, which is
 where the package's commands arrive. Two consequences:
 
-- `app.generator.*` raises `RuntimeError: Primary generator action is not
-  available` when `n_threads > 0`; use `/gun/...` or `/gps/...` commands
-  instead.
+- `app.generator.*` raises
+  `RuntimeError: Primary generator action is not available` when
+  `n_threads > 0`; use `/gun/...` or `/gps/...` commands instead.
 - Those commands exist only once the workers are built, so call
   `app.initialize()` first; before it they fail with code 100.
 
@@ -979,8 +979,8 @@ with g4.Application(gdml=g4.basic_gdml, n_threads=8, seed=1) as app:
 
 Settings that must precede initialization (sensitive volumes, fields, extra
 physics, production cuts) go before `initialize()`. More threads are not always
-faster: geometry initialization, memory pressure, output
-construction, and CPU oversubscription can reduce the gain.
+faster: geometry initialization, memory pressure, output construction, and CPU
+oversubscription can reduce the gain.
 
 Benchmark with the same event count and seed policy. Validate event counts and
 aggregate quantities, but do not require event ordering to be identical across
@@ -1067,15 +1067,15 @@ free. When relying on an installed Geant4's data, its version must equal
 `g4.geant4_version` and every dataset must be present, otherwise the package
 downloads its own copy.
 
-**A script fails with "current process has finished its bootstrapping phase"
-or "Application process died".** The script creates the `Application` at module
+**A script fails with "current process has finished its bootstrapping phase" or
+"Application process died".** The script creates the `Application` at module
 level. Move that code into a function called under `if __name__ == "__main__":`
 (section 3).
 
 **`Primary generator action is not available`, or a `/gun/` command fails with
 code 100.** The application is multithreaded. Call `app.initialize()` first and
-configure the source with `/gun/` or `/gps/` commands instead of
-`app.generator` (section 28).
+configure the source with `/gun/` or `/gps/` commands instead of `app.generator`
+(section 28).
 
 **`Could not find logical volume '...'`.** `detector.sensitive_volumes` takes
 logical volume names (`<volume name>`), not physical ones (`<physvol name>`).
@@ -1945,10 +1945,9 @@ The package has three layers:
    (`src/python/module.cpp`), which exposes that C++ application's methods to
    Python: `setup_manager`, `setup_physics`, `setup_detector`, `initialize`,
    `run`, `command`, the detector queries, and so on.
-3. **The Python package** (`src/geant4_python_application/`). Its
-   `Application` class does not call the C++ module directly. It starts a
-   separate worker process, creates the C++ application there, and forwards
-   every call to it.
+3. **The Python package** (`src/geant4_python_application/`). Its `Application`
+   class does not call the C++ module directly. It starts a separate worker
+   process, creates the C++ application there, and forwards every call to it.
 
 The Qt viewer is a fourth, optional module (`_geant4_vis`, `src/vis/`). Only
 `Application.visualize()` imports it, and only inside the worker process, which
@@ -1968,8 +1967,9 @@ Running Geant4 in a child process turns that limit into something convenient:
   starts a fresh worker with a fresh Geant4, so a script can simulate one
   geometry, then another, then a third, for example to compare designs.
 - **Crash isolation.** If Geant4 aborts, only the worker dies. Your Python
-  session gets `RuntimeError: Application process died. Recreate the
-  application` and can carry on.
+  session gets
+  `RuntimeError: Application process died. Recreate the application` and can
+  carry on.
 - **A clean Python process.** Geant4's threads, signal handlers and Qt event
   loop live in the worker.
 
@@ -1992,22 +1992,22 @@ Consequences to keep in mind:
 
 - **The `__main__` guard.** The worker is a `multiprocessing` process. Where
   Python starts it with the `spawn` method (macOS; Linux from Python 3.14
-  defaults to `forkserver`, which behaves the same way), the worker imports
-  your script again. Code that creates an `Application` at module level would
-  run again in the worker and fail. Put it under `if __name__ == "__main__":`
+  defaults to `forkserver`, which behaves the same way), the worker imports your
+  script again. Code that creates an `Application` at module level would run
+  again in the worker and fail. Put it under `if __name__ == "__main__":`
   (section 3).
-- **Everything crosses the process boundary by pickling.** Arguments and
-  results must be picklable, and large event arrays are copied from the worker
-  to your process. That copy is part of the cost of a run (section 30).
-- **Python code cannot run inside transport.** A Python function cannot be
-  sent to the worker and called from a Geant4 stepping action, which is why
+- **Everything crosses the process boundary by pickling.** Arguments and results
+  must be picklable, and large event arrays are copied from the worker to your
+  process. That copy is part of the cost of a run (section 30).
+- **Python code cannot run inside transport.** A Python function cannot be sent
+  to the worker and called from a Geant4 stepping action, which is why
   `run_with_callbacks` calls your callbacks after the run, over the returned
   arrays (section 24). `docs/FEATURE_SUPPORT.md` explains what live callbacks
   would require.
 - **Data files are prepared first.** `Application(...)` checks and if needed
   downloads the datasets in your process before starting the worker, and the
-  worker inherits the environment variables that point Geant4 at them
-  (section 2.4).
+  worker inherits the environment variables that point Geant4 at them (section
+  2.4).
 
 ## 61. The life of an application
 
@@ -2042,26 +2042,26 @@ What each step does in C++:
   `FTFP_BERT` hadron inelastic, stopping, ion physics and a neutron tracking
   cut, plus optical physics when `optical=True`. Any other name is looked up in
   Geant4's reference-list factory (`FTFP_BERT`, `QGSP_BIC_EMY`, ...). Extra
-  constructors from `available_extra_physics()` can be added with
-  `add_physics` until initialization.
+  constructors from `available_extra_physics()` can be added with `add_physics`
+  until initialization.
 - **Geometry.** The GDML text is kept until initialization, then written to a
   temporary file and read with `G4GDMLParser`. This is why volume and material
   names, and `check_overlaps()`, are only available after `initialize()`.
-- **Sensitive detectors and fields** are attached in
-  `ConstructSDandField()` during initialization. Each name in
-  `sensitive_volumes` must be a logical volume. A magnetic field alone uses
-  Geant4's `G4GlobalMagFieldMessenger`; when an electric field is set, a
-  uniform electromagnetic field is integrated with `G4EqMagElectricField` and a
-  classical Runge-Kutta stepper. Both are global and uniform.
+- **Sensitive detectors and fields** are attached in `ConstructSDandField()`
+  during initialization. Each name in `sensitive_volumes` must be a logical
+  volume. A magnetic field alone uses Geant4's `G4GlobalMagFieldMessenger`; when
+  an electric field is set, a uniform electromagnetic field is integrated with
+  `G4EqMagElectricField` and a classical Runge-Kutta stepper. Both are global
+  and uniform.
 - **Actions.** The run, event, tracking and stepping actions record data; the
   stacking action can drop particle types; the primary generator uses the
   particle gun or the GPS, or the primaries you pass to `run`.
 
 The rule that follows: **set everything that shapes the geometry or physics
 before the first `run`**: the physics list and extra constructors, sensitive
-volumes, fields, production cuts and other `/run/` or `/process/` settings
-that apply at initialization. Generator settings and event fields can change
-between runs.
+volumes, fields, production cuts and other `/run/` or `/process/` settings that
+apply at initialization. Generator settings and event fields can change between
+runs.
 
 ## 62. What happens during a run
 
@@ -2081,8 +2081,8 @@ BeamOn(n)
 ```
 
 The data is written straight into awkward's C++ `LayoutBuilder`s as Geant4
-produces it, so recording costs no Python calls per step. In a multithreaded
-run each worker thread fills its own builder and the pieces are concatenated
+produces it, so recording costs no Python calls per step. In a multithreaded run
+each worker thread fills its own builder and the pieces are concatenated
 afterwards, so events arrive in thread order and `run` sorts them by `id`.
 
 `run` then reshapes the flat field names into nested records:
@@ -2115,31 +2115,31 @@ So `events.track.step.energy` has three levels of nesting: event, track, step.
 `ak.flatten(..., axis=2)` merges a track's steps into one list per event, and
 `axis=None` flattens everything.
 
-| Field                         | Meaning                                                          | Unit    |
-| ----------------------------- | ---------------------------------------------------------------- | ------- |
-| `run`, `id`                   | run number and event number                                      |         |
-| `primaries`                   | particle, energy, position, direction of each primary            | keV, mm |
-| `track_id`, `track_parent_id` | Geant4 track id and its parent's id (0 for primaries)            |         |
-| `track_particle`              | particle name, e.g. `"e-"`, `"gamma"`, `"alpha"`                 |         |
-| `track_particle_type`         | particle category, e.g. `"lepton"`, `"nucleus"`                  |         |
-| `track_creator_process`       | process that created the track (`"InitProcess"` for primaries)   |         |
-| `track_creator_process_type`  | category of that process                                         |         |
-| `track_initial_energy`        | kinetic energy at the vertex                                     | keV     |
-| `track_initial_time`          | global time at the start of the track                            | µs      |
-| `track_initial_position`      | vertex position (`x`, `y`, `z`)                                  | mm      |
-| `track_initial_momentum`      | **unit direction** at the vertex (`px`, `py`, `pz`)              |         |
-| `track_children_ids`          | ids of the track's secondaries                                   |         |
-| `track_weight`                | track weight (1 unless biasing is used)                          |         |
-| `step_energy`                 | energy deposited during the step                                 | keV     |
-| `step_time`                   | global time at the end of the step                               | µs      |
-| `step_position`               | position at the end of the step (`x`, `y`, `z`)                  | mm      |
-| `step_momentum`               | **unit direction** at the end of the step (`px`, `py`, `pz`)     |         |
-| `step_track_kinetic_energy`   | kinetic energy at the end of the step                            | keV     |
+| Field                         | Meaning                                                           | Unit    |
+| ----------------------------- | ----------------------------------------------------------------- | ------- |
+| `run`, `id`                   | run number and event number                                       |         |
+| `primaries`                   | particle, energy, position, direction of each primary             | keV, mm |
+| `track_id`, `track_parent_id` | Geant4 track id and its parent's id (0 for primaries)             |         |
+| `track_particle`              | particle name, e.g. `"e-"`, `"gamma"`, `"alpha"`                  |         |
+| `track_particle_type`         | particle category, e.g. `"lepton"`, `"nucleus"`                   |         |
+| `track_creator_process`       | process that created the track (`"InitProcess"` for primaries)    |         |
+| `track_creator_process_type`  | category of that process                                          |         |
+| `track_initial_energy`        | kinetic energy at the vertex                                      | keV     |
+| `track_initial_time`          | global time at the start of the track                             | µs      |
+| `track_initial_position`      | vertex position (`x`, `y`, `z`)                                   | mm      |
+| `track_initial_momentum`      | **unit direction** at the vertex (`px`, `py`, `pz`)               |         |
+| `track_children_ids`          | ids of the track's secondaries                                    |         |
+| `track_weight`                | track weight (1 unless biasing is used)                           |         |
+| `step_energy`                 | energy deposited during the step                                  | keV     |
+| `step_time`                   | global time at the end of the step                                | µs      |
+| `step_position`               | position at the end of the step (`x`, `y`, `z`)                   | mm      |
+| `step_momentum`               | **unit direction** at the end of the step (`px`, `py`, `pz`)      |         |
+| `step_track_kinetic_energy`   | kinetic energy at the end of the step                             | keV     |
 | `step_process`                | process that limited the step, e.g. `"eIoni"`, `"Transportation"` |         |
-| `step_process_type`           | its category, e.g. `"Electromagnetic"`                           |         |
-| `step_volume`                 | physical volume the step was in (its start point)                |         |
-| `step_volume_post`            | physical volume at the end of the step                           |         |
-| `step_nucleus`                | target nucleus of a hadronic interaction, if any                 |         |
+| `step_process_type`           | its category, e.g. `"Electromagnetic"`                            |         |
+| `step_volume`                 | physical volume the step was in (its start point)                 |         |
+| `step_volume_post`            | physical volume at the end of the step                            |         |
+| `step_nucleus`                | target nucleus of a hadronic interaction, if any                  |         |
 
 Points to remember:
 
@@ -2149,13 +2149,14 @@ Points to remember:
 - A particle crossing a boundary has a step whose `volume` is the volume it
   leaves and whose `volume_post` is the volume it enters. Tutorials 66 and 70
   select those steps to find where particles exit or arrive.
-- `step_momentum` and `track_initial_momentum` hold directions, not momenta;
-  use `step_track_kinetic_energy` and the particle mass for the momentum.
+- `step_momentum` and `track_initial_momentum` hold directions, not momenta; use
+  `step_track_kinetic_energy` and the particle mass for the momentum.
 - Vectors are records with `x`, `y`, `z` (positions) or `px`, `py`, `pz`
   (directions), with the `vector` library's behaviours attached.
 - Energies are in keV and lengths in mm in the output, but the inputs follow
-  Geant4 commands (`app.generator.energy(1, "MeV")`, `/gun/position 0 0 -10 cm`),
-  and primary arrays passed to `run` use keV and **cm** (section 73.1).
+  Geant4 commands (`app.generator.energy(1, "MeV")`,
+  `/gun/position 0 0 -10 cm`), and primary arrays passed to `run` use keV and
+  **cm** (section 73.1).
 
 ## 64. The Python helper layers
 
@@ -2163,10 +2164,10 @@ Around `Application` the package adds thin, pure-Python helpers:
 
 - `Generator` (`app.generator`) turns method calls into `/gun/...` or `/gps/...`
   commands, depending on the current generator type.
-- `Detector` (`app.detector`) forwards geometry queries and the sensitive
-  volume and field settings.
-- `Scoring` and `NativeScoringMesh` score after the run (from recorded steps)
-  or during it (through Geant4's command-based scoring manager).
+- `Detector` (`app.detector`) forwards geometry queries and the sensitive volume
+  and field settings.
+- `Scoring` and `NativeScoringMesh` score after the run (from recorded steps) or
+  during it (through Geant4's command-based scoring manager).
 - awkward **behaviours** registered on the record names add methods to the
   returned arrays: `events.hits(volume)` and `events.energy_in_volume(volume)`.
 - `io`, `optical`, `geometry`, `cad` and `distributed` provide file formats,
@@ -2178,9 +2179,9 @@ Sections 73 to 78 list all of them.
 # Part VII - Worked detector simulations
 
 Each tutorial below is a complete, runnable script that answers one physics
-question, followed by the output it printed with geant4-python-application
-0.2.0 (Geant4 11.4.3) on macOS and what to learn from it. All five were run for
-this guide; their results are checked against textbook values or NIST data.
+question, followed by the output it printed with geant4-python-application 0.2.0
+(Geant4 11.4.3) on macOS and what to learn from it. All five were run for this
+guide; their results are checked against textbook values or NIST data.
 
 ## 65. How to use these tutorials
 
@@ -2204,9 +2205,9 @@ shapes it?
 
 **Model.** 5.5 MeV alphas (the energy from radon-222 decay) hit a 500 nm gold
 foil in vacuum. For each alpha the script finds the step on which it leaves the
-foil and reads its direction and kinetic energy there. This is the same
-geometry as the repository's port of Geant4's GoldFoilExperiment example,
-written with the public generator API.
+foil and reads its direction and kinetic energy there. This is the same geometry
+as the repository's port of Geant4's GoldFoilExperiment example, written with
+the public generator API.
 
 ```python
 import awkward as ak
@@ -2330,18 +2331,18 @@ bin [deg]   measured  Rutherford
 
 **What to learn.**
 
-- **Two regimes.** Below about 2°, the distribution is a broad peak made by
-  many small deflections (multiple Coulomb scattering); its median is 1.2°.
-  Above a few degrees a single close encounter with a nucleus dominates and the
-  counts fall as Rutherford's $\sin\theta / \sin^4(\theta/2)$: four orders of
-  magnitude between 2° and 30°.
+- **Two regimes.** Below about 2°, the distribution is a broad peak made by many
+  small deflections (multiple Coulomb scattering); its median is 1.2°. Above a
+  few degrees a single close encounter with a nucleus dominates and the counts
+  fall as Rutherford's $\sin\theta / \sin^4(\theta/2)$: four orders of magnitude
+  between 2° and 30°.
 - The tail sits a little below the curve in the table because the curve is
   normalised in the 5–10° bin, where multiple scattering still adds counts.
 - **Backscattering is rare but real**: 3 alphas in 100 000 came back through
   more than 90°, the same order as Geiger and Marsden's "1 in 8000" for their
   foil. That rarity is what made the observation so striking.
-- The alphas lose about 0.22 MeV in 500 nm of gold, a stopping power near
-  440 keV/µm.
+- The alphas lose about 0.22 MeV in 500 nm of gold, a stopping power near 440
+  keV/µm.
 - **Technique**: selecting the boundary-crossing step with
   `(steps.volume == "Foil") & (steps.volume_post != "Foil")`, restricting to the
   primary with `tracks.id == 1`, and reading directions from `step_momentum`.
@@ -2360,9 +2361,9 @@ does the energy resolution scale with beam energy?
 
 **Model.** 20 layers of 10 mm lead (the absorber) and 5 mm liquid argon (the
 active gaps, where a real detector collects ionisation charge), 1 m × 1 m
-across, in vacuum, as in Geant4's basic example B4. Electrons of 0.5, 1, 2 and
-4 GeV enter along the axis. The same application runs all four energies,
-changing only the gun energy between runs.
+across, in vacuum, as in Geant4's basic example B4. Electrons of 0.5, 1, 2 and 4
+GeV enter along the axis. The same application runs all four energies, changing
+only the gun energy between runs.
 
 ```python
 import awkward as ak
@@ -2494,13 +2495,13 @@ shower maximum in layer 2
 - **Containment.** 20 layers (36 radiation lengths of lead) contain more than
   99% of the energy; the small remainder escapes as photons and through the
   back.
-- **Stochastic resolution.** The relative resolution falls as
-  $1/\sqrt{E}$: about 20%/√E here, because the number of shower particles
-  crossing the gaps grows linearly with energy and its fluctuation as the
-  square root. Real Pb/LAr calorimeters with thinner layers reach about
-  10%/√E; try thinner absorbers in the exercises.
-- **Longitudinal profile.** The shower peaks in layer 2, the third layer
-  (about 4–5 radiation lengths for 2 GeV), and decays exponentially after it.
+- **Stochastic resolution.** The relative resolution falls as $1/\sqrt{E}$:
+  about 20%/√E here, because the number of shower particles crossing the gaps
+  grows linearly with energy and its fluctuation as the square root. Real Pb/LAr
+  calorimeters with thinner layers reach about 10%/√E; try thinner absorbers in
+  the exercises.
+- **Longitudinal profile.** The shower peaks in layer 2, the third layer (about
+  4–5 radiation lengths for 2 GeV), and decays exponentially after it.
 - **Technique**: generating repeated GDML placements in a Python loop, naming
   them so that analysis can select them (`Absorber{i}`, `Gap{i}`), several runs
   in one application, and keeping only three event fields.
@@ -2517,8 +2518,8 @@ Bragg peak, which is why proton therapy can spare tissue behind a tumour. Where
 is the peak for therapeutic energies, and does Geant4 reproduce the measured
 ranges?
 
-**Model.** A 40 cm water tank in vacuum and a proton pencil beam of 100, 150
-and 200 MeV. Energy deposited in the water is binned in 1 mm slices of depth.
+**Model.** A 40 cm water tank in vacuum and a proton pencil beam of 100, 150 and
+200 MeV. Energy deposited in the water is binned in 1 mm slices of depth.
 `QGSP_BIC_EMY` is the reference physics list Geant4 recommends for medical
 proton beams; the production cut is lowered to 0.1 mm. The range is compared
 with NIST's PSTAR table.
@@ -2616,22 +2617,21 @@ E [MeV]  peak [cm]  R80 [cm]  PSTAR CSDA [cm]  peak/plateau
 - **The peak is sharp.** For a mono-energetic beam the peak dose is almost five
   times the dose at 2–3 cm. Clinical beams spread the energy to cover a tumour
   of finite size (a spread-out Bragg peak).
-- **Entrance artifact.** The curves rise over the first two centimetres. Part
-  of this is real (secondary electrons build up), but most of it comes from the
+- **Entrance artifact.** The curves rise over the first two centimetres. Part of
+  this is real (secondary electrons build up), but most of it comes from the
   analysis: each step's energy is binned at its **end point**, and protons take
   long first steps, so energy from the first millimetres is recorded deeper.
-  This is why the plateau is taken at 2–3 cm. Splitting each step's energy
-  along the segment from the previous step's end to its own end would remove
-  it.
+  This is why the plateau is taken at 2–3 cm. Splitting each step's energy along
+  the segment from the previous step's end to its own end would remove it.
 - **Technique**: comparing a simulation with an external reference table,
   choosing a reference physics list for the application, and setting a
   production cut with a Geant4 command before the first run.
 
-**Exercises.** Give the beam a 1% energy spread with GPS
-(`/gps/ene/type Gauss`, `/gps/ene/sigma 1.5 MeV`) and watch the peak broaden and
-fall. Insert a 2 cm bone slab (`G4_BONE_COMPACT_ICRU`) at 5 cm depth and measure
-how far the peak moves. Add up the proton energy that does not appear in the
-water and relate it to nuclear interactions.
+**Exercises.** Give the beam a 1% energy spread with GPS (`/gps/ene/type Gauss`,
+`/gps/ene/sigma 1.5 MeV`) and watch the peak broaden and fall. Insert a 2 cm
+bone slab (`G4_BONE_COMPACT_ICRU`) at 5 cm depth and measure how far the peak
+moves. Add up the proton energy that does not appear in the water and relate it
+to nuclear interactions.
 
 ## 69. Tutorial: measuring momentum in a magnetic spectrometer
 
@@ -2640,9 +2640,10 @@ particle's momentum, and what limits its precision?
 
 **Model.** Six 300 µm silicon planes, 10 cm apart, in vacuum and in a uniform
 0.5 T field along x, which bends particles in the y–z plane. Muons of 0.5–5
-GeV/c travel along z. The script takes the muon's position in each plane, adds
-a 50 µm detector resolution, fits a parabola $y = a + bz + cz^2$ and converts
-the curvature $1/R = 2|c|$ into momentum with $p\,[\mathrm{GeV}/c] = 0.3\,B\,[\mathrm{T}]\,R\,[\mathrm{m}]$.
+GeV/c travel along z. The script takes the muon's position in each plane, adds a
+50 µm detector resolution, fits a parabola $y = a + bz + cz^2$ and converts the
+curvature $1/R = 2|c|$ into momentum with $p\,[\mathrm{GeV}/c] =
+0.3\,B\,[\mathrm{T}]\,R\,[\mathrm{m}]$.
 
 ```python
 import awkward as ak
@@ -2745,14 +2746,14 @@ p_true [GeV]  p_fit mean [GeV]  sigma_p/p
 - **Two limits on resolution.** At low momentum, multiple scattering in the
   silicon deflects the muon randomly by an amount that falls as $1/p$, giving a
   roughly constant $\sigma_p/p$ (about 3% here). At high momentum the track is
-  nearly straight, the sagitta is small compared with the 50 µm hit
-  resolution, and $\sigma_p/p$ grows linearly with $p$ (6% at 5 GeV/c).
-  Real trackers improve both with stronger fields, longer lever arms and more,
-  thinner, more precise planes.
-- **Technique**: a uniform magnetic field from Python (`app.detector.magnetic_field`),
-  converting momentum to the kinetic energy the gun expects, extracting one
-  point per plane per event, and adding detector resolution in the analysis
-  instead of in the simulation.
+  nearly straight, the sagitta is small compared with the 50 µm hit resolution,
+  and $\sigma_p/p$ grows linearly with $p$ (6% at 5 GeV/c). Real trackers
+  improve both with stronger fields, longer lever arms and more, thinner, more
+  precise planes.
+- **Technique**: a uniform magnetic field from Python
+  (`app.detector.magnetic_field`), converting momentum to the kinetic energy the
+  gun expects, extracting one point per plane per event, and adding detector
+  resolution in the analysis instead of in the simulation.
 
 **Exercises.** Double the field and check that the high-momentum resolution
 halves. Set the hit resolution to 10 µm. Replace the muons with electrons of the
@@ -2764,10 +2765,10 @@ same momentum and see what bremsstrahlung in silicon does to the fit.
 and does the contrast match simple attenuation physics?
 
 **Model.** A 30 cm wooden crate (cellulose at 0.6 g/cm³, defined in the GDML
-from a NIST material) hides a lead cross, made of two 30 mm thick arms, and a
-40 mm thick stainless-steel bar. A uniform, parallel 1 MeV photon beam covers
-the crate, and the script counts the photons that reach a screen behind it
-**without interacting** (still at 1 MeV), in 1 cm pixels.
+from a NIST material) hides a lead cross, made of two 30 mm thick arms, and a 40
+mm thick stainless-steel bar. A uniform, parallel 1 MeV photon beam covers the
+crate, and the script counts the photons that reach a screen behind it **without
+interacting** (still at 1 MeV), in 1 cm pixels.
 
 ```python
 import awkward as ak
@@ -2935,54 +2936,54 @@ steel bar              : 0.160
 **What to learn.**
 
 - **The contrast is the attenuation law.** The relative transmission through an
-  object of thickness $t$ replacing wood is
-  $\exp[-(\mu_\mathrm{object} - \mu_\mathrm{wood})\,t]$. With NIST attenuation
-  coefficients at 1 MeV that gives 0.10 for one lead arm, 0.010 for both, and
-  0.17 for the steel bar, matching the simulation within its statistics.
-- **Why unscattered photons.** Counting energy deposited in a thin screen
-  gives a much noisier image, because only a few percent of photons interact
-  in the screen and each deposits a random amount. Counting photons that arrive
-  with their full energy is the simulation's ideal detector; it also rejects
-  photons scattered in the crate, which would blur the image.
-- **Statistics set the image quality**: about 250 photons per open pixel give
-  6% noise; the darkest pixels behind both lead arms receive only a few photons.
+  object of thickness $t$ replacing wood is $\exp[-(\mu_\mathrm{object} -
+  \mu_\mathrm{wood})\,t]$. With NIST attenuation coefficients at 1 MeV that
+  gives 0.10 for one lead arm, 0.010 for both, and 0.17 for the steel bar,
+  matching the simulation within its statistics.
+- **Why unscattered photons.** Counting energy deposited in a thin screen gives
+  a much noisier image, because only a few percent of photons interact in the
+  screen and each deposits a random amount. Counting photons that arrive with
+  their full energy is the simulation's ideal detector; it also rejects photons
+  scattered in the crate, which would blur the image.
+- **Statistics set the image quality**: about 250 photons per open pixel give 6%
+  noise; the darkest pixels behind both lead arms receive only a few photons.
 - **Technique**: defining a custom material in GDML, a rotated placement, a
   plane GPS source, an overlap check after `initialize()`, selecting
   boundary-crossing steps by energy, and building an image with
   `numpy.histogram2d`.
 
 **Exercises.** Lower the beam energy to 200 keV: what happens to the
-transmission through lead, and why do low energies suit thin, light objects? Replace the steel bar with
-a 4 cm block of water and find the beam energy that gives the best contrast.
-Move the screen 50 cm further back and include scattered photons to see the
-blurring.
+transmission through lead, and why do low energies suit thin, light objects?
+Replace the steel bar with a 4 cm block of water and find the beam energy that
+gives the best contrast. Move the screen 50 cm further back and include
+scattered photons to see the blurring.
 
 # Part VIII - Example catalogue
 
 The repository has two sets of runnable examples. Neither is installed with the
-package; run them from a clone (`git clone
-https://github.com/lobis/geant4-python-application`).
+package; run them from a clone
+(`git clone https://github.com/lobis/geant4-python-application`).
 
 ## 71. Topic examples
 
 `examples/geant4-examples/` contains one short script per feature, numbered in
 learning order:
 
-| Script                          | Shows                                                               |
-| ------------------------------- | ------------------------------------------------------------------- |
-| `00_qt_viewer_smoke.py`         | Opening the Qt viewer; `visualization_available()`                  |
-| `01_reference_physics_lists.py` | Listing and selecting Geant4 reference physics lists                |
-| `02_gps_sources.py`             | Switching between the particle gun and GPS; GPS distributions       |
-| `03_scoring_meshes_hits.py`     | `Scoring.energy_deposit`, `Scoring.energy_mesh`, hits               |
-| `04_magnetic_electric_fields.py` | Uniform magnetic and electric fields                               |
-| `05_optical_scintillation.py`   | Optical GDML, scintillation, optical photons                        |
-| `06_callbacks.py`               | `run_with_callbacks` over runs, events, tracks and steps            |
-| `07_custom_physics.py`          | Extra physics constructors with `add_physics`                       |
-| `08_dna_medical.py`             | Geant4-DNA physics and chemistry constructors                       |
-| `09_cad_vtk_root_generators.py` | STL/tessellated geometry, VTK and ROOT output, HepMC primaries      |
-| `10_mpi_distributed.py`         | Splitting events across MPI ranks                                   |
-| `11_native_scoring_mesh.py`     | Geant4's command-based scoring mesh                                 |
-| `examples/attenuation.ipynb`    | Photon attenuation in a notebook (the one Binder opens)             |
+| Script                           | Shows                                                          |
+| -------------------------------- | -------------------------------------------------------------- |
+| `00_qt_viewer_smoke.py`          | Opening the Qt viewer; `visualization_available()`             |
+| `01_reference_physics_lists.py`  | Listing and selecting Geant4 reference physics lists           |
+| `02_gps_sources.py`              | Switching between the particle gun and GPS; GPS distributions  |
+| `03_scoring_meshes_hits.py`      | `Scoring.energy_deposit`, `Scoring.energy_mesh`, hits          |
+| `04_magnetic_electric_fields.py` | Uniform magnetic and electric fields                           |
+| `05_optical_scintillation.py`    | Optical GDML, scintillation, optical photons                   |
+| `06_callbacks.py`                | `run_with_callbacks` over runs, events, tracks and steps       |
+| `07_custom_physics.py`           | Extra physics constructors with `add_physics`                  |
+| `08_dna_medical.py`              | Geant4-DNA physics and chemistry constructors                  |
+| `09_cad_vtk_root_generators.py`  | STL/tessellated geometry, VTK and ROOT output, HepMC primaries |
+| `10_mpi_distributed.py`          | Splitting events across MPI ranks                              |
+| `11_native_scoring_mesh.py`      | Geant4's command-based scoring mesh                            |
+| `examples/attenuation.ipynb`     | Photon attenuation in a notebook (the one Binder opens)        |
 
 ## 72. Ports of the Geant4 examples
 
@@ -2992,36 +2993,36 @@ of examples shipped with Geant4. Each opens the Qt viewer by default and accepts
 runs them all. Some are faithful ports and some are adaptations where the
 original needs C++ user code (see `COMPATIBILITY.md` in that directory).
 
-| Example                                       | Detector or physics                                        |
-| --------------------------------------------- | ---------------------------------------------------------- |
-| `basic/B1/b1.py`                              | Water phantom with tissue and bone; dose in a volume       |
-| `basic/B2/b2.py`                              | Fixed target and six tracker chambers in a field           |
-| `basic/B3/b3.py`                              | Schematic PET ring: crystals and a patient                 |
-| `basic/B4/b4.py`                              | Lead/liquid-argon sampling calorimeter (tutorial 67)       |
-| `basic/B5/b5.py`                              | Double-arm spectrometer with field and detectors           |
-| `advanced/GoldFoilExperiment/gold_foil.py`    | Rutherford scattering of alphas on gold (tutorial 66)      |
-| `advanced/NanoparticleTherapy/nano_therapy.py` | Gold cluster in a tumour; dose with and without gold      |
-| `advanced/NanoparticleTherapy/brain_tumor.py` | Gold-nanoparticle therapy in a head model                  |
-| `extended/analysis/AnaEx01/ana_ex01.py`       | Calorimeter analysis output                                |
-| `extended/analysis/AnaEx02/ana_ex02.py`       | Nested Parquet event output                                |
-| `extended/analysis/AnaEx03/ana_ex03.py`       | ROOT summary output via uproot                             |
-| `extended/electromagnetic/TestEm1/test_em1.py` | Survey of electromagnetic processes                       |
-| `extended/eventgenerator/exgps/exgps.py`      | GPS source distributions                                   |
-| `extended/eventgenerator/particleGun/particle_gun.py` | Sampled particle-gun modes                         |
-| `extended/eventgenerator/HepMC/hepmc.py`      | Primaries from a HepMC2 file                               |
-| `extended/field/field01/field01.py`           | Tracking in a magnetic field                               |
-| `extended/field/field02/field02.py`           | Transport in a constant electric field                     |
-| `extended/hadronic/Hadr00/hadr00.py`          | Hadronic interactions in a target                          |
-| `extended/medical/GammaTherapy/gamma_therapy.py` | Photon therapy phantom with a native dose mesh          |
-| `extended/medical/electronScattering/electron_scattering.py` | Electron scattering benchmark foils         |
-| `extended/optical/OpNovice/op_novice.py`      | Optical photon generation and transport                    |
-| `extended/optical/LXe/lxe.py`                 | Liquid-xenon scintillation                                 |
-| `extended/optical/wls/wls.py`                 | Wavelength-shifting fibre                                  |
-| `extended/parameterisations/Par01/par01.py`   | Repeated detector cells generated as GDML                  |
-| `extended/physicslists/factory/factory.py`    | Choosing reference physics lists by name                   |
-| `extended/radioactivedecay/rdecay01/rdecay01.py` | Radioactive decay chains                                |
-| `extended/runAndEvent/RE01/re01.py`           | Several primary vertices per event                         |
-| `run_gdml.py`                                 | Open any GDML file in the viewer                           |
+| Example                                                      | Detector or physics                                   |
+| ------------------------------------------------------------ | ----------------------------------------------------- |
+| `basic/B1/b1.py`                                             | Water phantom with tissue and bone; dose in a volume  |
+| `basic/B2/b2.py`                                             | Fixed target and six tracker chambers in a field      |
+| `basic/B3/b3.py`                                             | Schematic PET ring: crystals and a patient            |
+| `basic/B4/b4.py`                                             | Lead/liquid-argon sampling calorimeter (tutorial 67)  |
+| `basic/B5/b5.py`                                             | Double-arm spectrometer with field and detectors      |
+| `advanced/GoldFoilExperiment/gold_foil.py`                   | Rutherford scattering of alphas on gold (tutorial 66) |
+| `advanced/NanoparticleTherapy/nano_therapy.py`               | Gold cluster in a tumour; dose with and without gold  |
+| `advanced/NanoparticleTherapy/brain_tumor.py`                | Gold-nanoparticle therapy in a head model             |
+| `extended/analysis/AnaEx01/ana_ex01.py`                      | Calorimeter analysis output                           |
+| `extended/analysis/AnaEx02/ana_ex02.py`                      | Nested Parquet event output                           |
+| `extended/analysis/AnaEx03/ana_ex03.py`                      | ROOT summary output via uproot                        |
+| `extended/electromagnetic/TestEm1/test_em1.py`               | Survey of electromagnetic processes                   |
+| `extended/eventgenerator/exgps/exgps.py`                     | GPS source distributions                              |
+| `extended/eventgenerator/particleGun/particle_gun.py`        | Sampled particle-gun modes                            |
+| `extended/eventgenerator/HepMC/hepmc.py`                     | Primaries from a HepMC2 file                          |
+| `extended/field/field01/field01.py`                          | Tracking in a magnetic field                          |
+| `extended/field/field02/field02.py`                          | Transport in a constant electric field                |
+| `extended/hadronic/Hadr00/hadr00.py`                         | Hadronic interactions in a target                     |
+| `extended/medical/GammaTherapy/gamma_therapy.py`             | Photon therapy phantom with a native dose mesh        |
+| `extended/medical/electronScattering/electron_scattering.py` | Electron scattering benchmark foils                   |
+| `extended/optical/OpNovice/op_novice.py`                     | Optical photon generation and transport               |
+| `extended/optical/LXe/lxe.py`                                | Liquid-xenon scintillation                            |
+| `extended/optical/wls/wls.py`                                | Wavelength-shifting fibre                             |
+| `extended/parameterisations/Par01/par01.py`                  | Repeated detector cells generated as GDML             |
+| `extended/physicslists/factory/factory.py`                   | Choosing reference physics lists by name              |
+| `extended/radioactivedecay/rdecay01/rdecay01.py`             | Radioactive decay chains                              |
+| `extended/runAndEvent/RE01/re01.py`                          | Several primary vertices per event                    |
+| `run_gdml.py`                                                | Open any GDML file in the viewer                      |
 
 The NanoparticleTherapy examples model the gold as a solid sphere. A
 centimetre-sized sphere of solid gold shields the tissue behind it from
@@ -3039,47 +3040,47 @@ argument; output units are in section 63.
 g4.Application(n_threads=0, gdml=None, physics="custom", seed=0, *, optical=False)
 ```
 
-| Argument    | Meaning                                                                        |
-| ----------- | ------------------------------------------------------------------------------ |
-| `n_threads` | 0 for the serial run manager, N for N Geant4 worker threads                    |
-| `gdml`      | the detector as a GDML **string** (read files with `Path(...).read_text()`)    |
-| `physics`   | `"custom"` or a reference list name from `available_physics_lists()`           |
-| `seed`      | random seed; 0 picks a random one                                              |
-| `optical`   | add `G4OpticalPhysics` to the physics list                                     |
+| Argument    | Meaning                                                                     |
+| ----------- | --------------------------------------------------------------------------- |
+| `n_threads` | 0 for the serial run manager, N for N Geant4 worker threads                 |
+| `gdml`      | the detector as a GDML **string** (read files with `Path(...).read_text()`) |
+| `physics`   | `"custom"` or a reference list name from `available_physics_lists()`        |
+| `seed`      | random seed; 0 picks a random one                                           |
+| `optical`   | add `G4OpticalPhysics` to the physics list                                  |
 
 Lifecycle and running:
 
-| Member                                            | Description                                                                  |
-| ------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `with g4.Application(...) as app:`                | start the worker and set up; stop it at the end of the block                 |
-| `start(setup=True, initialize=False)` / `stop()`  | the same without a `with` block                                              |
-| `initialize()`                                    | initialize Geant4 now (otherwise the first `run` does it)                    |
-| `run(n)`                                          | run `n` events from the current generator; returns the events                |
-| `run(primaries)`                                  | run one event per entry of an awkward array of primaries (73.1)              |
-| `run_with_callbacks(primaries, on_run=, on_event=, on_track=, on_step=)` | run, then call Python functions over the result |
-| `visualize(commands=None)`                        | open the Qt viewer; returns when it is closed                                |
+| Member                                                                   | Description                                                     |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| `with g4.Application(...) as app:`                                       | start the worker and set up; stop it at the end of the block    |
+| `start(setup=True, initialize=False)` / `stop()`                         | the same without a `with` block                                 |
+| `initialize()`                                                           | initialize Geant4 now (otherwise the first `run` does it)       |
+| `run(n)`                                                                 | run `n` events from the current generator; returns the events   |
+| `run(primaries)`                                                         | run one event per entry of an awkward array of primaries (73.1) |
+| `run_with_callbacks(primaries, on_run=, on_event=, on_track=, on_step=)` | run, then call Python functions over the result                 |
+| `visualize(commands=None)`                                               | open the Qt viewer; returns when it is closed                   |
 
 Configuration:
 
-| Member                                   | Description                                                            |
-| ---------------------------------------- | ---------------------------------------------------------------------- |
-| `command(cmd)` / `commands([cmds])`      | apply Geant4 UI commands; a failing command raises `RuntimeError`      |
-| `list_commands(directory="/")`           | print the commands under a directory (in the worker's output)          |
-| `set_event_fields(set)`                  | choose the recorded fields (section 63)                                |
-| `get_event_fields()`                     | the fields currently recorded                                          |
-| `get_event_fields_complete()`            | every field that can be recorded                                       |
-| `add_physics(name)`                      | add an extra physics constructor before initialization                 |
-| `seed` (property)                        | read or set the random seed                                            |
-| `detector`, `generator` (properties)     | the `Detector` and `Generator` helpers                                 |
+| Member                               | Description                                                       |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| `command(cmd)` / `commands([cmds])`  | apply Geant4 UI commands; a failing command raises `RuntimeError` |
+| `list_commands(directory="/")`       | print the commands under a directory (in the worker's output)     |
+| `set_event_fields(set)`              | choose the recorded fields (section 63)                           |
+| `get_event_fields()`                 | the fields currently recorded                                     |
+| `get_event_fields_complete()`        | every field that can be recorded                                  |
+| `add_physics(name)`                  | add an extra physics constructor before initialization            |
+| `seed` (property)                    | read or set the random seed                                       |
+| `detector`, `generator` (properties) | the `Detector` and `Generator` helpers                            |
 
 Static methods, usable without starting an application:
 
-| Method                                   | Returns                                                            |
-| ---------------------------------------- | ------------------------------------------------------------------ |
-| `Application.available_physics_lists()`  | `"custom"` plus Geant4's reference list names                      |
-| `Application.available_extra_physics()`  | constructor names for `add_physics` (optical, DNA, decay, ...)     |
-| `Application.multithreading_available()` | whether the linked Geant4 supports threads                         |
-| `Application.visualization_available()`  | whether the Qt viewer can be opened (does not load Qt)             |
+| Method                                   | Returns                                                        |
+| ---------------------------------------- | -------------------------------------------------------------- |
+| `Application.available_physics_lists()`  | `"custom"` plus Geant4's reference list names                  |
+| `Application.available_extra_physics()`  | constructor names for `add_physics` (optical, DNA, decay, ...) |
+| `Application.multithreading_available()` | whether the linked Geant4 supports threads                     |
+| `Application.visualization_available()`  | whether the Qt viewer can be opened (does not load Qt)         |
 
 The setup steps that `start()` performs are also public (`setup_manager`,
 `setup_physics`, `setup_detector`, `setup_action`) for use with
@@ -3091,12 +3092,12 @@ The setup steps that `start()` performs are also public (`setup_manager`,
 one primary, or, with a `primaries` field holding a list per event, several
 primaries per event:
 
-| Field       | Content                         | Unit       |
-| ----------- | ------------------------------- | ---------- |
-| `particle`  | Geant4 particle name            |            |
-| `energy`    | kinetic energy                  | **keV**    |
-| `position`  | record with `x`, `y`, `z`       | **cm**     |
-| `direction` | record with `x`, `y`, `z`       | unit-less  |
+| Field       | Content                   | Unit      |
+| ----------- | ------------------------- | --------- |
+| `particle`  | Geant4 particle name      |           |
+| `energy`    | kinetic energy            | **keV**   |
+| `position`  | record with `x`, `y`, `z` | **cm**    |
+| `direction` | record with `x`, `y`, `z` | unit-less |
 
 Fields left out keep the generator's current value. Note the units: keV and cm,
 unlike the mm of the output.
@@ -3106,21 +3107,21 @@ unlike the mm of the output.
 `app.generator` configures the particle gun (the default) or the General
 Particle Source. Every method returns the generator, so calls chain:
 
-| Member                               | Gun command                | GPS command                             |
-| ------------------------------------ | -------------------------- | --------------------------------------- |
-| `use_gun()` / `use_gps()`            | select the generator       |                                         |
-| `type` (property)                    | `"gun"` or `"gps"`         |                                         |
-| `particle(name)`                     | `/gun/particle`            | `/gps/particle`                         |
-| `energy(value, unit="MeV")`          | `/gun/energy`              | `/gps/ene/mono`                         |
-| `position(x, y, z, unit="cm")`       | `/gun/position`            | `/gps/pos/type Point`, `/gps/pos/centre` |
-| `direction(x, y, z)`                 | `/gun/direction`           | `/gps/direction`                        |
-| `commands([cmds])`                   | any commands, e.g. GPS distributions                                 |
+| Member                         | Gun command                          | GPS command                              |
+| ------------------------------ | ------------------------------------ | ---------------------------------------- |
+| `use_gun()` / `use_gps()`      | select the generator                 |                                          |
+| `type` (property)              | `"gun"` or `"gps"`                   |                                          |
+| `particle(name)`               | `/gun/particle`                      | `/gps/particle`                          |
+| `energy(value, unit="MeV")`    | `/gun/energy`                        | `/gps/ene/mono`                          |
+| `position(x, y, z, unit="cm")` | `/gun/position`                      | `/gps/pos/type Point`, `/gps/pos/centre` |
+| `direction(x, y, z)`           | `/gun/direction`                     | `/gps/direction`                         |
+| `commands([cmds])`             | any commands, e.g. GPS distributions |
 
 Select the generator type before the other calls, since they emit the commands
 of the current type. `Generator` works only with the serial run manager
 (`n_threads=0`); in multithreaded mode use the commands directly after
-`initialize()` (section 28). For spectra, areas and angular distributions use GPS
-commands (`/gps/pos/type Plane`, `/gps/ene/type Gauss`, `/gps/ang/type iso`,
+`initialize()` (section 28). For spectra, areas and angular distributions use
+GPS commands (`/gps/pos/type Plane`, `/gps/ene/type Gauss`, `/gps/ang/type iso`,
 ...); tutorial 70 shows an example.
 
 ## 75. Detector
@@ -3128,29 +3129,29 @@ commands (`/gps/pos/type Plane`, `/gps/ene/type Gauss`, `/gps/ang/type iso`,
 `app.detector` queries and configures the geometry. Queries need an initialized
 application; settings must be made before initialization.
 
-| Member                                     | Description                                                     |
-| ------------------------------------------ | --------------------------------------------------------------- |
-| `logical_volumes`, `physical_volumes`      | sets of names                                                   |
-| `materials`                                | set of material names in use                                    |
-| `gdml`                                     | the GDML text, until initialization (then cleared to save memory) |
-| `check_overlaps()`                         | run Geant4's overlap check; `True` means an overlap was found   |
-| `material_from_volume(name)`               | material of a volume                                            |
-| `logical_volume_from_physical(name)`       | logical volume of a physical volume                             |
-| `physical_volumes_from_logical(name)`      | physical volumes placed from a logical volume                   |
-| `sensitive_volumes` (property)             | set of **logical** volume names to make sensitive               |
-| `magnetic_field` (property)                | uniform field `(Bx, By, Bz)` in tesla                           |
-| `electric_field` (property)                | uniform field `(Ex, Ey, Ez)` in kV/cm                           |
+| Member                                | Description                                                       |
+| ------------------------------------- | ----------------------------------------------------------------- |
+| `logical_volumes`, `physical_volumes` | sets of names                                                     |
+| `materials`                           | set of material names in use                                      |
+| `gdml`                                | the GDML text, until initialization (then cleared to save memory) |
+| `check_overlaps()`                    | run Geant4's overlap check; `True` means an overlap was found     |
+| `material_from_volume(name)`          | material of a volume                                              |
+| `logical_volume_from_physical(name)`  | logical volume of a physical volume                               |
+| `physical_volumes_from_logical(name)` | physical volumes placed from a logical volume                     |
+| `sensitive_volumes` (property)        | set of **logical** volume names to make sensitive                 |
+| `magnetic_field` (property)           | uniform field `(Bx, By, Bz)` in tesla                             |
+| `electric_field` (property)           | uniform field `(Ex, Ey, Ez)` in kV/cm                             |
 
 ## 76. Scoring
 
-| Member                                                    | Description                                                            |
-| --------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `Scoring.energy_deposit(events, volume=None)`             | deposited energy per event in keV, optionally in one physical volume   |
-| `Scoring.hits(events, volume=None)`                       | steps with energy > 0: `position`, `time`, `energy`                    |
+| Member                                                               | Description                                                             |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `Scoring.energy_deposit(events, volume=None)`                        | deposited energy per event in keV, optionally in one physical volume    |
+| `Scoring.hits(events, volume=None)`                                  | steps with energy > 0: `position`, `time`, `energy`                     |
 | `Scoring.energy_mesh(events, bins=10, mesh_range=None, volume=None)` | 3D histogram of deposited energy; returns `(mesh, edges)` in keV and mm |
-| `NativeScoringMesh(app, name="mesh", quantity="eDep")`    | a Geant4 command-based scoring mesh                                    |
-| `.box(half_size, bins, unit="mm", center=(0, 0, 0))`      | create and close a box mesh (half-lengths, Geant4 convention)          |
-| `.dump(path, option="")`                                  | write the scored quantity to a file after a run                        |
+| `NativeScoringMesh(app, name="mesh", quantity="eDep")`               | a Geant4 command-based scoring mesh                                     |
+| `.box(half_size, bins, unit="mm", center=(0, 0, 0))`                 | create and close a box mesh (half-lengths, Geant4 convention)           |
+| `.dump(path, option="")`                                             | write the scored quantity to a file after a run                         |
 
 The returned events also carry methods from awkward behaviours:
 `events.hits(volume=None)` (as above) and `events.energy_in_volume(volume)`
@@ -3158,32 +3159,32 @@ The returned events also carry methods from awkward behaviours:
 
 ## 77. Input, output and geometry helpers
 
-| Function                                                     | Description                                                  |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| `g4.basic_gdml`                                              | 1 m air world with a 50 cm water box (`box` / `boxVolume`)   |
-| `io.events_to_parquet(events, path)`, `io.events_from_parquet(path)` | full nested events in Parquet                        |
-| `io.events_to_root(events, path, treename="events")`         | per-event id and deposited energy, via uproot                |
-| `io.events_from_root(path, treename="events")`               | read that tree back as NumPy arrays                          |
-| `io.mesh_to_vtk(mesh, edges, path)`                          | write an energy mesh as legacy VTK for ParaView              |
-| `io.hepmc_to_primaries(text)`                                | HepMC2 ASCII particles to a primary array                    |
-| `optical.optical_water_gdml`, `lxe_scintillator_gdml`, `wls_fiber_gdml` | ready-made optical geometries                     |
-| `optical.scintillation_commands(stack_photons=True, max_cerenkov=100)` | commands that tune scintillation and Cherenkov     |
-| `geometry.linear_array_gdml(count, spacing_mm=20, box_size_mm=10, material="G4_Si")` | a row of identical cells as GDML   |
-| `cad.cube_mesh(size_mm)`, `cad.mesh_to_gdml(vertices, faces, ...)` | tessellated solids from a triangle mesh               |
-| `cad.stl_ascii_to_gdml(text, ...)`                           | an ASCII STL file as GDML                                    |
-| `distributed.get_rank_size()`                                | MPI rank and size (from mpi4py or launcher variables)        |
-| `distributed.split_count(n, rank, size)`                     | this rank's `(start, count)` of `n` events                   |
+| Function                                                                             | Description                                                |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| `g4.basic_gdml`                                                                      | 1 m air world with a 50 cm water box (`box` / `boxVolume`) |
+| `io.events_to_parquet(events, path)`, `io.events_from_parquet(path)`                 | full nested events in Parquet                              |
+| `io.events_to_root(events, path, treename="events")`                                 | per-event id and deposited energy, via uproot              |
+| `io.events_from_root(path, treename="events")`                                       | read that tree back as NumPy arrays                        |
+| `io.mesh_to_vtk(mesh, edges, path)`                                                  | write an energy mesh as legacy VTK for ParaView            |
+| `io.hepmc_to_primaries(text)`                                                        | HepMC2 ASCII particles to a primary array                  |
+| `optical.optical_water_gdml`, `lxe_scintillator_gdml`, `wls_fiber_gdml`              | ready-made optical geometries                              |
+| `optical.scintillation_commands(stack_photons=True, max_cerenkov=100)`               | commands that tune scintillation and Cherenkov             |
+| `geometry.linear_array_gdml(count, spacing_mm=20, box_size_mm=10, material="G4_Si")` | a row of identical cells as GDML                           |
+| `cad.cube_mesh(size_mm)`, `cad.mesh_to_gdml(vertices, faces, ...)`                   | tessellated solids from a triangle mesh                    |
+| `cad.stl_ascii_to_gdml(text, ...)`                                                   | an ASCII STL file as GDML                                  |
+| `distributed.get_rank_size()`                                                        | MPI rank and size (from mpi4py or launcher variables)      |
+| `distributed.split_count(n, rank, size)`                                             | this rank's `(start, count)` of `n` events                 |
 
 ## 78. Package-level functions and attributes
 
-| Name                                        | Description                                                        |
-| ------------------------------------------- | ------------------------------------------------------------------ |
-| `g4.__version__`, `g4.version`              | package version                                                    |
-| `g4.geant4_version`                         | Geant4 version the package was built against                       |
-| `g4.data_directory()`                       | where the datasets are                                             |
-| `g4.application_directory(path=None, *, temp=False)` | read or change the package's data directory              |
-| `g4.install_datasets(show_progress=True)`   | download missing datasets now                                      |
-| `GEANT4_PYTHON_APPLICATION_DIR`             | environment variable for the data directory                        |
+| Name                                                 | Description                                  |
+| ---------------------------------------------------- | -------------------------------------------- |
+| `g4.__version__`, `g4.version`                       | package version                              |
+| `g4.geant4_version`                                  | Geant4 version the package was built against |
+| `g4.data_directory()`                                | where the datasets are                       |
+| `g4.application_directory(path=None, *, temp=False)` | read or change the package's data directory  |
+| `g4.install_datasets(show_progress=True)`            | download missing datasets now                |
+| `GEANT4_PYTHON_APPLICATION_DIR`                      | environment variable for the data directory  |
 
 # Part X - Working on the package itself
 
