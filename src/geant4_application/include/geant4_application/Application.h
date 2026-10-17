@@ -35,6 +35,9 @@ private:
     static std::unordered_set<std::string> eventFieldsComplete;
     static std::unordered_set<std::string> eventFields;
 
+    // /gun/ and /gps/ commands issued before their messengers exist, applied by Initialize
+    static std::vector<std::string> pendingGeneratorCommands;
+
 public:
     Application();
     ~Application();
@@ -67,8 +70,6 @@ public:
     static void ListCommands(const std::string& directory);
     static G4UImanager* GetUIManager();
 
-    const PrimaryGeneratorAction& GetPrimaryGeneratorAction() const;
-    const StackingAction& GetStackingAction() const;
     const DetectorConstruction& GetDetectorConstruction() const;
 
     static std::filesystem::path GetTemporaryApplicationDirectory();

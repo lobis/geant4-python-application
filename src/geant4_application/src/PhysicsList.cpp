@@ -19,16 +19,19 @@ using namespace geant4_app;
 PhysicsList::PhysicsList(bool optical) : G4VModularPhysicsList() {
     SetVerboseLevel(1);
 
-    // Decay physics
-    RegisterPhysics(new G4DecayPhysics());
-
-    // Radioactive decay
-    RegisterPhysics(new G4RadioactiveDecayPhysics());
-
     // Electromagnetic physics
     // RegisterPhysics(new G4EmStandardPhysics());
     // RegisterPhysics(new G4EmExtraPhysics());
     RegisterPhysics(new G4EmStandardPhysics_option4());
+
+    // Decay physics
+    RegisterPhysics(new G4DecayPhysics());
+
+    // Radioactive decay. Must come after the EM constructor: registered first, it
+    // creates the atomic de-excitation module and initializes it before the
+    // material-cuts couples exist, which leaves fluorescence and Auger emission
+    // off in every volume (while /process/em/printParameters reports them on).
+    RegisterPhysics(new G4RadioactiveDecayPhysics());
 
     // Hadronic physics
     RegisterPhysics(new G4HadronElasticPhysics());
