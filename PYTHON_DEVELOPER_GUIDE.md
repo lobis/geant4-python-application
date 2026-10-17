@@ -23,6 +23,8 @@ How the guide is organised:
 - **Part X** is for contributors to the package itself: building, testing, CI,
   Geant4 upgrades, the conda recipe, and releases.
 
+# Part I - Getting started
+
 ## 1. The simulation idea
 
 A Geant4 simulation normally has these pieces:
