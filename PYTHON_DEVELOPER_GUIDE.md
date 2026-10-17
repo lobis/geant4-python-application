@@ -1985,7 +1985,8 @@ app.command("/gun/energy 1 MeV")
   -> Message(target="", method="command", args=("/gun/energy 1 MeV",), kwargs={})
   -> pickled and sent through a multiprocessing Pipe with a sequence number
   -> worker: getattr(cpp_app, "command")("/gun/energy 1 MeV")
-  -> the result (or the exception) is pickled back
+  -> the result (or the exception) is pickled back; a result holding more than
+     1 MB of awkward arrays goes through shared memory instead (below)
   -> Application raises the exception again in your process, or returns the result
 ```
 
@@ -2003,7 +2004,15 @@ Consequences to keep in mind:
   (section 3).
 - **Everything crosses the process boundary by pickling.** Arguments and results
   must be picklable, and large event arrays are copied from the worker to your
-  process. That copy is part of the cost of a run (section 30).
+  process. That copy is part of the cost of a run (section 30). To keep it
+  cheap, `_transfer.py` writes the raw buffers of a large result
+  (`ak.to_buffers`) into one `multiprocessing.shared_memory` block and pickles
+  only the forms, lengths and offsets. Your process unlinks the block, copies it
+  out and rebuilds the arrays with `ak.from_buffers`. Pickling through the pipe
+  remains the fallback for small results and for blocks that can't be
+  allocated (for example a full `/dev/shm` on Linux). A block orphaned by a
+  crash is removed by `multiprocessing`'s resource tracker when both processes
+  have exited.
 - **Python code cannot run inside transport.** A Python function cannot be sent
   to the worker and called from a Geant4 stepping action, which is why
   `run_with_callbacks` calls your callbacks after the run, over the returned

@@ -11,6 +11,7 @@ import awkward as ak
 
 import geant4_python_application
 import geant4_python_application.events
+from geant4_python_application import _transfer
 from geant4_python_application._geant4_application import (
     Application as Geant4Application,
 )
@@ -106,7 +107,13 @@ def _start_application(pipe: multiprocessing.Pipe):
                 raise ValueError(f"Unknown method: {method}")
 
             result = getattr(target, method)(*message.args, **message.kwargs)
-            pipe.send((counter, result))
+            # Large awkward results go through shared memory, not the pipe.
+            result = _transfer.pack(result)
+            try:
+                pipe.send((counter, result))
+            except BaseException:
+                _transfer.discard(result)
+                raise
         except KeyboardInterrupt:
             pass
         except EOFError or BrokenPipeError:
@@ -194,10 +201,12 @@ class Application:
                 self._send(self._message_counter, message)
                 counter, response = self._recv()
                 if counter != self._message_counter:
+                    _transfer.discard(response)
                     raise RuntimeError("Message counter mismatch")
                 self._message_counter += 1
             except (EOFError, BrokenPipeError):
                 raise RuntimeError("Application process died. Recreate the application")
+            response = _transfer.unpack(response)
             if isinstance(response, Exception):
                 raise response
             return response
