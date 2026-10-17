@@ -8,6 +8,8 @@ writes docs/geant4-python-developer-guide.pdf. The intermediate LaTeX goes to
 build/guide-latex/.
 """
 
+from __future__ import annotations
+
 import re
 import shutil
 import subprocess
@@ -15,8 +17,16 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else ROOT / "PYTHON_DEVELOPER_GUIDE.md"
-OUTPUT = Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else ROOT / "docs" / "geant4-python-developer-guide.pdf"
+SOURCE = (
+    Path(sys.argv[1]).resolve()
+    if len(sys.argv) > 1
+    else ROOT / "PYTHON_DEVELOPER_GUIDE.md"
+)
+OUTPUT = (
+    Path(sys.argv[2]).resolve()
+    if len(sys.argv) > 2
+    else ROOT / "docs" / "geant4-python-developer-guide.pdf"
+)
 WORK = ROOT / "build" / "guide-latex"
 
 PREAMBLE = r"""
@@ -115,9 +125,19 @@ understand how the package works, and contribute to it.
 """
 
 SPECIALS = {
-    "\\": r"\textbackslash{}", "&": r"\&", "%": r"\%", "$": r"\$", "#": r"\#",
-    "_": r"\_", "{": r"\{", "}": r"\}", "~": r"\textasciitilde{}", "^": r"\textasciicircum{}",
-    "<": r"\textless{}", ">": r"\textgreater{}", "|": r"\textbar{}",
+    "\\": r"\textbackslash{}",
+    "&": r"\&",
+    "%": r"\%",
+    "$": r"\$",
+    "#": r"\#",
+    "_": r"\_",
+    "{": r"\{",
+    "}": r"\}",
+    "~": r"\textasciitilde{}",
+    "^": r"\textasciicircum{}",
+    "<": r"\textless{}",
+    ">": r"\textgreater{}",
+    "|": r"\textbar{}",
 }
 
 
@@ -143,16 +163,33 @@ def inline(text):
         stash.append(s)
         return f"\x00{len(stash) - 1}\x01"
 
-    text = re.sub(r"`([^`]+)`", lambda m: keep(r"\code{" + esc_code(m.group(1)) + "}"), text)
+    text = re.sub(
+        r"`([^`]+)`", lambda m: keep(r"\code{" + esc_code(m.group(1)) + "}"), text
+    )
     text = re.sub(r"\$([^$]+)\$", lambda m: keep("$" + m.group(1) + "$"), text)
-    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)",
-                  lambda m: keep(r"\href{" + m.group(2).replace("%", r"\%").replace("#", r"\#") + "}{" + esc(m.group(1)) + "}"),
-                  text)
-    text = re.sub(r"https?://[^\s)]+", lambda m: keep(r"\url{" + m.group(0) + "}"), text)
+    text = re.sub(
+        r"\[([^\]]+)\]\(([^)]+)\)",
+        lambda m: keep(
+            r"\href{"
+            + m.group(2).replace("%", r"\%").replace("#", r"\#")
+            + "}{"
+            + esc(m.group(1))
+            + "}"
+        ),
+        text,
+    )
+    text = re.sub(
+        r"https?://[^\s)]+", lambda m: keep(r"\url{" + m.group(0) + "}"), text
+    )
     text = esc(text)
     text = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", text)
     text = re.sub(r"(?<![\w*])\*([^*\n]+)\*(?![\w*])", r"\\emph{\1}", text)
-    text = text.replace("“", "``").replace("”", "''").replace(' "', " ``").replace('" ', "'' ")
+    text = (
+        text.replace("“", "``")
+        .replace("”", "''")
+        .replace(' "', " ``")
+        .replace('" ', "'' ")
+    )
     text = re.sub(r"^\"", "``", text)
     text = re.sub(r"\"([.,;:)])", r"''\1", text)
     while "\x00" in text:  # stashed pieces can contain other stashed pieces
@@ -161,7 +198,9 @@ def inline(text):
 
 
 def table(rows):
-    rows = [[c.strip() for c in re.split(r"(?<!\\)\|", r.strip().strip("|"))] for r in rows]
+    rows = [
+        [c.strip() for c in re.split(r"(?<!\\)\|", r.strip().strip("|"))] for r in rows
+    ]
     rows = [r for r in rows if not all(re.fullmatch(r":?-+:?", c) for c in r)]
     ncol = max(len(r) for r in rows)
     rows = [r + [""] * (ncol - len(r)) for r in rows]
@@ -171,12 +210,22 @@ def table(rows):
         cells = [r[i] for r in rows[1:] if r[i]]
         if cells and all(c.startswith("`") and c.endswith("`") for c in cells):
             # monospace column: as wide as its longest entry, up to 45% of the line
-            spec.append(r">{\raggedright\arraybackslash}p{%.3f\linewidth}" % min(0.45, 0.0118 * (length - 2) + 0.02))
+            spec.append(
+                r">{\raggedright\arraybackslash}p{%.3f\linewidth}"
+                % min(0.45, 0.0118 * (length - 2) + 0.02)
+            )
         elif length <= 12:
-            spec.append(r">{\raggedright\arraybackslash}p{%.3f\linewidth}" % max(0.07, 0.012 * length))
+            spec.append(
+                r">{\raggedright\arraybackslash}p{%.3f\linewidth}"
+                % max(0.07, 0.012 * length)
+            )
         else:
             spec.append(r">{\raggedright\arraybackslash}X")
-    out = [r"{\small", r"\begin{xltabular}{\linewidth}{" + "".join(spec) + "}", r"\toprule"]
+    out = [
+        r"{\small",
+        r"\begin{xltabular}{\linewidth}{" + "".join(spec) + "}",
+        r"\toprule",
+    ]
     out.append(" & ".join(r"\textbf{" + inline(c) + "}" for c in rows[0]) + r" \\")
     out += [r"\midrule", r"\endhead"]
     for r in rows[1:]:
@@ -195,11 +244,19 @@ def heading(level, text):
         value = sum({"I": 1, "V": 5, "X": 10}[c] for c in roman)
         value -= 2 * sum(1 for a, b in zip(roman, roman[1:]) if a == "I" and b in "VX")
         front = [r"\mainmatter"] if value == 1 else []
-        return front + [r"\setcounter{part}{%d}" % (value - 1), r"\part{%s}" % inline(name), r"\markright{%s}" % inline(name)]
+        return front + [
+            r"\setcounter{part}{%d}" % (value - 1),
+            r"\part{%s}" % inline(name),
+            r"\markright{%s}" % inline(name),
+        ]
     cmd = "section" if level == 2 else "subsection"
     if number:
-        return [r"\%s*{\texorpdfstring{%s\quad %s}{%s %s}}" % (cmd, number, title_tex, number, esc(title)),
-                r"\addcontentsline{toc}{%s}{\protect\numberline{%s}%s}" % (cmd, number, title_tex)]
+        return [
+            r"\%s*{\texorpdfstring{%s\quad %s}{%s %s}}"
+            % (cmd, number, title_tex, number, esc(title)),
+            r"\addcontentsline{toc}{%s}{\protect\numberline{%s}%s}"
+            % (cmd, number, title_tex),
+        ]
     return [r"\%s*{%s}" % (cmd, title_tex)]
 
 
@@ -238,14 +295,15 @@ def convert(md):
             j = i + 1
             while not lines[j].lstrip().startswith("```"):
                 j += 1
-            block = [l[indent:] for l in lines[i + 1:j]]
+            block = [l[indent:] for l in lines[i + 1 : j]]
             if indent == 0:
                 close_list()
             out += code_block(lang, block)
             i = j + 1
             continue
         if line.startswith("|"):
-            flush(); close_list()
+            flush()
+            close_list()
             j = i
             while j < len(lines) and lines[j].startswith("|"):
                 j += 1
@@ -254,16 +312,22 @@ def convert(md):
             continue
         m = re.match(r"^!\[([^\]]*)\]\(([^)]+)\)\s*$", line)
         if m:
-            flush(); close_list()
+            flush()
+            close_list()
             path = (SOURCE.parent / m.group(2)).resolve()
-            out += [r"\begin{figure}[H]\centering",
-                    r"\includegraphics[width=0.86\linewidth]{%s}" % path.as_posix(),
-                    r"\caption{%s}" % inline(m.group(1)), r"\end{figure}", ""]
+            out += [
+                r"\begin{figure}[H]\centering",
+                r"\includegraphics[width=0.86\linewidth]{%s}" % path.as_posix(),
+                r"\caption{%s}" % inline(m.group(1)),
+                r"\end{figure}",
+                "",
+            ]
             i += 1
             continue
         m = re.match(r"^(#{1,3}) (.*)", line)
         if m:
-            flush(); close_list()
+            flush()
+            close_list()
             level = len(m.group(1))
             if level == 1 and first_h1:  # the document title is on the title page
                 first_h1 = False
@@ -281,8 +345,12 @@ def convert(md):
                 list_env = env
             item = [m.group(2)]
             i += 1
-            while i < len(lines) and lines[i].startswith("  ") and lines[i].strip() \
-                    and not lines[i].lstrip().startswith("```"):
+            while (
+                i < len(lines)
+                and lines[i].startswith("  ")
+                and lines[i].strip()
+                and not lines[i].lstrip().startswith("```")
+            ):
                 item.append(lines[i].strip())
                 i += 1
             out.append(r"\item " + inline(" ".join(item)))
@@ -293,8 +361,12 @@ def convert(md):
             k = i + 1
             while k < len(lines) and not lines[k].strip():
                 k += 1
-            if list_env and k < len(lines) and not (
-                re.match(r"^(- |\d+\. )", lines[k]) or lines[k].startswith("   ")
+            if (
+                list_env
+                and k < len(lines)
+                and not (
+                    re.match(r"^(- |\d+\. )", lines[k]) or lines[k].startswith("   ")
+                )
             ):
                 close_list()
             i += 1
@@ -306,7 +378,8 @@ def convert(md):
         close_list()
         para.append(line.strip())
         i += 1
-    flush(); close_list()
+    flush()
+    close_list()
     return "\n".join(out)
 
 

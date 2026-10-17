@@ -3199,20 +3199,20 @@ Geant4 upgrades, wheels, the conda recipe, and releases are produced.
 
 ## 79. Repository layout and the example ports
 
-| Path                                   | Contents                                                      |
-| -------------------------------------- | ------------------------------------------------------------- |
-| `src/geant4_application/`              | The C++ Geant4 application and its pybind11 module            |
-| `src/geant4_python_application/`       | The Python package: `Application`, generator, scoring, I/O    |
-| `src/geant4_python_application/files/` | Data directories and the Geant4 dataset list and downloader   |
-| `tests/`                               | The pytest suite                                              |
-| `examples/geant4-examples/`            | Numbered topic examples and the ports of the Geant4 examples  |
-| `examples/attenuation.ipynb`           | The notebook that the Binder badges open                      |
-| `tools/`                               | Example runner, macOS wheel builder, CI helper scripts        |
-| `conda-recipe/`                        | The conda-forge recipe                                        |
-| `.github/workflows/`                   | `build-test.yaml`, `wheels.yaml`, `conda-recipe.yaml`         |
-| `INSTALLATION.md`                      | The full installation reference for users                     |
-| `docs/FEATURE_SUPPORT.md`              | Which Geant4 features are native, partial, or Python adapters |
-| `docs/geant4-python-developer-guide.pdf` | This guide as a PDF, built by `tools/build_guide_pdf.py`    |
+| Path                                     | Contents                                                      |
+| ---------------------------------------- | ------------------------------------------------------------- |
+| `src/geant4_application/`                | The C++ Geant4 application and its pybind11 module            |
+| `src/geant4_python_application/`         | The Python package: `Application`, generator, scoring, I/O    |
+| `src/geant4_python_application/files/`   | Data directories and the Geant4 dataset list and downloader   |
+| `tests/`                                 | The pytest suite                                              |
+| `examples/geant4-examples/`              | Numbered topic examples and the ports of the Geant4 examples  |
+| `examples/attenuation.ipynb`             | The notebook that the Binder badges open                      |
+| `tools/`                                 | Example runner, macOS wheel builder, CI helper scripts        |
+| `conda-recipe/`                          | The conda-forge recipe                                        |
+| `.github/workflows/`                     | `build-test.yaml`, `wheels.yaml`, `conda-recipe.yaml`         |
+| `INSTALLATION.md`                        | The full installation reference for users                     |
+| `docs/FEATURE_SUPPORT.md`                | Which Geant4 features are native, partial, or Python adapters |
+| `docs/geant4-python-developer-guide.pdf` | This guide as a PDF, built by `tools/build_guide_pdf.py`      |
 
 `examples/geant4-examples/Geant4-11.4.2-examples-python/` holds Python ports of
 the official Geant4 examples (B1 to B5, GoldFoilExperiment, exgps, particleGun,
@@ -3424,9 +3424,10 @@ environment.
 
 ## 86. Updating the PDF of this guide
 
-`PYTHON_DEVELOPER_GUIDE.md` is the source; `docs/geant4-python-developer-guide.pdf`
-is generated from it and committed so that readers can download it from GitHub.
-After changing the guide, rebuild the PDF and commit both files together:
+`PYTHON_DEVELOPER_GUIDE.md` is the source;
+`docs/geant4-python-developer-guide.pdf` is generated from it and committed so
+that readers can download it from GitHub. After changing the guide, rebuild the
+PDF and commit both files together:
 
 ```bash
 python tools/build_guide_pdf.py
@@ -3435,7 +3436,7 @@ python tools/build_guide_pdf.py
 The script converts the Markdown to LaTeX (headings, lists, tables, code,
 figures and `$...$` math) and typesets it with
 [tectonic](https://tectonic-typesetting.github.io), a self-contained XeLaTeX
-engine that downloads the packages it needs on first use (`brew install
-tectonic` on macOS, or `conda install -c conda-forge tectonic`). The figures of
-Part VII are in `docs/images/`; regenerate them by running the tutorial scripts
-if their results change.
+engine that downloads the packages it needs on first use
+(`brew install tectonic` on macOS, or `conda install -c conda-forge tectonic`).
+The figures of Part VII are in `docs/images/`; regenerate them by running the
+tutorial scripts if their results change.
