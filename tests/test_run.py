@@ -47,6 +47,46 @@ def test_general_particle_source():
         assert np.allclose(ak.flatten(events.primaries.energy), 2000)
 
 
+@pytest.mark.parametrize("initialize_first", [False, True])
+def test_generator_multithreaded(initialize_first):
+    # In multithreaded mode only the workers have a primary generator; commands
+    # issued before they exist are applied once the application is initialized.
+    if not Application.multithreading_available():
+        pytest.skip("linked Geant4 runtime was built without multithreading")
+    with Application(gdml=basic_gdml, n_threads=2, seed=1) as app:
+        if initialize_first:
+            app.initialize()
+        assert app.generator.type == "gun"
+        app.generator.particle("proton").energy(50, "MeV")
+        app.generator.position(0, 0, -10, "cm").direction(0, 0, 1)
+        events = app.run(10)
+    assert len(events) == 10
+    assert set(ak.flatten(events.primaries.particle)) == {"proton"}
+    assert np.allclose(ak.flatten(events.primaries.energy), 50000)
+
+
+def test_general_particle_source_multithreaded():
+    if not Application.multithreading_available():
+        pytest.skip("linked Geant4 runtime was built without multithreading")
+    with Application(gdml=basic_gdml, n_threads=2, seed=1) as app:
+        app.generator.use_gps().particle("geantino").energy(2, "MeV")
+        app.generator.position(0, 0, -10, "cm").direction(0, 0, 1)
+        assert app.generator.type == "gps"
+        events = app.run(4)
+    assert len(events) == 4
+    assert set(ak.flatten(events.primaries.particle)) == {"geantino"}
+    assert np.allclose(ak.flatten(events.primaries.energy), 2000)
+
+
+def test_generator_command_typo_multithreaded():
+    if not Application.multithreading_available():
+        pytest.skip("linked Geant4 runtime was built without multithreading")
+    with Application(gdml=basic_gdml, n_threads=2) as app:
+        app.command("/gun/energyy 1 MeV")  # kept until the generator exists
+        with pytest.raises(RuntimeError, match="/gun/energyy"):
+            app.initialize()
+
+
 def test_multiple_primary_vertices_per_event():
     particle = lambda name, x: {
         "particle": name,

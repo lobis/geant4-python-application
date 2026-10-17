@@ -38,9 +38,12 @@ PYBIND11_MODULE(_geant4_application, m) {
             .def_static("get_event_fields_complete", &Application::GetEventFieldsComplete)
             .def_static("command", &Application::Command, py::arg("command"))
             .def_static("list_commands", &Application::ListCommands, py::arg("directory") = "/")
-            .def_property_readonly("generator", &Application::GetPrimaryGeneratorAction, py::return_value_policy::reference_internal)
+            // The generator and stacking actions belong to the worker threads in
+            // multithreaded mode (the master has none), and all their state is static,
+            // so these return the classes rather than an instance.
+            .def_property_readonly("generator", [](const Application&) { return py::type::of<PrimaryGeneratorAction>(); })
             .def_property_readonly("detector", &Application::GetDetectorConstruction, py::return_value_policy::reference_internal)
-            .def_property_readonly("stacking", &Application::GetStackingAction, py::return_value_policy::reference_internal);
+            .def_property_readonly("stacking", [](const Application&) { return py::type::of<StackingAction>(); });
 
     py::class_<PrimaryGeneratorAction>(m, "PrimaryGeneratorAction")
             .def_property_static(

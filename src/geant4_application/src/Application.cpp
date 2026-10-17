@@ -232,6 +232,12 @@ void Application::Initialize() {
 
     runManager->Initialize();
     isInitialized = true;
+
+    const auto pending = std::move(pendingGeneratorCommands);
+    pendingGeneratorCommands.clear();
+    for (const auto& command: pending) {
+        Command(command);
+    }
 }
 
 py::list Application::Run(const py::object& primaries) {
@@ -333,8 +339,29 @@ G4UImanager* Application::GetUIManager() {
     return ui;
 }
 
+// The particle gun and the GPS, and so their /gun/ and /gps/ commands, are created
+// with the user actions. In multithreaded mode those exist only on the worker threads,
+// which Geant4 starts during initialization (the master thread has no primary
+// generator). Commands for them issued earlier are kept and applied, in order, right
+// after initialization; the master then forwards them to every worker.
+static bool IsPendingGeneratorCommand(G4UImanager* ui, const string& command) {
+    const auto start = command.find_first_not_of(' ');
+    if (start == string::npos) {
+        return false;
+    }
+    const auto path = command.substr(start, command.find(' ', start) - start);
+    if (path.rfind("/gun/", 0) != 0 && path.rfind("/gps/", 0) != 0) {
+        return false;
+    }
+    return ui->FindCommand(path.c_str()) == nullptr;
+}
+
 void Application::Command(const string& command) {
     auto ui = GetUIManager();
+    if ((pInstance == nullptr || !pInstance->IsInitialized()) && IsPendingGeneratorCommand(ui, command)) {
+        pendingGeneratorCommands.push_back(command);
+        return;
+    }
     int code = ui->ApplyCommand(command);
     if (code != 0) {
         throw runtime_error("Command '" + command + "' failed with code " + to_string(code));
@@ -344,28 +371,6 @@ void Application::Command(const string& command) {
 void Application::ListCommands(const string& directory) {
     auto ui = GetUIManager();
     ui->ListCommands(directory.c_str());
-}
-
-const PrimaryGeneratorAction& Application::GetPrimaryGeneratorAction() const {
-    if (runManager == nullptr) {
-        throw runtime_error("RunManager needs to be set up first");
-    }
-    const auto primaryGeneratorAction = dynamic_cast<const PrimaryGeneratorAction*>(runManager->GetUserPrimaryGeneratorAction());
-    if (primaryGeneratorAction == nullptr) {
-        throw runtime_error("Primary generator action is not available");
-    }
-    return *primaryGeneratorAction;
-}
-
-const StackingAction& Application::GetStackingAction() const {
-    if (runManager == nullptr) {
-        throw runtime_error("RunManager needs to be set up first");
-    }
-    const auto stackingAction = dynamic_cast<const StackingAction*>(runManager->GetUserStackingAction());
-    if (stackingAction == nullptr) {
-        throw runtime_error("Stacking action is not available");
-    }
-    return *stackingAction;
 }
 
 const DetectorConstruction& Application::GetDetectorConstruction() const {
@@ -397,3 +402,4 @@ void Application::SetEventFields(const unordered_set<string>& fields) {
 }
 
 unordered_set<string> Application::eventFields = {};
+vector<string> Application::pendingGeneratorCommands = {};
