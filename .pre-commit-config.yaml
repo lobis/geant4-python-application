@@ -7,6 +7,7 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-added-large-files
+        args: [--maxkb=1024] # docs/geant4-python-developer-guide.pdf
       - id: check-case-conflict
       - id: check-merge-conflict
       - id: check-symlinks

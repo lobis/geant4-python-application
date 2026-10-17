@@ -28,8 +28,12 @@ looking at [geant4_pybind](https://github.com/HaarigerHarald/geant4_pybind).
 - The complete event data is available as an
   [awkward array](https://github.com/scikit-hep/awkward)
 
-New to Geant4 or this package? See the
-[Python developer guide](https://github.com/lobis/geant4-python-application/blob/main/PYTHON_DEVELOPER_GUIDE.md).
+New to Geant4 or this package? Read the
+[Python developer guide](https://github.com/lobis/geant4-python-application/blob/main/PYTHON_DEVELOPER_GUIDE.md),
+also available as a typeset
+[PDF](https://github.com/lobis/geant4-python-application/blob/main/docs/geant4-python-developer-guide.pdf).
+It covers installation, writing simulations, how the package works, five worked
+detector simulations, and the API reference.
 
 ## Platform support
 
