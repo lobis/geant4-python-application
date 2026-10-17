@@ -8,6 +8,8 @@ does the particle transport in native C++.
 It is not a complete replacement for the official Geant4 Application Developer
 Guide. Use that guide for detailed physics, geometry, and toolkit reference. Use
 this guide for the Python interface and this repository's supported workflow.
+Part VI is for contributors to the package itself: building, testing, CI,
+Geant4 upgrades, the conda recipe, and releases.
 
 ## 1. The simulation idea
 
@@ -32,26 +34,108 @@ create Application -> configure -> initialize -> BeamOn/run -> analyze output
 
 ## 2. Installation
 
-The package requires Python and a compatible Geant4 installation. From the
-repository root:
+Prebuilt wheels bundle a compiled Geant4 11.4.3, so on supported platforms you
+do **not** need to install Geant4 (C++) yourself:
+
+| Platform               | Python     | Prebuilt wheel | Qt viewer (`[gui]`) |
+| ---------------------- | ---------- | -------------- | ------------------- |
+| macOS, Apple Silicon   | 3.8 – 3.13 | yes            | yes                 |
+| macOS, Intel           | 3.8 – 3.13 | yes            | yes                 |
+| Linux x86_64           | 3.8 – 3.13 | yes            | yes (needs OpenGL)  |
+| Linux aarch64, Windows | —          | no             | build from source   |
+
+On Windows, WSL works with the Linux wheels.
+
+### 2.1 Create a fresh virtual environment first
+
+Always install into a new environment. Mixing the package with whatever is
+already in the system Python or conda's `base` environment (another Qt/PyQt,
+numpy or Geant4 build) is the most common cause of library mismatch errors, and
+recent Ubuntu/Debian refuse `pip install` outside an environment with
+`externally-managed-environment`.
 
 ```bash
-pip install .
+python3 -m venv g4-env
+source g4-env/bin/activate
+python -m pip install --upgrade pip
 ```
 
-For development, install Geant4 first. The repository's README contains a
-source-build example. Your Geant4 installation should include the data files
-needed by the physics lists. Check the installation with:
+or with conda:
+
+```bash
+conda create -n g4 python=3.12 -y
+conda activate g4
+```
+
+Activate the environment again in every new terminal.
+
+### 2.2 Install from PyPI
+
+```bash
+pip install "geant4-python-application[gui]"
+```
+
+Leave out `[gui]` for a physics-only install without Qt (servers, containers,
+clusters):
+
+```bash
+pip install geant4-python-application
+```
+
+Wheels are also attached to every GitHub release from 0.1.0 on, and each run of
+the Wheels workflow keeps them as downloadable artifacts for 90 days; see
+`INSTALLATION.md` for installing those with `--find-links`.
+
+### 2.3 Check the installation
 
 ```bash
 python - <<'PY'
 import geant4_python_application as g4
 
+print("package:", g4.__version__)
 print("Geant4:", g4.geant4_version)
 print("MT available:", g4.Application.multithreading_available())
+print("viewer available:", g4.Application.visualization_available())
 print("Physics lists:", g4.Application.available_physics_lists()[:5])
 PY
 ```
+
+### 2.4 Geant4 data files
+
+The physics data files (~2 GB) are not part of the wheel. They are downloaded
+the first time a simulation runs, once per user, into a directory shared by all
+your environments:
+
+- macOS: `~/Library/Application Support/geant4_python_application`
+- Linux: `~/.local/share/geant4_python_application`
+
+```bash
+python -c "import geant4_python_application as g4; print(g4.data_directory())"
+```
+
+The download is robust: interrupted downloads resume, failed downloads raise an
+error, and each archive's MD5 checksum is verified before it is extracted.
+Datasets already downloaded for another Geant4 version are hard-linked (or
+copied, across filesystems) instead of downloaded again when their name and
+version have not changed.
+
+If an installed Geant4 of exactly the same version (for example conda-forge's
+`geant4=11.4.3`) already provides every dataset, those are used and nothing is
+downloaded. The package reads the dataset environment variables that conda sets
+on activation (`G4LEDATA`, `G4ENSDFSTATEDATA`, ...) and otherwise asks
+`geant4-config --check-datasets`.
+
+To store the data elsewhere, set `GEANT4_PYTHON_APPLICATION_DIR` before import,
+or call `g4.application_directory(path)` before the application initializes;
+`g4.application_directory(temp=True)` uses a temporary directory. For cluster
+jobs, point it at a shared location so jobs do not each download the data.
+Uninstalling the package does not remove the data; delete the directory
+yourself.
+
+### 2.5 Building from source
+
+Platforms without wheels, and work on the package itself, need a Geant4 11.4.3
+installation and a source build. Section 60 walks through it.
 
 ## 3. Your first simulation
 
@@ -217,6 +301,15 @@ track_counts = ak.num(events.track.id, axis=1)
 print(track_counts)
 ```
 
+Two step fields have special values worth knowing:
+
+- `step_process` and `step_process_type` are `"InitStep"` for the first step of
+  a track, where no process has acted yet. Otherwise `step_process` is the
+  process name (for example `"eIoni"`) and `step_process_type` its category
+  (for example `"Electromagnetic"`).
+- `step_volume` is `"OutOfWorld"` when a step starts without a volume, which
+  Geant4 11.4 can produce for a primary generated exactly on the world boundary.
+
 The default event fields can be reduced for smaller output with:
 
 ```python
@@ -272,13 +365,16 @@ io.events_to_root(events, "events.root")
 
 ## 11. Visualization
 
-Visualization requires installing/building the package with Qt/OpenGL support:
+Install with the `gui` extra:
 
 ```bash
-pip install . -Ccmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON
+pip install "geant4-python-application[gui]"
 ```
 
-Then:
+The extra installs Qt from the `PyQt5-Qt5` package, so no Homebrew, conda or
+system Qt is needed. The viewer is a separate module that only
+`Application.visualize()` loads: importing the package and running simulations
+never loads Qt, so headless machines need neither Qt nor OpenGL.
 
 ```python
 with g4.Application(gdml=g4.basic_gdml) as app:
@@ -287,8 +383,31 @@ with g4.Application(gdml=g4.basic_gdml) as app:
     app.visualize()
 ```
 
-Visualization is for inspecting geometry and tracks; production runs should
-usually be performed in batch mode without the viewer.
+The call returns when the window is closed; commands such as `/run/beamOn 10`
+can be typed into the viewer's command panel.
+
+To check whether a viewer can be opened, without loading Qt:
+
+```python
+print(g4.Application.visualization_available())
+```
+
+If it cannot, `app.visualize()` raises a `RuntimeError` explaining what is
+missing. On Linux, Qt still uses the system's OpenGL and X11 libraries; desktop
+installations have them, minimal ones may need packages such as `libgl1` and
+`libxkbcommon-x11-0` (`INSTALLATION.md` lists them).
+
+Source builds leave the viewer out by default. It needs a Geant4 built as
+shared libraries with Qt and OpenGL, and is enabled with:
+
+```bash
+pip install . -Ccmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON
+```
+
+Visualization is for inspecting geometry and tracks; production runs should be
+performed in batch mode without the viewer. Scripts that open the viewer by
+default, such as the example ports (section 59), accept `--batch` to run
+headless.
 
 ## 12. Multithreading and MPI
 
@@ -337,8 +456,27 @@ with g4.Application(gdml=g4.basic_gdml, seed=1234) as app:
     events = app.run(1000)
 ```
 
-Results can still vary with different Geant4 versions, physics lists, thread
-counts, platforms, and random-engine behavior. Validate a simulation by checking
+The same seed, configuration, and Geant4 version give the same events. Results
+change with the Geant4 version (moving from 11.2 to 11.4 changed the exact step
+energies of seeded runs), physics list, thread count, platform, and
+random-engine behavior. So do not hard-code event-by-event values from one
+version into a test; check reproducibility instead:
+
+```python
+import awkward as ak
+import numpy as np
+
+
+def step_energies(seed):
+    with g4.Application(gdml=g4.basic_gdml, seed=seed) as app:
+        events = app.run(100)
+    return np.asarray(ak.flatten(events.track.step.energy, axis=None))
+
+
+assert np.array_equal(step_energies(1100), step_energies(1100))
+```
+
+Validate a simulation by checking
 geometry overlaps, inspecting particle/energy distributions, and running enough
 events for the statistical uncertainty to be meaningful.
 
@@ -586,6 +724,26 @@ with g4.Application(gdml=g4.basic_gdml) as app:
     events = app.run(100)
 ```
 
+The primary position must be inside the world volume. A vertex outside it makes
+`run` raise a `RuntimeError` naming the position and the world volume, where
+plain Geant4 11.4 would crash the process (or, after initialization, silently
+keep the previous gun position). The application survives the error, so correct
+the position and run again:
+
+```python
+with g4.Application(gdml=g4.basic_gdml) as app:  # the world spans +-50 cm
+    app.command("/gun/position 0 0 1 m")
+    try:
+        app.run(1)
+    except RuntimeError as error:
+        print(error)  # Primary vertex at (0.000000, 0.000000, 100.000000) cm is outside ...
+    app.command("/gun/position 0 0 0 cm")
+    events = app.run(2)
+```
+
+The check applies to the particle gun and to event-by-event primary arrays
+(section 21.3).
+
 ### 21.2 General Particle Source
 
 Use GPS commands for distributions in position, angle, or energy:
@@ -711,7 +869,8 @@ it harder to see the actual error. Prefer small event counts while debugging.
 
 The Qt viewer is most useful for answering geometry questions: is the world
 present, is the target where expected, and does the primary start in the world?
-Build with visualization enabled, then run a few events. Keep visualization
+Install the `[gui]` extra (or build from source with visualization enabled),
+then run a few events. Keep visualization
 separate from production output and do not use it to estimate physics results.
 
 ## 27. Production run design
@@ -803,7 +962,9 @@ and event count.
 ### Physics regression tests
 
 Run a fixed seed and compare distributions or aggregate values with tolerances.
-Avoid exact event-by-event comparisons when changing thread count or platform.
+Avoid exact event-by-event comparisons when changing thread count, platform, or
+Geant4 version; to test seeding, compare two runs with the same seed instead
+(section 13).
 
 ```python
 def test_smoke():
@@ -815,9 +976,27 @@ def test_smoke():
 
 ## 32. Common failure modes
 
-**The application says the data files are missing.** Install the Geant4 datasets
-and verify the environment used by Python is the same environment used to
-install Geant4.
+**Import fails with a library or symbol error.** The package is mixing with
+libraries already in the environment (another Qt/PyQt, numpy or Geant4). Create
+a fresh virtual environment and install there (section 2.1).
+
+**`pip install` refuses with `externally-managed-environment`.** The system
+Python is protected; install into a virtual environment.
+
+**The data files are missing, or a download fails.** Run again: interrupted
+downloads resume. Check that `g4.data_directory()` is writable and has ~2 GB
+free. When relying on an installed Geant4's data, its version must equal
+`g4.geant4_version` and every dataset must be present, otherwise the package
+downloads its own copy.
+
+**`RuntimeError: Primary vertex ... is outside the world volume`.** The gun or
+primary-array position lies outside the world. Check the units (`cm` versus
+`m`) and the world's half-lengths (section 21.1).
+
+**`app.visualize()` raises a `RuntimeError`.** Install the `[gui]` extra and, on
+Linux, the OpenGL/X11 libraries; `g4.Application.visualization_available()`
+reports whether the viewer can open. On a machine without a display, run
+headless with `--batch`.
 
 **`n_threads` fails.** Check `g4.Application.multithreading_available()` and use
 `n_threads=0` with a serial Geant4 build.
@@ -848,7 +1027,7 @@ be substantially more expensive than the primary transport.
 | `G4UserRunAction` / event / track / step actions | Built-in native recording plus offline Python callbacks |
 | Sensitive detector / hits                        | Recorded steps, `events.hits()`, and Python scoring     |
 | Command-based scoring                            | `NativeScoringMesh`                                     |
-| Geant4 visualization manager                     | `app.visualize()` with Qt/OpenGL build support          |
+| Geant4 visualization manager                     | `app.visualize()` with the `[gui]` extra                |
 | Geant4 MT run manager                            | `n_threads=N`                                           |
 | MPI job splitting                                | `distributed.get_rank_size()` and `split_count()`       |
 
@@ -1629,3 +1808,233 @@ if __name__ == "__main__":
 When adapting this template, change one section at a time and keep the
 simulation executable after each change. This is how a short educational script
 becomes a dependable research program.
+
+# Part VI - Working on the package itself
+
+Parts I to V are about writing simulations with the package. This part is for
+contributors: how the repository is laid out, how to build and test it, and how
+Geant4 upgrades, wheels, the conda recipe, and releases are produced.
+
+## 59. Repository layout and the example ports
+
+| Path                                   | Contents                                                        |
+| -------------------------------------- | --------------------------------------------------------------- |
+| `src/geant4_application/`              | The C++ Geant4 application and its pybind11 module              |
+| `src/geant4_python_application/`       | The Python package: `Application`, generator, scoring, I/O      |
+| `src/geant4_python_application/files/` | Data directories and the Geant4 dataset list and downloader     |
+| `tests/`                               | The pytest suite                                                |
+| `examples/geant4-examples/`            | Numbered topic examples and the ports of the Geant4 examples    |
+| `examples/attenuation.ipynb`           | The notebook that the Binder badges open                        |
+| `tools/`                               | Example runner, macOS wheel builder, CI helper scripts          |
+| `conda-recipe/`                        | The conda-forge recipe                                          |
+| `.github/workflows/`                   | `build-test.yaml`, `wheels.yaml`, `conda-recipe.yaml`           |
+| `INSTALLATION.md`                      | The full installation reference for users                       |
+| `docs/FEATURE_SUPPORT.md`              | Which Geant4 features are native, partial, or Python adapters   |
+
+`examples/geant4-examples/Geant4-11.4.2-examples-python/` holds Python ports of
+the official Geant4 examples (B1 to B5, GoldFoilExperiment, exgps, particleGun,
+HepMC, field01/02, OpNovice, LXe, wls, AnaEx01 to 03, rdecay01, TestEm1,
+GammaTherapy, electronScattering, Hadr00, Par01, factory and RE01). The examples
+are not installed with the package; run them from a clone. Each opens the Qt
+viewer by default, and `--batch -n N` runs `N` events headless:
+
+```bash
+python examples/geant4-examples/Geant4-11.4.2-examples-python/basic/B1/b1.py --batch -n 10
+```
+
+Run every port headless with one command; it prints one line per example and
+exits with status 1 if any fails:
+
+```bash
+python tools/run_example_ports.py --events 10
+```
+
+A port must keep its primaries inside its world: since Geant4 11.4 a position
+outside the world is an error (section 21.1), which is why several ports had
+their gun positions moved when the package moved to 11.4.
+
+## 60. Building from source
+
+A source build needs Geant4 11.4.3. The simplest way to get it is conda-forge,
+in a fresh environment:
+
+```bash
+conda create -n g4-dev -c conda-forge python=3.12 geant4=11.4.3 cmake ninja freetype -y
+conda activate g4-dev
+```
+
+On Linux add `gxx_linux-64`; on Apple Silicon use `clang_osx-arm64` (not
+`clang_osx-64`, which builds an x86_64 module that the arm64 Python cannot
+load). Then build and install the package with its test dependencies:
+
+```bash
+git clone https://github.com/lobis/geant4-python-application.git
+cd geant4-python-application
+export CMAKE_PREFIX_PATH="$CONDA_PREFIX"
+pip install ".[test]"
+```
+
+`CMAKE_PREFIX_PATH` matters: Geant4 11.4's CMake configuration looks up its own
+dependencies (FreeType, Xerces-C, Expat, zlib) again when this package is
+configured. With a Geant4 built from source, point it at that Geant4's Xerces-C
+installation instead. `INSTALLATION.md` gives the exact Geant4 and Xerces-C
+source-build commands that CI uses (static libraries, `-fPIC`, GDML on,
+datasets off; on macOS also `-DGEANT4_USE_SYSTEM_ZLIB=ON`, because Geant4's
+bundled zlib does not compile against recent macOS SDKs).
+
+The C++ module is rebuilt by `pip install .`; there is no separate build step.
+`CMakeLists.txt` requires the exact Geant4 version (`find_package(Geant4 11.4.3
+...)`), so a build against another Geant4 fails at configure time rather than at
+run time. Building the Qt viewer from source is covered in section 11.
+
+## 61. Running the tests
+
+```bash
+python -m pytest -vv
+```
+
+The suite downloads the Geant4 datasets on first use unless your Geant4
+installation provides them (section 2.4). It contains:
+
+- `tests/test_application.py`: transport, seeding, multithreading, fields,
+  event fields, and the primary-outside-world error. Multithreaded cases are
+  skipped when the linked Geant4 has no multithreading.
+- `tests/test_datasets.py`: dataset reuse across Geant4 versions and discovery
+  of an installed Geant4's datasets. These tests use a temporary directory and
+  a fake `geant4-config` script on `PATH`, so they need no network and no real
+  Geant4 installation.
+- `tests/test_analysis.py`, `test_capabilities.py`, `test_module.py` and
+  `test_run.py`: analysis, scoring, I/O, generators and the other modules.
+
+Follow the same rules the suite follows when adding tests: never hard-code
+values that depend on the Geant4 version (compare two seeded runs instead),
+keep every primary inside the world, and skip rather than fail when an optional
+capability (multithreading, the viewer) is missing. Before opening a pull
+request, also run `python tools/run_example_ports.py`.
+
+## 62. Continuous integration
+
+Three GitHub Actions workflows build and test the package:
+
+- **Build and Test** (`build-test.yaml`) builds the package on Ubuntu and
+  macOS against conda-forge's Geant4 (Python 3.12) and against a Geant4 and
+  Xerces-C built from source and cached (Python 3.8 to 3.13). It runs pytest
+  and, on Ubuntu with Python 3.12, every example port and the example
+  notebooks.
+- **Wheels** (`wheels.yaml`) builds the sdist and the relocatable wheels with
+  cibuildwheel (manylinux_2_28 x86_64, macOS 11+ arm64 and x86_64), with Geant4
+  built as shared libraries with the Qt viewer, then tests the installed wheels
+  with the `test` and `gui` extras. It runs every day, by hand, and on each
+  published release. Its artifacts are the CI wheels that `INSTALLATION.md`
+  tells users how to install.
+- **Conda recipe** (`conda-recipe.yaml`) builds and tests the conda recipe with
+  rattler-build on Linux and both macOS architectures (section 64).
+
+CI downloads from GitHub, python.org and conda occasionally fail with server
+errors or timeouts, so network steps are wrapped in `tools/ci/retry.sh`, which
+retries a command up to five times with a growing pause (`RETRY_ATTEMPTS`
+changes the count):
+
+```bash
+./tools/ci/retry.sh conda install -y -c conda-forge geant4=11.4.3
+```
+
+On macOS, Apple's linker occasionally crashes on GitHub's runners;
+`tools/ci/retry_link.sh` is used as `CMAKE_CXX_LINKER_LAUNCHER` to retry a
+failed link. pytest reruns only tests that failed with a network-looking error
+(`--only-rerun "(?i)http|timeout|connection|socket|resolve"`), so real failures
+are not hidden. Cache keys for the Geant4 and Xerces-C builds include the
+operating system and architecture, so an Intel and an Apple Silicon runner never
+share a build.
+
+Windows is no longer built or tested: conda-forge has no Windows Geant4, and the
+wheels target macOS and Linux. Windows users can use WSL with the Linux wheels.
+
+## 63. Upgrading Geant4
+
+The package is built against exactly one Geant4 version, and the datasets must
+match it. Upgrading (as done for 11.2.2 to 11.4.3) touches these places:
+
+1. **Version pins**: `GEANT4_VERSION` in `build-test.yaml` and `wheels.yaml`,
+   both `find_package(Geant4 ...)` calls in `CMakeLists.txt`, the `Dockerfile`,
+   `geant4_version` in `conda-recipe/recipe.yaml`, and the versions quoted in
+   `INSTALLATION.md` and `NOTICE`. Search for the old version string to be sure:
+
+   ```bash
+   git grep -n "11\.4\.3"
+   ```
+
+2. **Datasets**: update every version and MD5 checksum in
+   `src/geant4_python_application/files/datasets.py` from the release's dataset
+   page (`https://geant4.web.cern.ch/download/<version>.html#datasets`) and
+   `cmake/Modules/G4DatasetDefinitions.cmake` in the Geant4 source. Add datasets
+   that became required (11.4 added `G4CHANNELING`). The optional TENDL,
+   NuDEXLib and URRPT datasets are deliberately left out.
+3. **Behaviour changes in Geant4**: read the release notes and run the full
+   suite and every example port. The 11.4 upgrade needed: a check that rejects
+   primaries outside the world, because Geant4 11.4 crashes on them and its
+   particle gun keeps the previous position with only a warning
+   (`PrimaryGeneratorAction.cpp`, guarded by `G4VERSION_NUMBER >= 1140`);
+   null checks for a step with no volume or no defining process
+   (`DataModel.cpp`); and gun positions moved inside the world in tests,
+   examples and the notebook.
+4. **Tests with exact values**: replace any reference numbers from the old
+   version with version-independent checks (section 61).
+
+Users who upgrade keep their old data: datasets whose name and version did not
+change are hard-linked from the previous version's directory, so only the
+changed ones are downloaded.
+
+## 64. The conda-forge recipe
+
+`conda-recipe/recipe.yaml` is a rattler-build (v1 format) recipe, prepared for
+submission to `conda-forge/staged-recipes`. Until it is accepted, install with
+pip (section 2). Its design:
+
+- The source is the sdist from PyPI, pinned by SHA-256. The awkward headers and
+  pybind11, which CMake would otherwise download at build time, are listed as
+  extra sources and passed with `FETCHCONTENT_SOURCE_DIR_*`, because
+  conda-forge builds have no network access. Their licences are packaged too.
+- The package links conda-forge's `geant4` and pins it exactly (`==11.4.3`) at
+  run time, since the datasets are matched to that version. Because conda's
+  Geant4 brings its datasets, a conda install downloads nothing (section 2.4).
+- Host requirements include `freetype`, `xerces-c`, `expat` and `zlib`, which
+  Geant4's CMake configuration looks up, and the build uses Ninja explicitly
+  (`CMAKE_GENERATOR=Ninja`), since conda-forge's Linux image has no `make`.
+- Windows is skipped. The recipe's tests import the package, check
+  `pip check`, check the Geant4 version, check that the installation's datasets
+  are found, and run ten events.
+
+Build it locally the way the workflow does:
+
+```bash
+conda install -c conda-forge rattler-build
+rattler-build build --recipe conda-recipe/recipe.yaml -c conda-forge --output-dir output
+```
+
+The workflow writes a small variant file pinning one Python and conda-forge's
+compiler and C library baselines. For each new release, update `version` and
+the sdist `sha256` in the recipe (and `geant4_version` after a Geant4 upgrade).
+
+## 65. Making a release
+
+The version comes from the git tag through `setuptools_scm`; nothing in the
+source needs editing. To release:
+
+1. Make sure Build and Test and Wheels pass on `main`.
+2. Publish a GitHub release with a tag such as `v0.3.0`.
+3. The Wheels workflow then builds the sdist and wheels, checks that every wheel
+   is larger than 2 MB (a smaller one means Geant4 was not bundled), uploads
+   everything to PyPI, attaches the files to the GitHub release, and builds,
+   tests and publishes the Docker image to `ghcr.io/lobis/geant4-python-application`.
+4. Update the conda recipe to the new version and sdist checksum (section 64).
+
+To try a version number before releasing, run the Wheels workflow by hand with
+the `version` input (for example `0.3.0rc1`).
+
+`pyproject.toml` lists both authors and maintainers by name only, because PyPI
+shows just the first person when authors carry email addresses, and its
+`[project.urls]` give PyPI its Homepage, Source, Issues, Documentation and
+Changelog links. Installation instructions in the README, `INSTALLATION.md`,
+release notes and this guide always start by creating a fresh virtual
+environment.
