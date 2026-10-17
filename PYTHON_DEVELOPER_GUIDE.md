@@ -1176,7 +1176,9 @@ it. A result without configuration metadata cannot be reproduced.
 
 1. Change the electron energy from 1 MeV to 10 MeV.
 2. Replace the electron with a gamma ray and explain the changed distribution.
-3. Move the source outside the world and observe the diagnostic behavior.
+3. Move the source outside the world (for example `/gun/position 0 0 -60 cm`,
+   since the world spans +-50 cm) and read the `RuntimeError` that `run`
+   raises. Then move it back and check that the same application runs again.
 4. Set the target volume as sensitive and compare the resulting step records.
 
 ## 39. Designing a detector model
