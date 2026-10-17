@@ -2009,10 +2009,10 @@ Consequences to keep in mind:
   (`ak.to_buffers`) into one `multiprocessing.shared_memory` block and pickles
   only the forms, lengths and offsets. Your process unlinks the block, copies it
   out and rebuilds the arrays with `ak.from_buffers`. Pickling through the pipe
-  remains the fallback for small results and for blocks that can't be
-  allocated (for example a full `/dev/shm` on Linux). A block orphaned by a
-  crash is removed by `multiprocessing`'s resource tracker when both processes
-  have exited.
+  remains the fallback for small results and for blocks that can't be allocated
+  (for example a full `/dev/shm` on Linux). A block orphaned by a crash is
+  removed by `multiprocessing`'s resource tracker when both processes have
+  exited.
 - **Python code cannot run inside transport.** A Python function cannot be sent
   to the worker and called from a Geant4 stepping action, which is why
   `run_with_callbacks` calls your callbacks after the run, over the returned
