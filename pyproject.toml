@@ -99,6 +99,7 @@ filterwarnings = [
     "error"
 ]
 log_cli_level = "INFO"
+markers = ["slow: takes more than a few seconds"]
 minversion = "6.0"
 testpaths = ["tests"]
 xfail_strict = true
