@@ -2012,9 +2012,9 @@ Consequences to keep in mind:
   remains the fallback for small results and for blocks that can't be allocated
   (for example a full `/dev/shm` on Linux). Your process names each block, so it
   unlinks the block itself if the worker dies mid-transfer.
-  `GEANT4_PYTHON_APPLICATION_SHM_MIN_BYTES` (set before `start()`) changes the
-  1 MB threshold: `0` sends every array result through shared memory, a huge
-  value turns it off.
+  `GEANT4_PYTHON_APPLICATION_SHM_MIN_BYTES` (set before `start()`) changes the 1
+  MB threshold: `0` sends every array result through shared memory, a huge value
+  turns it off.
 - **Python code cannot run inside transport.** A Python function cannot be sent
   to the worker and called from a Geant4 stepping action, which is why
   `run_with_callbacks` calls your callbacks after the run, over the returned

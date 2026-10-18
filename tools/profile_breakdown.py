@@ -166,13 +166,27 @@ OPTICAL_PROCESSES = ("Scintillation", "Cerenkov")
 
 CATEGORIES = ["e-", "e+", "gamma", "opticalphoton", "hadrons", "other"]
 _ION = re.compile(r"^[A-Z][a-z]?\d+(\[.*\])?$")
-HADRONS = {"proton", "neutron", "pi+", "pi-", "pi0", "kaon+", "kaon-", "kaon0L", "kaon0S"}
+HADRONS = {
+    "proton",
+    "neutron",
+    "pi+",
+    "pi-",
+    "pi0",
+    "kaon+",
+    "kaon-",
+    "kaon0L",
+    "kaon0S",
+}
 
 
 def categorize(name: str) -> str:
     if name in ("e-", "e+", "gamma", "opticalphoton"):
         return name
-    if name in HADRONS or name in ("deuteron", "triton", "alpha", "He3") or _ION.match(name):
+    if (
+        name in HADRONS
+        or name in ("deuteron", "triton", "alpha", "He3")
+        or _ION.match(name)
+    ):
         # nuclear recoils and fragments ("O16", "Pb207[569.7]") count as hadrons
         return "hadrons"
     return "other"
@@ -207,7 +221,9 @@ def median_and_samples(samples: list[float]) -> dict:
 # -- 1. in-process ------------------------------------------------------------
 
 
-def _inprocess(workload: str, n_threads: int, n_events: int, repeats: int, seed: int, queue) -> None:
+def _inprocess(
+    workload: str, n_threads: int, n_events: int, repeats: int, seed: int, queue
+) -> None:
     try:
         from geant4_python_application._geant4_application import Application
 
@@ -240,7 +256,7 @@ def _inprocess(workload: str, n_threads: int, n_events: int, repeats: int, seed:
             # (In)activating a process marks the physics modified, so the next
             # BeamOn rebuilds tables on every thread; timed() warms up first.
             for process in OPTICAL_PROCESSES:
-                app.command(f"/process/inactivate {process}")
+                app.command(f"/process/deactivate {process}")
             result["no-optical"] = timed(MINIMAL_FIELDS)
             app.set_event_fields({"id", "track_particle"})
             check = app.run(warm)
@@ -253,10 +269,14 @@ def _inprocess(workload: str, n_threads: int, n_events: int, repeats: int, seed:
         raise
 
 
-def run_inprocess(workload: str, n_threads: int, n_events: int, repeats: int, seed: int) -> dict:
+def run_inprocess(
+    workload: str, n_threads: int, n_events: int, repeats: int, seed: int
+) -> dict:
     context = multiprocessing.get_context("spawn")
     queue = context.Queue()
-    process = context.Process(target=_inprocess, args=(workload, n_threads, n_events, repeats, seed, queue))
+    process = context.Process(
+        target=_inprocess, args=(workload, n_threads, n_events, repeats, seed, queue)
+    )
     process.start()
     result = queue.get()
     process.join()
@@ -287,9 +307,13 @@ class TimedApplication(g4.Application):
         return result
 
 
-def run_public(workload: str, n_threads: int, n_events: int, repeats: int, seed: int) -> dict:
+def run_public(
+    workload: str, n_threads: int, n_events: int, repeats: int, seed: int
+) -> dict:
     spec = WORKLOADS[workload]
-    app = TimedApplication(n_threads=n_threads, gdml=spec["gdml"], optical=spec["optical"], seed=seed)
+    app = TimedApplication(
+        n_threads=n_threads, gdml=spec["gdml"], optical=spec["optical"], seed=seed
+    )
     totals, childs, snapshots, sizes = [], [], [], []
     counts = None
     stats_before = dict(_transfer.stats)
@@ -355,29 +379,74 @@ def markdown(all_results: list[dict]) -> str:
     for workload, results in by_workload.items():
         lines.append(f"### {WORKLOADS[workload]['title']}\n")
         bds = [breakdown(r) for r in results]
-        header = ["seconds (share of public-API wall)", *[f"{r['threads']} thr, {r['events']} ev" for r in results]]
+        header = [
+            "seconds (share of public-API wall)",
+            *[f"{r['threads']} thr, {r['events']} ev" for r in results],
+        ]
         rows = [
-            ["**wall, `Application.run`, default fields**", *[f"**{b['total']:.2f}**" for b in bds]],
-            ["G4 transport (fields {id})", *[pct(b["transport"], b["total"]) for b in bds]],
+            [
+                "**wall, `Application.run`, default fields**",
+                *[f"**{b['total']:.2f}**" for b in bds],
+            ],
+            [
+                "G4 transport (fields {id})",
+                *[pct(b["transport"], b["total"]) for b in bds],
+            ],
         ]
         if "optical_photons" in bds[0]:
-            rows.append(["  of which optical photons", *[pct(b["optical_photons"], b["total"]) for b in bds]])
+            rows.append(
+                [
+                    "  of which optical photons",
+                    *[pct(b["optical_photons"], b["total"]) for b in bds],
+                ]
+            )
         rows += [
-            ["step/track recording (InsertStep etc.)", *[pct(b["recording"], b["total"]) for b in bds]],
-            ["builder -> awkward snapshot (est.)", *[pct(b["snapshot"], b["total"]) for b in bds]],
-            ["result transfer to parent process", *[pct(b["ipc"], b["total"]) for b in bds]],
-            ["  runs via shm / pipe (incl. warm-up)", *[
-                "{} / {}".format(*(r["public"].get("transfer", {}).get(k, "?") for k in ("shared_memory", "pipe")))
-                for r in results
-            ]],
-            ["Python assembly in Application.run", *[pct(b["python"], b["total"]) for b in bds]],
-            ["in-process wall, fields {id} / default", *[
-                f"{r['inprocess']['minimal']['median']:.2f} / {r['inprocess']['default']['median']:.2f}" for r in results
-            ]],
-            ["events/s: public API / in-process {id}", *[
-                f"{r['events'] / b['total']:.0f} / {r['events'] / b['transport']:.0f}" for r, b in zip(results, bds)
-            ]],
-            ["output size (MB, awkward buffers)", *[f"{r['public']['bytes'] / 1e6:.0f}" for r in results]],
+            [
+                "step/track recording (InsertStep etc.)",
+                *[pct(b["recording"], b["total"]) for b in bds],
+            ],
+            [
+                "builder -> awkward snapshot (est.)",
+                *[pct(b["snapshot"], b["total"]) for b in bds],
+            ],
+            [
+                "result transfer to parent process",
+                *[pct(b["ipc"], b["total"]) for b in bds],
+            ],
+            [
+                "  runs via shm / pipe (incl. warm-up)",
+                *[
+                    "{} / {}".format(
+                        *(
+                            r["public"].get("transfer", {}).get(k, "?")
+                            for k in ("shared_memory", "pipe")
+                        )
+                    )
+                    for r in results
+                ],
+            ],
+            [
+                "Python assembly in Application.run",
+                *[pct(b["python"], b["total"]) for b in bds],
+            ],
+            [
+                "in-process wall, fields {id} / default",
+                *[
+                    f"{r['inprocess']['minimal']['median']:.2f} / {r['inprocess']['default']['median']:.2f}"
+                    for r in results
+                ],
+            ],
+            [
+                "events/s: public API / in-process {id}",
+                *[
+                    f"{r['events'] / b['total']:.0f} / {r['events'] / b['transport']:.0f}"
+                    for r, b in zip(results, bds)
+                ],
+            ],
+            [
+                "output size (MB, awkward buffers)",
+                *[f"{r['public']['bytes'] / 1e6:.0f}" for r in results],
+            ],
         ]
         lines.append("| " + " | ".join(header) + " |")
         lines.append("|" + "---|" * len(header))
@@ -393,7 +462,9 @@ def markdown(all_results: list[dict]) -> str:
         for cat in CATEGORIES:
             t, s = c["tracks"][cat], c["steps"][cat]
             if t or s:
-                lines.append(f"| {cat} | {t / c['events']:.1f} | {s / c['events']:.1f} | {100 * s / total_steps:.1f}% |")
+                lines.append(
+                    f"| {cat} | {t / c['events']:.1f} | {s / c['events']:.1f} | {100 * s / total_steps:.1f}% |"
+                )
         em = sum(c["steps"][k] for k in ("e-", "e+", "gamma"))
         lines.append(
             f"| **all** | {total_tracks / c['events']:.1f} | {total_steps / c['events']:.1f} | "
@@ -401,39 +472,68 @@ def markdown(all_results: list[dict]) -> str:
         )
         seen = results[0]["inprocess"].get("no_optical_photons_seen")
         if seen is not None:
-            lines.append(f"\n(no-optical check: {seen} optical photons with Scintillation and Cerenkov inactivated)")
+            lines.append(
+                f"\n(no-optical check: {seen} optical photons with Scintillation and Cerenkov inactivated)"
+            )
         lines.append("")
     return "\n".join(lines)
 
 
 def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--workloads", nargs="+", default=list(WORKLOADS), choices=list(WORKLOADS))
-    parser.add_argument("--threads", nargs="+", type=int, default=[0, 8], help="0 = serial run manager")
-    parser.add_argument("--events", type=float, default=1.0, help="scale the per-workload event counts")
-    parser.add_argument("--no-scale", action="store_true", help="do not multiply events by the thread count")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--workloads", nargs="+", default=list(WORKLOADS), choices=list(WORKLOADS)
+    )
+    parser.add_argument(
+        "--threads", nargs="+", type=int, default=[0, 8], help="0 = serial run manager"
+    )
+    parser.add_argument(
+        "--events", type=float, default=1.0, help="scale the per-workload event counts"
+    )
+    parser.add_argument(
+        "--no-scale",
+        action="store_true",
+        help="do not multiply events by the thread count",
+    )
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--seed", type=int, default=1234)
-    parser.add_argument("--out", type=Path, default=None, help="write raw results as JSON")
+    parser.add_argument(
+        "--out", type=Path, default=None, help="write raw results as JSON"
+    )
     args = parser.parse_args(argv)
 
-    print(f"geant4_python_application {g4.__version__}, Geant4 {g4.geant4_version}, awkward {ak.__version__}", file=sys.stderr)
+    print(
+        f"geant4_python_application {g4.__version__}, Geant4 {g4.geant4_version}, awkward {ak.__version__}",
+        file=sys.stderr,
+    )
     all_results = []
     for workload in args.workloads:
         for n_threads in args.threads:
             n = int(round(WORKLOADS[workload]["events"] * args.events))
             if not args.no_scale and n_threads > 1:
                 n *= n_threads
-            print(f"[{workload}] threads={n_threads} events={n} ...", file=sys.stderr, flush=True)
+            print(
+                f"[{workload}] threads={n_threads} events={n} ...",
+                file=sys.stderr,
+                flush=True,
+            )
             t0 = time.perf_counter()
             res = {
                 "workload": workload,
                 "threads": max(n_threads, 1),
                 "events": n,
-                "inprocess": run_inprocess(workload, n_threads, n, args.repeats, args.seed),
+                "inprocess": run_inprocess(
+                    workload, n_threads, n, args.repeats, args.seed
+                ),
                 "public": run_public(workload, n_threads, n, args.repeats, args.seed),
             }
-            print(f"  done in {time.perf_counter() - t0:.1f}s: {json.dumps(breakdown(res))}", file=sys.stderr, flush=True)
+            print(
+                f"  done in {time.perf_counter() - t0:.1f}s: {json.dumps(breakdown(res))}",
+                file=sys.stderr,
+                flush=True,
+            )
             all_results.append(res)
             if args.out is not None:
                 args.out.parent.mkdir(parents=True, exist_ok=True)
