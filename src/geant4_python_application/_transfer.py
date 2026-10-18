@@ -10,16 +10,27 @@ block, copies it out and rebuilds the arrays with ``ak.from_buffers``.
 Small results, results without awkward arrays, and results whose block can't
 be allocated are pickled through the pipe as before.
 
-Cleanup: the child unlinks the block if anything fails before the descriptor
-is sent, and the parent unlinks it as soon as it has attached. A block left
-behind by a process that crashed in between is unlinked by multiprocessing's
-resource tracker, which the parent and child share, once both have exited.
+Cleanup: the parent chooses each block's name (``block_name``), so it can
+unlink the block itself when the child dies mid-transfer. The child unlinks the
+block if anything fails before the descriptor is sent, and the parent unlinks
+it as soon as it has attached. Should both processes crash, multiprocessing's
+resource tracker, which they share, unlinks it once they have exited.
+
+Environment variables, read by the child when it packs a result:
+
+``GEANT4_PYTHON_APPLICATION_SHM_MIN_BYTES``
+    Results with fewer bytes of array data go through the pipe (default
+    1 MiB). ``0`` sends every array result through shared memory; a huge value
+    disables shared memory.
+``GEANT4_PYTHON_APPLICATION_SHM_TEST_PAUSE``
+    Testing only: seconds to sleep after writing a block, before sending it.
 """
 
 from __future__ import annotations
 
 import os
 import sys
+import time
 from multiprocessing import shared_memory
 
 import awkward as ak
@@ -27,9 +38,14 @@ import numpy as np
 
 # Below this many bytes of array data the pipe is as fast and needs no cleanup.
 MIN_SHARED_BYTES = 1 << 20
+MIN_BYTES_VARIABLE = "GEANT4_PYTHON_APPLICATION_SHM_MIN_BYTES"
+TEST_PAUSE_VARIABLE = "GEANT4_PYTHON_APPLICATION_SHM_TEST_PAUSE"
 _ALIGNMENT = 64
 _BUFFER_KEY = "{form_key}-{attribute}"
 _BYTEORDER = "<" if sys.byteorder == "little" else ">"
+
+# Parent side: how many results holding awkward arrays arrived by each path.
+stats = {"shared_memory": 0, "pipe": 0}
 
 
 class SharedArray:
@@ -71,6 +87,11 @@ class SharedResult:
             setattr(self, name, value)
 
 
+def block_name(prefix: str, counter: int) -> str:
+    """Name of the block for message ``counter`` (macOS allows 30 characters)."""
+    return f"{prefix}_{counter:x}"
+
+
 def _map_arrays(obj, function):
     """Copy of nested dicts/lists/tuples with each ak.Array replaced by function(array)."""
     if isinstance(obj, ak.Array):
@@ -88,8 +109,15 @@ def _arrays(obj):
     return found
 
 
-def _allocate(size: int) -> shared_memory.SharedMemory:
-    block = shared_memory.SharedMemory(create=True, size=size)
+def _min_bytes() -> int:
+    try:
+        return int(os.environ[MIN_BYTES_VARIABLE])
+    except (KeyError, ValueError):
+        return MIN_SHARED_BYTES
+
+
+def _allocate(size: int, name: str | None = None) -> shared_memory.SharedMemory:
+    block = shared_memory.SharedMemory(name=name, create=True, size=size)
     if sys.platform.startswith("linux"):
         # /dev/shm is a tmpfs that can be smaller than the result (64 MB in
         # Docker by default). Writing past its limit raises SIGBUS and kills
@@ -103,7 +131,8 @@ def _allocate(size: int) -> shared_memory.SharedMemory:
     return block
 
 
-def _destroy(name: str) -> None:
+def destroy(name: str) -> None:
+    """Unlink the block called name, if it exists."""
     try:
         block = shared_memory.SharedMemory(name=name)
     except FileNotFoundError:
@@ -112,8 +141,10 @@ def _destroy(name: str) -> None:
     block.unlink()
 
 
-def pack(result, min_bytes: int = MIN_SHARED_BYTES):
+def pack(result, name: str | None = None, min_bytes: int | None = None):
     """Child side: the object to send through the pipe in place of result."""
+    if min_bytes is None:
+        min_bytes = _min_bytes()
     arrays = _arrays(result)
     if not arrays or sum(array.layout.nbytes for array in arrays) < min_bytes:
         return result
@@ -138,7 +169,7 @@ def pack(result, min_bytes: int = MIN_SHARED_BYTES):
             flattened[id(array)] = (array, form, length, buffers)
         size = max(offset, 1)
 
-        block = _allocate(size)
+        block = _allocate(size, name)
     except Exception:
         return result
 
@@ -147,7 +178,7 @@ def pack(result, min_bytes: int = MIN_SHARED_BYTES):
 
         def to_shared(array):
             _, form, length, buffers = flattened[id(array)]
-            attrs = array.attrs
+            attrs = getattr(array, "attrs", None)
             if attrs is not None:
                 attrs = {k: v for k, v in attrs.items() if not k.startswith("@")}
             return SharedArray(
@@ -169,6 +200,10 @@ def pack(result, min_bytes: int = MIN_SHARED_BYTES):
             return result
         raise
     block.close()
+
+    pause = os.environ.get(TEST_PAUSE_VARIABLE)
+    if pause:
+        time.sleep(float(pause))
     return packed
 
 
@@ -184,22 +219,23 @@ def _write(block, size, flattened) -> None:
 
 
 def discard(message) -> None:
-    """Child side: free the block of a packed result that could not be sent."""
+    """Free the block of a packed result that won't be unpacked."""
     if isinstance(message, SharedResult):
-        _destroy(message.name)
+        destroy(message.name)
 
 
 def unpack(message):
     """Parent side: the result that pack(result) stood in for."""
     if not isinstance(message, SharedResult):
+        if _arrays(message):
+            stats["pipe"] += 1
         return message
 
     try:
         block = shared_memory.SharedMemory(name=message.name)
     except FileNotFoundError:
-        raise RuntimeError(
-            f"Shared memory block {message.name} holding the result is gone"
-        ) from None
+        msg = f"Shared memory block {message.name} holding the result is gone"
+        raise RuntimeError(msg) from None
     try:
         # Unlinking first means nothing is left behind if the copy is interrupted;
         # the mapping stays valid until close().
@@ -214,6 +250,7 @@ def unpack(message):
             key: data[start : start + nbytes]
             for key, (start, nbytes) in shared.buffers.items()
         }
+        kwargs = {} if shared.attrs is None else {"attrs": shared.attrs}
         return ak.from_buffers(
             shared.form,
             shared.length,
@@ -221,10 +258,12 @@ def unpack(message):
             buffer_key=_BUFFER_KEY,
             byteorder=_BYTEORDER,
             behavior=shared.behavior,
-            attrs=shared.attrs,
+            **kwargs,
         )
 
-    return _replace_shared(message.payload, from_shared)
+    result = _replace_shared(message.payload, from_shared)
+    stats["shared_memory"] += 1
+    return result
 
 
 def _replace_shared(obj, function):
