@@ -37,6 +37,20 @@ conda activate g4
 Activate the environment again in every new terminal. All commands below assume
 it is active.
 
+### From conda-forge
+
+```bash
+conda create -n g4 -c conda-forge geant4-python-application
+conda activate g4
+```
+
+The conda-forge package is built against conda-forge's `geant4` and installs
+Geant4's data files as conda packages (`geant4-data-*`), so nothing is
+downloaded at first use. It is physics-only for now: install from PyPI with the
+`[gui]` extra for the Qt viewer. See the
+[feedstock](https://github.com/conda-forge/geant4-python-application-feedstock)
+for the platforms it is built for.
+
 ### From PyPI
 
 ```bash
