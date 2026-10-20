@@ -15,9 +15,10 @@ How the guide is organised:
   ten-event first run to a production campaign.
 - **Part VI** explains how the package works inside: the worker process, the
   application lifecycle, and the event data model.
-- **Part VII** has five complete detector simulations, each run and checked
+- **Part VII** has six complete detector simulations, each run and checked
   against reference physics: Rutherford's gold foil, a sampling calorimeter, a
-  proton-therapy Bragg peak, a magnetic spectrometer, and gamma radiography.
+  proton-therapy Bragg peak, a magnetic spectrometer, gamma radiography, and
+  dose enhancement by gold nanoparticles.
 - **Part VIII** catalogues the repository's examples, and **Part IX** is the API
   reference.
 - **Part X** is for contributors to the package itself: building, testing, CI,
@@ -152,7 +153,7 @@ yourself.
 ### 2.5 Building from source
 
 Platforms without wheels, and work on the package itself, need a Geant4 11.4.3
-installation and a source build. Section 80 walks through it.
+installation and a source build. Section 81 walks through it.
 
 ## 3. Your first simulation
 
@@ -455,7 +456,7 @@ pip install . -Ccmake.define.GEANT4_PYTHON_APPLICATION_VISUALIZATION=ON
 
 Visualization is for inspecting geometry and tracks; production runs should be
 performed in batch mode without the viewer. Scripts that open the viewer by
-default, such as the example ports (section 72), accept `--batch` to run
+default, such as the example ports (section 73), accept `--batch` to run
 headless.
 
 ## 12. Multithreading and MPI
@@ -621,17 +622,8 @@ def main():
             }
         )
         app.detector.sensitive_volumes = {"boxVolume"}
-        # with n_threads > 0, initialize before configuring the source and use
-        # /gun/ commands: app.generator needs the serial run manager (section 28)
-        app.initialize()
-        app.commands(
-            [
-                "/gun/particle gamma",
-                "/gun/energy 2 MeV",
-                "/gun/position 0 0 -10 cm",
-                "/gun/direction 0 0 1",
-            ]
-        )
+        app.generator.particle("gamma").energy(2, "MeV")
+        app.generator.position(0, 0, -10, "cm").direction(0, 0, 1)
         events = app.run(10_000)
 
     deposited = g4.Scoring.energy_deposit(events, volume="box")
@@ -846,7 +838,7 @@ with g4.Application(gdml=g4.basic_gdml) as app:
     events = app.run(primaries)
 ```
 
-Energies are in keV and positions in cm here (section 73.1). Add a `primaries`
+Energies are in keV and positions in cm here (section 74.1). Add a `primaries`
 field holding a list per event to put several primaries in one event. Test
 array-driven primaries in serial mode first. The repository currently documents
 limitations for this input path in multithreaded runs.
@@ -965,22 +957,24 @@ with g4.Application(gdml=g4.basic_gdml, n_threads=8) as app:
 
 The linked Geant4 library must have been compiled with multithreading.
 
-**Configure the source differently in multithreaded mode.** Geant4 gives each
-worker thread its own primary generator and none to the master thread, which is
-where the package's commands arrive. Two consequences:
-
-- `app.generator.*` raises
-  `RuntimeError: Primary generator action is not available` when
-  `n_threads > 0`; use `/gun/...` or `/gps/...` commands instead.
-- Those commands exist only once the workers are built, so call
-  `app.initialize()` first; before it they fail with code 100.
+**The source is configured the same way in both modes.** Geant4 gives each
+worker thread its own particle gun and none to the master thread, which is where
+the package's commands arrive, so in multithreaded mode the `/gun/` and `/gps/`
+commands only exist once the workers are built during initialization. Source
+settings made before that, through `app.generator` or `app.command`, are kept
+and applied in order right after `initialize()` (or the first `run()`), which
+forwards them to every worker:
 
 ```python
 with g4.Application(gdml=g4.basic_gdml, n_threads=8, seed=1) as app:
-    app.initialize()
-    app.commands(["/gun/particle proton", "/gun/energy 50 MeV"])
+    app.generator.particle("proton").energy(50, "MeV")
     events = app.run(100_000)
 ```
+
+Because they are applied later, a mistyped `/gun/` or `/gps/` command issued
+before initialization is reported by `initialize()` (or the first `run()`)
+rather than immediately. After initialization source settings take effect at
+once, as in serial mode.
 
 Settings that must precede initialization (sensitive volumes, fields, extra
 physics, production cuts) go before `initialize()`. More threads are not always
@@ -1078,9 +1072,20 @@ level. Move that code into a function called under `if __name__ == "__main__":`
 (section 3).
 
 **`Primary generator action is not available`, or a `/gun/` command fails with
-code 100.** The application is multithreaded. Call `app.initialize()` first and
-configure the source with `/gun/` or `/gps/` commands instead of `app.generator`
-(section 28).
+code 100.** In version 0.2.0, `app.generator` works only with the serial run
+manager, and in a multithreaded application the `/gun/` commands exist only
+after `app.initialize()`. Later versions remove both limits (section 28). With
+0.2.0, call `app.initialize()` first and configure the source with `/gun/` or
+`/gps/` commands.
+
+**No fluorescence x-rays or Auger electrons.** Version 0.2.0 produces none with
+the default `"custom"` physics list, although `/process/em/printParameters`
+reports them enabled; later versions fix this. With the reference lists,
+de-excitation respects production cuts: in heavy materials the default 0.7 mm
+cut lies above the K-shell energy (it is a 103 keV photon threshold in gold), so
+the x-rays are not produced. Before `initialize()`, run
+`/process/em/deexcitationIgnoreCut true` or lower the cut
+(`/run/setCut 0.01 mm`); `FTFP_BERT` also needs `/process/em/fluo true`.
 
 **`Could not find logical volume '...'`.** `detector.sensitive_volumes` takes
 logical volume names (`<volume name>`), not physical ones (`<physvol name>`).
@@ -2161,7 +2166,7 @@ Points to remember:
 - Energies are in keV and lengths in mm in the output, but the inputs follow
   Geant4 commands (`app.generator.energy(1, "MeV")`,
   `/gun/position 0 0 -10 cm`), and primary arrays passed to `run` use keV and
-  **cm** (section 73.1).
+  **cm** (section 74.1).
 
 ## 64. The Python helper layers
 
@@ -2179,19 +2184,21 @@ Around `Application` the package adds thin, pure-Python helpers:
   ready-made optical geometries, generated GDML layouts, tessellated CAD
   geometry and MPI helpers.
 
-Sections 73 to 78 list all of them.
+Sections 74 to 79 list all of them.
 
 # Part VII - Worked detector simulations
 
 Each tutorial below is a complete, runnable script that answers one physics
 question, followed by the output it printed with geant4-python-application 0.2.0
-(Geant4 11.4.3) on macOS and what to learn from it. All five were run for this
-guide; their results are checked against textbook values or NIST data.
+(Geant4 11.4.3) on macOS and what to learn from it. Tutorial 71 needs a later
+version, because 0.2.0 produces no fluorescence x-rays; it was run with a build
+of the main branch (section 81). All six were run for this guide; their results
+are checked against textbook values or NIST data.
 
 ## 65. How to use these tutorials
 
 - Save the script, activate your environment (section 2.1) and run it with
-  `python name.py`. Each one takes from a few seconds to about a minute.
+  `python name.py`. Each one takes from a few seconds to a few minutes.
 - The numbers you get will match the ones shown when you use the same package
   version, Geant4 version and seed; with another Geant4 version they change
   slightly (section 13).
@@ -2963,13 +2970,228 @@ Replace the steel bar with a 4 cm block of water and find the beam energy that
 gives the best contrast. Move the screen 50 cm further back and include
 scattered photons to see the blurring.
 
+## 71. Tutorial: dose enhancement by gold nanoparticles
+
+**Question.** Gold nanoparticles taken up by a tumour make it absorb more of a
+kilovoltage photon beam, because gold's photoelectric cross section is far
+larger than that of soft tissue. How much more dose does a tumour loaded with
+1–2% gold by mass receive, and at which beam energies does it matter?
+
+**Model.** A block of tissue-equivalent plastic (A-150) with a 2 mm thick tumour
+1 cm below its surface, irradiated by a broad, parallel photon beam (a plane GPS
+source covering the tumour face) of 50, 100, 250 and 1000 keV. The tumour is
+plain A-150, or A-150 with 1% or 2% gold by mass, defined as a GDML mixture of
+`G4_A-150_TISSUE` and `G4_Au`. The dose is the energy deposited in the tumour
+divided by its mass. Each configuration runs as ten batches of 100 000 photons,
+and the spread between batches gives the uncertainty. If the tumour is thin
+enough for most photons to cross it, but thick compared with electron ranges,
+the dose is proportional to the mass energy-absorption coefficient
+$\mu_{en}/\rho$, so the expected ratio for a gold mass fraction $w$ is $1 +
+w\,[(\mu_{en}/\rho)_\mathrm{Au} / (\mu_{en}/\rho)_\mathrm{tissue} - 1]$, with
+NIST's coefficients. The default `"custom"` physics list produces fluorescence
+x-rays and Auger electrons, which this tutorial depends on. The runs are
+multithreaded, with the source configured through `app.generator` (section 28).
+
+```python
+import awkward as ak
+import numpy as np
+
+import geant4_python_application as g4
+
+# A 10 x 10 x 6 cm block of tissue-equivalent plastic (A-150) in vacuum. A tumour
+# 2 x 2 cm wide and 2 mm thick sits 1 cm below the surface, made of A-150 or of
+# A-150 loaded with gold.
+GDML_TEMPLATE = """<?xml version="1.0" encoding="utf-8"?>
+<gdml>
+  <materials>{materials}</materials>
+  <solids>
+    <box name="WorldSolid" x="200" y="200" z="200" lunit="mm"/>
+    <box name="PhantomSolid" x="100" y="100" z="60" lunit="mm"/>
+    <box name="TumourSolid" x="20" y="20" z="2" lunit="mm"/>
+  </solids>
+  <structure>
+    <volume name="TumourLV"><materialref ref="{tumour}"/><solidref ref="TumourSolid"/></volume>
+    <volume name="PhantomLV">
+      <materialref ref="G4_A-150_TISSUE"/><solidref ref="PhantomSolid"/>
+      <physvol name="Tumour">
+        <volumeref ref="TumourLV"/>
+        <position name="tumourPosition" unit="mm" x="0" y="0" z="-19"/>
+      </physvol>
+    </volume>
+    <volume name="World">
+      <materialref ref="G4_Galactic"/><solidref ref="WorldSolid"/>
+      <physvol name="Phantom">
+        <volumeref ref="PhantomLV"/>
+        <position name="phantomPosition" unit="mm" x="0" y="0" z="30"/>
+      </physvol>
+    </volume>
+  </structure>
+  <setup name="Default" version="1.0"><world ref="World"/></setup>
+</gdml>
+"""
+
+# The gold-loaded tissue is a GDML mixture by mass fraction: the gold is spread
+# through the tissue as nanoparticles would be, not lumped together.
+GOLD_TISSUE = """
+    <material name="GoldTissue" state="solid">
+      <D value="{density:.5f}" unit="g/cm3"/>
+      <fraction n="{tissue:.4f}" ref="G4_A-150_TISSUE"/>
+      <fraction n="{gold:.4f}" ref="G4_Au"/>
+    </material>
+"""
+
+TISSUE_DENSITY = 1.127  # g/cm3, A-150
+GOLD_DENSITY = 19.32  # g/cm3
+TUMOUR_VOLUME = 2.0 * 2.0 * 0.2  # cm3
+
+ENERGIES_KEV = [50, 100, 250, 1000]
+GOLD_FRACTIONS = [0.0, 0.01, 0.02]
+BATCHES = 10
+PHOTONS_PER_BATCH = 100_000
+
+# Mass energy-absorption coefficients (cm2/g) from the NIST X-ray tables;
+# 250 keV is interpolated log-log between 200 and 300 keV.
+MU_EN_GOLD = {50: 6.124, 100: 2.074, 250: 0.341, 1000: 0.03525}
+MU_EN_TISSUE = {50: 0.04018, 100: 0.02520, 250: 0.03058, 1000: 0.03070}
+
+
+def tumour_gdml(gold):
+    """The geometry with gold mass fraction `gold` in the tumour, and its density."""
+    if gold == 0:
+        # the reference is plain A-150: in Geant4 11.4.3 a mixture with a zero
+        # gold fraction does not behave like it (it overdoses at 1 MeV)
+        return (
+            GDML_TEMPLATE.format(materials="", tumour="G4_A-150_TISSUE"),
+            TISSUE_DENSITY,
+        )
+    # the volumes add up: the gold does not displace tissue
+    density = 1.0 / ((1.0 - gold) / TISSUE_DENSITY + gold / GOLD_DENSITY)
+    materials = GOLD_TISSUE.format(density=density, tissue=1.0 - gold, gold=gold)
+    return GDML_TEMPLATE.format(materials=materials, tumour="GoldTissue"), density
+
+
+def batch_doses(gold, energy_kev, n_threads):
+    """Dose to the tumour (keV per gram per photon) in each batch."""
+    gdml, density = tumour_gdml(gold)
+    mass = density * TUMOUR_VOLUME
+    doses = []
+    with g4.Application(gdml=gdml, n_threads=n_threads, seed=11) as app:
+        app.set_event_fields({"id", "step_energy", "step_volume"})
+        # a broad, parallel beam that covers the tumour face
+        app.generator.use_gps().particle("gamma").energy(energy_kev, "keV")
+        app.generator.commands(
+            [
+                "/gps/pos/type Plane",
+                "/gps/pos/shape Square",
+                "/gps/pos/centre 0 0 -1 cm",
+                "/gps/pos/halfx 1 cm",
+                "/gps/pos/halfy 1 cm",
+                "/gps/direction 0 0 1",
+            ]
+        )
+        for _ in range(BATCHES):
+            events = app.run(PHOTONS_PER_BATCH)
+            energy = float(ak.sum(g4.Scoring.energy_deposit(events, volume="Tumour")))
+            doses.append(energy / mass / PHOTONS_PER_BATCH)
+    return np.array(doses)
+
+
+def main():
+    n_threads = 8 if g4.Application.multithreading_available() else 0
+    doses = {}
+    for energy in ENERGIES_KEV:
+        for gold in GOLD_FRACTIONS:
+            doses[energy, gold] = batch_doses(gold, energy, n_threads)
+
+    print("E [keV]  gold  dose ratio       expected")
+    for energy in ENERGIES_KEV:
+        plain = doses[energy, 0.0]
+        for gold in GOLD_FRACTIONS[1:]:
+            loaded = doses[energy, gold]
+            ratio = loaded.mean() / plain.mean()
+            # relative standard errors of the two batch means, added in quadrature
+            spread = [d.std(ddof=1) / d.mean() for d in (loaded, plain)]
+            error = ratio * np.hypot(*spread) / np.sqrt(BATCHES)
+            expected = 1.0 + gold * (MU_EN_GOLD[energy] / MU_EN_TISSUE[energy] - 1.0)
+            print(
+                f"{energy:7d}  {gold:4.0%}  {ratio:5.3f} +- {error:5.3f}  {expected:8.3f}"
+            )
+    np.savez(
+        "gold_nanoparticles.npz", **{f"e{e}_g{g}": d for (e, g), d in doses.items()}
+    )
+
+
+if __name__ == "__main__":
+    main()
+```
+
+**Output** (ten batches of 100 000 photons for each of the twelve
+configurations, about two minutes on 8 threads):
+
+```text
+E [keV]  gold  dose ratio       expected
+     50    1%  2.586 +- 0.031     2.514
+     50    2%  4.150 +- 0.045     4.028
+    100    1%  1.857 +- 0.015     1.813
+    100    2%  2.740 +- 0.021     2.626
+    250    1%  1.121 +- 0.013     1.102
+    250    2%  1.237 +- 0.014     1.203
+   1000    1%  1.007 +- 0.016     1.001
+   1000    2%  1.017 +- 0.016     1.003
+```
+
+![Dose enhancement against photon energy](docs/images/gold_nanoparticles.png)
+
+**What to learn.**
+
+- **The enhancement follows the absorption coefficients.** A 1% gold loading
+  more than doubles the dose at 50 keV and nearly doubles it at 100 keV. At 250
+  keV the gain is 10–20%, and at 1 MeV there is none: Compton scattering, which
+  depends only on the electron density, dominates in both materials. The curves
+  in the figure jump at gold's K edge (80.7 keV). The lowest energies give the
+  largest gain but penetrate tissue poorly, so studies of this therapy use
+  kilovoltage beams that balance the two.
+- **Fluorescence carries energy away.** Most 100 keV photons absorbed by gold
+  free a K-shell electron (binding energy 80.7 keV). In 96% of cases the vacancy
+  is filled with emission of a 67–78 keV K x-ray, which mostly escapes a 2 mm
+  tumour, and $\mu_{en}/\rho$ already counts that energy as lost. Version 0.2.0
+  produced no fluorescence, so the whole binding energy stayed in the tumour and
+  1% gold gave a ratio of about 2.7 at 100 keV instead of 1.8.
+- **The small excess has a physical cause.** The simulated enhancement (the
+  ratio minus one) is 4–7% above the estimate at 50 and 100 keV. Scatter in the
+  surrounding phantom is not the cause: without the phantom, 2% gold at 100 keV
+  still gives 2.72 ± 0.03. The cause is gold's L-shell x-rays (9.7–13.4 keV).
+  $\mu_{en}/\rho$ counts them as escaping, but they travel only a millimetre or
+  so in the loaded tissue, so the tumour absorbs a large part of them. In a 0.2
+  mm tumour, which they escape, the same case gives 2.59 ± 0.03, in agreement
+  with the estimate.
+- **A mixture gives the average dose.** Real nanoparticles are a few to a
+  hundred nanometres across, and the Auger electrons they emit deposit a very
+  high dose within nanometres of them. A homogeneous mixture reproduces the dose
+  averaged over the tumour, not this microscopic structure. Lumping the same
+  gold into one solid piece is worse still: a solid gold sphere absorbs the
+  low-energy photons near its surface and shields the tissue behind it (the
+  NanoparticleTherapy example ports, section 73).
+- **Technique**: a GDML mixture by mass fraction, a plane GPS beam configured
+  through `app.generator` in a multithreaded run, batch uncertainties combined
+  in quadrature, and a comparison with tabulated coefficients. One pitfall found
+  while writing it: the reference tumour must be plain `G4_A-150_TISSUE`,
+  because a mixture with a zero gold fraction gives a wrong dose at 1 MeV.
+
+**Exercises.** Add 75 and 85 keV to `ENERGIES_KEV` and find the K edge in the
+simulated ratio. Switch fluorescence off by calling `app.initialize()` and then
+`app.command("/process/em/fluo false")` in `batch_doses` (before initialization
+the physics list switches it back on), and compare the 100 keV ratio with the
+0.2.0 value above. Replace the mixture by a solid gold sphere holding the same
+gold mass at the tumour centre and compare the tumour dose.
+
 # Part VIII - Example catalogue
 
 The repository has two sets of runnable examples. Neither is installed with the
 package; run them from a clone
 (`git clone https://github.com/lobis/geant4-python-application`).
 
-## 71. Topic examples
+## 72. Topic examples
 
 `examples/geant4-examples/` contains one short script per feature, numbered in
 learning order:
@@ -2990,7 +3212,7 @@ learning order:
 | `11_native_scoring_mesh.py`      | Geant4's command-based scoring mesh                            |
 | `examples/attenuation.ipynb`     | Photon attenuation in a notebook (the one Binder opens)        |
 
-## 72. Ports of the Geant4 examples
+## 73. Ports of the Geant4 examples
 
 `examples/geant4-examples/Geant4-11.4.2-examples-python/` holds Python versions
 of examples shipped with Geant4. Each opens the Qt viewer by default and accepts
@@ -3032,14 +3254,15 @@ original needs C++ user code (see `COMPATIBILITY.md` in that directory).
 The NanoparticleTherapy examples model the gold as a solid sphere. A
 centimetre-sized sphere of solid gold shields the tissue behind it from
 low-energy photons, so its result differs from that of nanoparticles dispersed
-through the tissue; keep this in mind when interpreting them.
+through the tissue; keep this in mind when interpreting them. Tutorial 71 models
+dispersed gold.
 
 # Part IX - API reference
 
 This part lists the public interface of version 0.2.0. Units are those of the
 argument; output units are in section 63.
 
-## 73. Application
+## 74. Application
 
 ```text
 g4.Application(n_threads=0, gdml=None, physics="custom", seed=0, *, optical=False)
@@ -3091,7 +3314,7 @@ The setup steps that `start()` performs are also public (`setup_manager`,
 `setup_physics`, `setup_detector`, `setup_action`) for use with
 `start(setup=False)`.
 
-### 73.1 Primary arrays
+### 74.1 Primary arrays
 
 `run` accepts an awkward array instead of a number. Each entry is one event with
 one primary, or, with a `primaries` field holding a list per event, several
@@ -3107,7 +3330,7 @@ primaries per event:
 Fields left out keep the generator's current value. Note the units: keV and cm,
 unlike the mm of the output.
 
-## 74. Generator
+## 75. Generator
 
 `app.generator` configures the particle gun (the default) or the General
 Particle Source. Every method returns the generator, so calls chain:
@@ -3123,13 +3346,13 @@ Particle Source. Every method returns the generator, so calls chain:
 | `commands([cmds])`             | any commands, e.g. GPS distributions |
 
 Select the generator type before the other calls, since they emit the commands
-of the current type. `Generator` works only with the serial run manager
-(`n_threads=0`); in multithreaded mode use the commands directly after
-`initialize()` (section 28). For spectra, areas and angular distributions use
-GPS commands (`/gps/pos/type Plane`, `/gps/ene/type Gauss`, `/gps/ang/type iso`,
-...); tutorial 70 shows an example.
+of the current type. `Generator` works with both run managers; in multithreaded
+mode, settings made before `initialize()` take effect at initialization (section
+28). For spectra, areas and angular distributions use GPS commands
+(`/gps/pos/type Plane`, `/gps/ene/type Gauss`, `/gps/ang/type iso`, ...);
+tutorial 70 shows an example.
 
-## 75. Detector
+## 76. Detector
 
 `app.detector` queries and configures the geometry. Queries need an initialized
 application; settings must be made before initialization.
@@ -3147,7 +3370,7 @@ application; settings must be made before initialization.
 | `magnetic_field` (property)           | uniform field `(Bx, By, Bz)` in tesla                             |
 | `electric_field` (property)           | uniform field `(Ex, Ey, Ez)` in kV/cm                             |
 
-## 76. Scoring
+## 77. Scoring
 
 | Member                                                               | Description                                                             |
 | -------------------------------------------------------------------- | ----------------------------------------------------------------------- |
@@ -3162,7 +3385,7 @@ The returned events also carry methods from awkward behaviours:
 `events.hits(volume=None)` (as above) and `events.energy_in_volume(volume)`
 (deposited energy per event).
 
-## 77. Input, output and geometry helpers
+## 78. Input, output and geometry helpers
 
 | Function                                                                             | Description                                                |
 | ------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
@@ -3180,7 +3403,7 @@ The returned events also carry methods from awkward behaviours:
 | `distributed.get_rank_size()`                                                        | MPI rank and size (from mpi4py or launcher variables)      |
 | `distributed.split_count(n, rank, size)`                                             | this rank's `(start, count)` of `n` events                 |
 
-## 78. Package-level functions and attributes
+## 79. Package-level functions and attributes
 
 | Name                                                 | Description                                  |
 | ---------------------------------------------------- | -------------------------------------------- |
@@ -3197,7 +3420,7 @@ Parts I to IX are about writing simulations with the package. This part is for
 contributors: how the repository is laid out, how to build and test it, and how
 Geant4 upgrades, wheels, the conda recipe, and releases are produced.
 
-## 79. Repository layout and the example ports
+## 80. Repository layout and the example ports
 
 | Path                                     | Contents                                                      |
 | ---------------------------------------- | ------------------------------------------------------------- |
@@ -3236,7 +3459,7 @@ A port must keep its primaries inside its world: since Geant4 11.4 a position
 outside the world is an error (section 21.1), which is why several ports had
 their gun positions moved when the package moved to 11.4.
 
-## 80. Building from source
+## 81. Building from source
 
 A source build needs Geant4 11.4.3. The simplest way to get it is conda-forge,
 in a fresh environment:
@@ -3271,7 +3494,7 @@ The C++ module is rebuilt by `pip install .`; there is no separate build step.
 configure time rather than at run time. Building the Qt viewer from source is
 covered in section 11.
 
-## 81. Running the tests
+## 82. Running the tests
 
 ```bash
 python -m pytest -vv
@@ -3287,8 +3510,11 @@ installation provides them (section 2.4). It contains:
   of an installed Geant4's datasets. These tests use a temporary directory and a
   fake `geant4-config` script on `PATH`, so they need no network and no real
   Geant4 installation.
+- `tests/test_physics.py`: fluorescence from a gold slab, serial and
+  multithreaded, a check that atomic de-excitation is active.
 - `tests/test_analysis.py`, `test_capabilities.py`, `test_module.py` and
-  `test_run.py`: analysis, scoring, I/O, generators and the other modules.
+  `test_run.py`: analysis, scoring, I/O, generators (including the generator in
+  multithreaded mode) and the other modules.
 
 Follow the same rules the suite follows when adding tests: never hard-code
 values that depend on the Geant4 version (compare two seeded runs instead), keep
@@ -3296,7 +3522,7 @@ every primary inside the world, and skip rather than fail when an optional
 capability (multithreading, the viewer) is missing. Before opening a pull
 request, also run `python tools/run_example_ports.py`.
 
-## 82. Continuous integration
+## 83. Continuous integration
 
 Three GitHub Actions workflows build and test the package:
 
@@ -3311,7 +3537,7 @@ Three GitHub Actions workflows build and test the package:
   published release. Its artifacts are the CI wheels that `INSTALLATION.md`
   tells users how to install.
 - **Conda recipe** (`conda-recipe.yaml`) builds and tests the conda recipe with
-  rattler-build on Linux and both macOS architectures (section 84).
+  rattler-build on Linux and both macOS architectures (section 85).
 
 CI downloads from GitHub, python.org and conda occasionally fail with server
 errors or timeouts, so network steps are wrapped in `tools/ci/retry.sh`, which
@@ -3333,7 +3559,7 @@ share a build.
 Windows is no longer built or tested: conda-forge has no Windows Geant4, and the
 wheels target macOS and Linux. Windows users can use WSL with the Linux wheels.
 
-## 83. Upgrading Geant4
+## 84. Upgrading Geant4
 
 The package is built against exactly one Geant4 version, and the datasets must
 match it. Upgrading (as done for 11.2.2 to 11.4.3) touches these places:
@@ -3361,13 +3587,13 @@ match it. Upgrading (as done for 11.2.2 to 11.4.3) touches these places:
    checks for a step with no volume or no defining process (`DataModel.cpp`);
    and gun positions moved inside the world in tests, examples and the notebook.
 4. **Tests with exact values**: replace any reference numbers from the old
-   version with version-independent checks (section 81).
+   version with version-independent checks (section 82).
 
 Users who upgrade keep their old data: datasets whose name and version did not
 change are hard-linked from the previous version's directory, so only the
 changed ones are downloaded.
 
-## 84. The conda-forge recipe
+## 85. The conda-forge recipe
 
 `conda-recipe/recipe.yaml` is a rattler-build (v1 format) recipe, prepared for
 submission to `conda-forge/staged-recipes`. Until it is accepted, install with
@@ -3398,7 +3624,7 @@ The workflow writes a small variant file pinning one Python and conda-forge's
 compiler and C library baselines. For each new release, update `version` and the
 sdist `sha256` in the recipe (and `geant4_version` after a Geant4 upgrade).
 
-## 85. Making a release
+## 86. Making a release
 
 The version comes from the git tag through `setuptools_scm`; nothing in the
 source needs editing. To release:
@@ -3410,7 +3636,7 @@ source needs editing. To release:
    everything to PyPI, attaches the files to the GitHub release, and builds,
    tests and publishes the Docker image to
    `ghcr.io/lobis/geant4-python-application`.
-4. Update the conda recipe to the new version and sdist checksum (section 84).
+4. Update the conda recipe to the new version and sdist checksum (section 85).
 
 To try a version number before releasing, run the Wheels workflow by hand with
 the `version` input (for example `0.3.0rc1`).
@@ -3422,7 +3648,7 @@ Changelog links. Installation instructions in the README, `INSTALLATION.md`,
 release notes and this guide always start by creating a fresh virtual
 environment.
 
-## 86. Updating the PDF of this guide
+## 87. Updating the PDF of this guide
 
 `PYTHON_DEVELOPER_GUIDE.md` is the source;
 `docs/geant4-python-developer-guide.pdf` is generated from it and committed so
