@@ -73,8 +73,8 @@ Activate the environment again (`source g4-env/bin/activate` or
   3.8–3.13. Geant4 is bundled, so no separate Geant4 (C++) installation is
   needed.
 - The conda-forge package uses conda-forge's Geant4 and its data packages, so
-  nothing is downloaded at first use. It does not include the Qt viewer yet;
-  use the pip install for `app.visualize()`.
+  nothing is downloaded at first use. It does not include the Qt viewer yet; use
+  the pip install for `app.visualize()`.
 - `[gui]` adds the interactive Qt viewer (`app.visualize()`); leave it out for a
   physics-only install.
 - Check the installation:
