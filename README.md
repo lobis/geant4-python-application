@@ -5,6 +5,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/geant4-python-application)](https://pypi.org/project/geant4-python-application/)
 [![Python](https://img.shields.io/pypi/pyversions/geant4-python-application)](https://pypi.org/project/geant4-python-application/)
+[![conda-forge](https://img.shields.io/conda/vn/conda-forge/geant4-python-application)](https://anaconda.org/conda-forge/geant4-python-application)
 [![Views](https://hits.sh/github.com/lobis/geant4-python-application.svg?label=views)](https://hits.sh/github.com/lobis/geant4-python-application/)
 [![Wheels](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/wheels.yaml)
 [![Build and Test](https://github.com/lobis/geant4-python-application/actions/workflows/build-test.yaml/badge.svg)](https://github.com/lobis/geant4-python-application/actions/workflows/build-test.yaml)
@@ -43,23 +44,25 @@ reach out to kavyavadhwa@gmail.com.
 ## Installation
 
 The package is published on
+[conda-forge](https://anaconda.org/conda-forge/geant4-python-application) and
 [PyPI](https://pypi.org/project/geant4-python-application/). Install it into a
-fresh virtual environment: mixing it with packages already in your system or
-base conda Python (other Qt/PyQt, numpy or Geant4 builds) is the most common
-cause of library mismatch errors.
+fresh environment: mixing it with packages already in your system or base conda
+Python (other Qt/PyQt, numpy or Geant4 builds) is the most common cause of
+library mismatch errors.
+
+With conda, from conda-forge (Geant4 and its data files come as conda packages):
+
+```bash
+conda create -n g4 -c conda-forge geant4-python-application
+conda activate g4
+```
+
+With pip, from PyPI (includes the interactive Qt viewer):
 
 ```bash
 python3 -m venv g4-env
 source g4-env/bin/activate
 python -m pip install --upgrade pip
-pip install "geant4-python-application[gui]"
-```
-
-With conda, create a new environment instead of using `base`:
-
-```bash
-conda create -n g4 python=3.12 -y
-conda activate g4
 pip install "geant4-python-application[gui]"
 ```
 
@@ -69,6 +72,9 @@ Activate the environment again (`source g4-env/bin/activate` or
 - Prebuilt wheels for macOS (Apple Silicon and Intel) and Linux x86_64, Python
   3.8–3.13. Geant4 is bundled, so no separate Geant4 (C++) installation is
   needed.
+- The conda-forge package uses conda-forge's Geant4 and its data packages, so
+  nothing is downloaded at first use. It does not include the Qt viewer yet;
+  use the pip install for `app.visualize()`.
 - `[gui]` adds the interactive Qt viewer (`app.visualize()`); leave it out for a
   physics-only install.
 - Check the installation:
