@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import multiprocessing
 import os
+import secrets
 import threading
 from collections import namedtuple
 from pathlib import Path
@@ -11,6 +12,7 @@ import awkward as ak
 
 import geant4_python_application
 import geant4_python_application.events
+from geant4_python_application import _transfer
 from geant4_python_application._geant4_application import (
     Application as Geant4Application,
 )
@@ -75,7 +77,7 @@ def _visualize(app, commands: list[str]) -> None:
     _geant4_vis.start_visualization(commands)
 
 
-def _start_application(pipe: multiprocessing.Pipe):
+def _start_application(pipe: multiprocessing.Pipe, block_prefix: str):
     app = Geant4Application()
     app.set_event_fields(_default_event_fields)
     while True:
@@ -106,7 +108,13 @@ def _start_application(pipe: multiprocessing.Pipe):
                 raise ValueError(f"Unknown method: {method}")
 
             result = getattr(target, method)(*message.args, **message.kwargs)
-            pipe.send((counter, result))
+            # Large awkward results go through shared memory, not the pipe.
+            result = _transfer.pack(result, _transfer.block_name(block_prefix, counter))
+            try:
+                pipe.send((counter, result))
+            except BaseException:
+                _transfer.discard(result)
+                raise
         except KeyboardInterrupt:
             pass
         except EOFError or BrokenPipeError:
@@ -129,8 +137,13 @@ class Application:
         geant4_python_application.install_datasets(show_progress=True)
 
         self._pipe, child_pipe = multiprocessing.Pipe()
+        # Names this application's shared-memory blocks, so a block left by a
+        # child that died mid-transfer can be found and unlinked.
+        self._block_prefix = "g4" + secrets.token_hex(5)
         self._process = multiprocessing.Process(
-            target=_start_application, args=(child_pipe,), daemon=True
+            target=_start_application,
+            args=(child_pipe, self._block_prefix),
+            daemon=True,
         )
         self._message_counter = 0
         self._lock = threading.Lock()
@@ -190,14 +203,21 @@ class Application:
         if self._process is None or not self._process.is_alive():
             raise RuntimeError("Application is not running")
         with self._lock:
+            block = _transfer.block_name(self._block_prefix, self._message_counter)
             try:
                 self._send(self._message_counter, message)
                 counter, response = self._recv()
                 if counter != self._message_counter:
+                    _transfer.discard(response)
                     raise RuntimeError("Message counter mismatch")
                 self._message_counter += 1
+                response = _transfer.unpack(response)
             except (EOFError, BrokenPipeError):
                 raise RuntimeError("Application process died. Recreate the application")
+            finally:
+                # unpack has normally unlinked it already. This covers a child
+                # that died mid-transfer and an interrupted receive.
+                _transfer.destroy(block)
             if isinstance(response, Exception):
                 raise response
             return response

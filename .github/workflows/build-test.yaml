@@ -271,6 +271,16 @@ jobs:
         run: |
           python -m pytest -vv --reruns 3 --reruns-delay 30 --only-rerun "(?i)http|timeout|connection|socket|resolve"
 
+      # Docker and many JupyterHubs give containers a 64 MB /dev/shm. Results
+      # larger than that must fall back to the pipe instead of crashing.
+      - name: Run shared-memory tests with a 64 MB /dev/shm
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
+        run: |
+          sudo mount -o remount,size=64m /dev/shm
+          df -h /dev/shm
+          python -m pytest tests/test_transfer.py -vv -rs | tee transfer-tests.log
+          grep -q "test_result_larger_than_dev_shm_falls_back_to_pipe PASSED" transfer-tests.log
+
       - name: Run the ported Geant4 examples
         if: matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
         run: |
