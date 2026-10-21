@@ -314,7 +314,7 @@ def run_public(
     app = TimedApplication(
         n_threads=n_threads, gdml=spec["gdml"], optical=spec["optical"], seed=seed
     )
-    totals, childs, snapshots, sizes = [], [], [], []
+    totals, child_seconds, snapshots, sizes = [], [], [], []
     counts = None
     stats_before = dict(_transfer.stats)
     with app:
@@ -327,7 +327,7 @@ def run_public(
             t0 = time.perf_counter()
             events = app.run(n_events)
             totals.append(time.perf_counter() - t0)
-            childs.append(app.last_child_seconds)
+            child_seconds.append(app.last_child_seconds)
             snapshots.append(snapshot_estimate(app.last_raw))
             sizes.append(sum(a.layout.nbytes for d in app.last_raw for a in d.values()))
             app.last_raw = None
@@ -337,7 +337,7 @@ def run_public(
     return {
         "transfer": {k: _transfer.stats[k] - stats_before[k] for k in stats_before},
         "total": median_and_samples(totals),
-        "child": median_and_samples(childs),
+        "child": median_and_samples(child_seconds),
         "snapshot_est": median_and_samples(snapshots),
         "bytes": statistics.median(sizes),
         "counts": counts,
