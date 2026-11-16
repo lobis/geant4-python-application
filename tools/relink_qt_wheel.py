@@ -73,7 +73,7 @@ def relink_macos(root: Path, binary: Path) -> bool:
             run("install_name_tool", "-change", old, f"@rpath/{framework}", str(binary))
     rpath = rpath_to_qt(root, binary, "@loader_path")
     rpaths = re.findall(
-        r"^\s+path (\S+) \(offset", run("otool", "-l", str(binary)), re.M
+        r"^\s+path (\S+) \(offset", run("otool", "-l", str(binary)), re.MULTILINE
     )
     # Absolute rpaths only point into the build machine (e.g. its Qt or Geant4).
     for stale in (p for p in rpaths if p.startswith("/")):
